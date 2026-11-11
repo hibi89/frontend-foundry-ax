@@ -12,7 +12,7 @@
 7. **Production·프로젝트·환경:** Vercel 프로젝트/Production URL **미적용**. 실행 명령/환경 미정(아직 제품 코드 없음). 설계상 React/TS/Playwright/Node/SQLite/AI 어댑터 검토.
 8. **원본 위치·백업·인증·수정금지:** FFAX 이미지 콘셉트 원본은 이전 채팅 생성물. 기존 WORKNOVA/KUODRA/RAG/DBVORA는 **참고 프로젝트일 뿐 이 저장소에서 임의 수정 금지**. 인증키/토큰/기존 서비스 데이터 GitHub 기록 금지. GitHub 변경 전 브랜치·이전 SHA와 되돌리기 절차 확보.
 9. **다음 우선순위·완료 기준·승인:** 자산 원본 업로드 성공 확인 → 구조/보안/모델 예산·비주얼 편집 범위 승인 → 12 고정 테스트 brief/2 샘플 앱 준비 → 설계·코드·QA 단계별 실구현. 100% 기준은 `docs/ACCEPTANCE_MATRIX.md` AC 12개 전항목 + release gates.
-10. **갱신 시점·검증 범위·문서 기준 커밋:** 2026-11-12 KST, 검증은 repository 생성과 초기 README commit 및 문서 생성으로 한정. **새 문서 커밋 SHA는 생성 직후 최신 HEAD 조회하여 확정해야 함.** 설계 문서가 제품 완료를 의미하지 않음.
+10. **갱신 시점·검증 범위·문서 기준 커밋:** 2026-11-12 KST, 검증은 repository 생성과 초기 README commit 및 문서 생성으로 한정. 문서 기준선 SHA: `cdfab4c045a6cd0e5669a082fd69d1dd30291cf2` (원격 main에서 9개 문서 존재 확인). 설계 문서가 제품 완료를 의미하지 않음.
 
 **새 채팅 읽기 순서:** `HANDOFF.md` → `STATUS.md` → `AGENTS.md` → `REQUIREMENTS.md` → `docs/PRODUCT_SPEC_V1.md` → `docs/ACCEPTANCE_MATRIX.md` → 실제 소스.
 
