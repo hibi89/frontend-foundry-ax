@@ -1,3 +1,15 @@
+# FFAX P75 — 2026-11-12 KST, current branch checkpoint
+
+- **Provisional technical score: 75/100** (P50 50 + AC-01 8 + AC-07 12 + AC-10 5). Fixed v1 requirements/weights unchanged; release **HOLD**.
+- **Product:** `hibi89/frontend-foundry-ax@feature/ffax-workbench-p75-20261112`, **tested code SHA `5cdba6922584df3e3824d105d8345307670ea5ca`**. Previous main `191289d19f7eb6203a2a6beb5e8efbcf10bc844d` preserved.
+- **Code:** two React fixture imports with read-only SHA manifest/isolated clone; owner-approved CSS-only UI patch and safe rollback; ten service/API flows and transpiled TSX handlers; Git review plan and local real `git revert`.
+- **Evidence:** [P75 engineering proof](docs/FFAX_P75_ENGINEERING_EVIDENCE_20261112.md); Node22 Linux **49 PASS/0 FAIL/0 SKIP**, Chromium same-source set_content 30 PASS/0 FAIL, CLI import→approve→rollback SHA exact. Actual [Draft PR #1](https://github.com/hibi89/frontend-foundry-ax/pull/1) OPEN/UNMERGED.
+- **Limits:** actual AI model, React runtime/production bundle, remote GitHub project importer, buyer Windows, real service API contract, axe/human, clean CI, Vercel/Production not verified. No paid API or customer source transferred.
+- **Kmong sync:** FFAX is separate incubating candidate; active 16 other products are neither silently renumbered nor modified.
+- **Next:** AC04 real React build/model adapter & privacy budget approval; AC09 accessibility+owner UI; AC11 failure/budget and AC12 clean CI+end-to-end. Do not promise full 75% customer-ready product.
+
+---
+
 # STATUS.md — FFAX current checkpoint 2026-11-12 KST
 
 - **Repo:** `hibi89/frontend-foundry-ax` Private · branch `feature/ffax-workbench-p50-20261112` · verified tested code SHA `e2d9355577e20cbe9d70d80f8bbb9a4263f2de08`.

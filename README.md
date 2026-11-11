@@ -1,5 +1,26 @@
 # FRONTEND FOUNDRY AX (FFAX)
 
+> **Latest P75 development (2026-11-12 KST): 75/100 provisional engineering score**, feature branch `feature/ffax-workbench-p75-20261112`, [Draft PR #1](https://github.com/hibi89/frontend-foundry-ax/pull/1) unmerged, RELEASE HOLD. Earlier P50 below is historical. [P75 evidence](docs/FFAX_P75_ENGINEERING_EVIDENCE_20261112.md).
+
+## Safe local React project review (v0.2)
+
+Use the new CLI to **inspect a synthetic React fixture, create an isolated snapshot, preview an allowlisted CSS-only change, require explicit approval, compare API flows and verify an exact rollback**. It never modifies the original source, requires no credentials, does not run imported code, and does not push or deploy.
+
+```bash
+npm install --ignore-scripts
+npm test   # 49/49 local Node tests
+node scripts/workspace_cli.mjs inspect fixtures/react-market
+node scripts/workspace_cli.mjs import fixtures/react-market /tmp/ffax-workspaces demo-market
+# Place your own UI CSS change in /tmp/new-theme.css first
+node scripts/workspace_cli.mjs preview /tmp/ffax-workspaces/demo-market /tmp/new-theme.css
+node scripts/workspace_cli.mjs apply /tmp/ffax-workspaces/demo-market /tmp/new-theme.css p75-demo-0001 APPROVE_UI_PATCH
+node scripts/workspace_cli.mjs verify-original /tmp/ffax-workspaces/demo-market
+node scripts/workspace_cli.mjs rollback /tmp/ffax-workspaces/demo-market p75-demo-0001 APPROVE_ROLLBACK
+```
+
+The two fixtures include five API/UI flows each. TSX handlers are executed under a React API **stub**; actual React runtime, real GitHub imports, Windows and customer repos have not been validated. See P75 evidence before treating the 75% figure as production readiness.
+
+
 > **v0.1 local-first workbench implemented on `feature/ffax-workbench-p50-20261112` — P50 technical milestone (50/100 provisional), RELEASE HOLD. The v1.0 product is not complete.**
 
 ![FFAX concept poster](assets/concepts/ffax-v1-vision.webp)
