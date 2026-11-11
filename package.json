@@ -1,15 +1,19 @@
 {
   "name": "frontend-foundry-ax",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Local-first FFAX: structured UI editor plus read-only React snapshot, approved UI patch, regression fixtures and draft PR review gate.",
+  "description": "Local-first FFAX UI workbench with isolated React patch review, bounded opt-in model adapter, and separate QA probes.",
   "scripts": {
     "start": "node src/server.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:browser": "python scripts/browser_qa.py",
     "check": "npm test && npm run test:browser",
-    "test:integration": "node --test tests/workspace.test.mjs tests/react-tsx-interactions.test.mjs tests/github-review.test.mjs"
+    "test:integration": "node --test tests/workspace.test.mjs tests/react-tsx-interactions.test.mjs tests/github-review.test.mjs",
+    "test:policy": "node --test tests/ai-gate.test.mjs",
+    "test:react-compile": "node scripts/react_export_probe.mjs",
+    "test:react-runtime": "python scripts/react_runtime_probe.py",
+    "test:accessibility": "python scripts/accessibility_probe.py"
   },
   "engines": {
     "node": ">=20"
