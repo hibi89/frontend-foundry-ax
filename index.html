@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="FFAX local-first frontend design workbench" />
+  <title>FFAX — Frontend Foundry AX</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="FFAX 홈"><span class="logo">F</span><span>FFAX</span><small>Frontend Foundry AX</small></a>
+    <nav class="steps" aria-label="워크플로우 단계"><span class="current">01 기획</span><span>02 디자인</span><span>03 생성</span><span>04 편집</span><span>05 검증</span><span>06 적용</span></nav>
+    <span class="status-pill">LOCAL · REVIEW ONLY</span>
+  </header>
+  <section class="heading"><div><p class="eyebrow">AI DESIGN WORKBENCH · v0.1 prototype</p><h1>Build interfaces, not bottlenecks.</h1><p>자연어 기획부터 UI 시안, 컴포넌트 편집, 코드 내보내기까지. 외부 전송 없이 로컬에서 시험합니다.</p></div><div class="heading-badges"><span>13 components</span><span>3 themes</span><span>Undo / Redo</span></div></section>
+  <main class="workspace">
+    <aside class="panel planner" aria-label="기획 및 디자인 생성">
+      <div class="panel-title"><div><small>01 / BRIEF</small><h2>아이디어를 디자인으로</h2></div><span class="dot"></span></div>
+      <label for="prompt">원하는 화면을 설명하세요</label>
+      <textarea id="prompt" rows="8" maxlength="2000" placeholder="예: AI 마켓플레이스 대시보드를 고급 다크 테마로 만들어줘"></textarea>
+      <div class="helper">기존 서비스의 결제·인증·API는 자동 수정하지 않습니다.</div>
+      <button id="analyze" class="primary-btn" type="button">✦ 요구 분석 · 디자인 2안</button>
+      <section class="brief-area" aria-label="분석 결과"><p class="subheading">구조화된 요구사항</p><div id="brief-summary" class="brief-text" role="status">요구사항을 입력하고 분석하세요.</div><div id="design-options" class="design-options"></div></section>
+      <div class="section-rule"></div>
+      <p class="subheading">참고 이미지 (선택)</p>
+      <label for="reference-file">본인이 사용할 권리가 있는 이미지</label>
+      <input id="reference-file" type="file" accept="image/png,image/jpeg,image/webp" />
+      <label class="check"><input id="rights" type="checkbox" /> 이미지 사용 권한을 확인했습니다.</label>
+      <button id="apply-reference" class="ghost-btn" type="button">이미지에서 색상 2안 추출</button>
+      <div id="reference-result" class="helper" role="status">이미지는 브라우저 안에서만 분석합니다.</div><div id="reference-choices" class="reference-choices" aria-label="이미지 스타일 후보와 승인"></div>
+      <p class="micro-note">이미지 인식은 기본 색상 힌트 단계입니다. 구조·레이어·디자인 1:1 복원은 지원하지 않습니다.</p>
+    </aside>
+    <section class="canvas-panel" aria-label="프론트엔드 미리보기">
+      <div class="canvas-toolbar"><div><small>LIVE PREVIEW · COMPONENT CANVAS</small><strong id="project-title">마켓플레이스</strong></div><div class="viewport-tools"><button data-width="375" type="button">375</button><button data-width="768" type="button">768</button><button data-width="1440" class="active" type="button">1440</button></div></div>
+      <div class="canvas-scroll"><div id="preview" class="preview-wrap" role="region" aria-label="선택 가능한 UI 컴포넌트 미리보기"></div></div>
+      <div class="canvas-footer"><span id="version-info">Draft v1 · 13 components</span><span>선택 · 속성 변경 · 드래그 정렬</span></div>
+      <section class="qa-panel"><div class="qa-heading"><h2>검증 및 코드 내보내기</h2><button id="run-qa" type="button" class="ghost-btn">3개 화면 폭 빠른 검사</button></div><div id="qa-report" role="status" class="qa-result">검증 전. 실제 브라우저의 스크린샷·콘솔·네트워크 검증은 별도 QA 스크립트를 실행하세요.</div><div class="export-row"><button id="export-react" type="button" class="primary-btn">React TSX 내보내기</button><button id="export-json" type="button" class="ghost-btn">프로젝트 JSON 저장</button></div></section>
+    </section>
+    <aside class="panel inspector" aria-label="컴포넌트 편집기">
+      <div class="panel-title"><div><small>04 / EDIT</small><h2>비주얼 에디터</h2></div><span class="dot"></span></div>
+      <p class="helper">중앙 미리보기의 컴포넌트를 클릭하거나 드래그해 선택·재배열합니다.</p>
+      <label for="component-select">선택된 컴포넌트</label><select id="component-select"></select>
+      <label for="component-text">텍스트</label><input id="component-text" maxlength="180" type="text" />
+      <label for="component-type">컴포넌트 종류</label><select id="component-type"></select>
+      <label for="component-color">색상 토큰</label><select id="component-color"><option value="accent">Accent</option><option value="neutral">Neutral</option></select>
+      <label for="component-spacing">내부 간격</label><select id="component-spacing"><option value="8">8px</option><option value="16">16px</option><option value="24">24px</option><option value="32">32px</option></select>
+      <label for="component-align">정렬</label><select id="component-align"><option value="start">왼쪽</option><option value="center">가운데</option><option value="end">오른쪽</option></select>
+      <label for="theme-select">프로젝트 테마</label><select id="theme-select"></select>
+      <div class="inspector-actions"><button id="move-up" type="button">↑ 위로</button><button id="move-down" type="button">↓ 아래로</button></div>
+      <div class="inspector-actions"><button id="undo" type="button">↶ 되돌리기</button><button id="redo" type="button">↷ 다시하기</button></div>
+      <div class="inspector-actions"><button id="add-component" type="button">+ 추가</button><button id="remove-component" type="button" class="danger">− 삭제</button></div>
+      <label for="source-preview">생성되는 React 코드 일부</label><pre id="source-preview" class="code-preview" aria-label="생성 소스코드 미리보기"></pre>
+    </aside>
+  </main>
+  <footer class="site-foot">FFAX concept implementation · Offline-first · 미리보기의 샘플 데이터는 실제 서비스 데이터가 아닙니다. · 기존 GitHub 프로젝트에는 자동 적용되지 않습니다.</footer>
+  <script type="module" src="/src/app.mjs"></script>
+</body>
+</html>
