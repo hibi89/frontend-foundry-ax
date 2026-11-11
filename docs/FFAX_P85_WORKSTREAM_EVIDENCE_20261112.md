@@ -29,7 +29,7 @@
 - **Total = 78/100 (provisional local engineering), RELEASE HOLD.** Goal 85 not met; do not invent percentage or label this release candidate.
 
 ### Deployment and source preservation
-No Vercel/Production, no permission changes, no main merge, no outside product changes. Work is limited to private `feature/ffax-workbench-p85-20261112`. Existing P75 Draft PR #1 is untouched. GitHub source SHA will be recorded after actual commit and post-push read-back. Public hub receives only metadata and never private implementation source.
+No Vercel/Production, no permission changes, no main merge, no outside product changes. Work is limited to private `feature/ffax-workbench-p85-20261112`. Existing P75 Draft PR #1 is untouched. GitHub tested source commit `3d2d71d1e2887eaf55214acca146eca1b6f11b92`; 8/8 changed file Git Blob SHA identical to locally tested bytes. Follow-up document commit SHA must be checked after push. Public hub receives only metadata and never private implementation source.
 
 ### Next priority toward a verified >=85
 1. Real AI adapter with explicit model/provider/data-transmission/price approval, genuine React target runtime + 12 brief tests; **AC04 14** if all acceptance conditions pass, yielding at least 92 with AC11, not a guaranteed 85.

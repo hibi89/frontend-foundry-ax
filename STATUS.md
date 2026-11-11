@@ -1,3 +1,13 @@
+## 2026-11-12 KST — P85 목표 작업 진행 / 검증된 기준 **78/100 잠정**
+- **고정 100점 기준 유지:** P75 75점 + **AC11 비용·보안·복구 3점 PASS** = **78점**. 85점은 **아직 미달**이며 타 항목을 부분 테스트만으로 가산하지 않는다.
+- **기능 SHA:** `3d2d71d1e2887eaf55214acca146eca1b6f11b92` · `feature/ffax-workbench-p85-20261112` (Private). 로컬 8개 수정 파일과 GitHub Blob SHA **8/8 정확 일치**. 이전 `main@191289d19f7eb6203a2a6beb5e8efbcf10bc844d` 변경 없음.
+- **신규 기능:** 명시적 opt-in AI 요청 정책, 사용자 제공 단가·토큰/세션 예산 상한, 보수적 2회 재시도 과금 상한, 429 제한 재시도/멱등 ID, 개인정보·비밀 패턴 거부, 실패·중단 시 안전한 review_hold, 원문/출력 없는 SHA 감사. 실제 모델 어댑터는 연결하지 않았고 외부 송신은 0건.
+- **실행 증거:** Linux Node v22.16 `npm test` **67 PASS/0 FAIL/0 SKIP**; Chromium 동일 소스 `set_content` **30 PASS**; 경량 접근성(레이블·키보드·role·focus) **12 PASS**; 기존 12개 규칙 기반 TSX 실제 TypeScript5.8 shim 검사 + 설치된 **레거시 React UMD** 12/12 렌더·3폭36 검증 PASS. **실제 LLM 생성이나 목표 React 최신 런타임/axe/Windows/CI/Production 성공이 아님**.
+- **차단:** AC04 14점(실 AI 생성/12 브리프/실환경 미달), AC09 6점(axe + 수동 UX 승인 미달), AC12 2점(clean install + CI + D1–D5 미달). Release **HOLD**. 실 외부 AI 호출/유료 API/고객 코드 전송·배포·권한 변경은 사용자 별도 승인 필요.
+- **증거:** [FFAX P85 워크스트림 점검](docs/FFAX_P85_WORKSTREAM_EVIDENCE_20261112.md), [100점 기준](docs/ACCEPTANCE_MATRIX.md). 기존 75점 기능과 다른 서비스 저장소 무변경.
+
+---
+
 # FFAX P75 — 2026-11-12 KST, current branch checkpoint
 
 - **Provisional technical score: 75/100** (P50 50 + AC-01 8 + AC-07 12 + AC-10 5). Fixed v1 requirements/weights unchanged; release **HOLD**.

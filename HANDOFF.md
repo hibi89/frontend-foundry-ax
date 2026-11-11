@@ -1,3 +1,19 @@
+# FFAX P85 목표 작업 — 78/100 검증 체크포인트 인수인계 (2026-11-12 KST)
+
+1. **목표·요구·기술:** FFAX AI 기획→디자인→React 소스→시각 편집→브라우저 QA→안전한 Git 통합. 12개 AC 총100점의 최초 스펙 그대로. 현재 Node/JS local-first + TypeScript 기반. 목표는 85이지만 실제 **78/100**만 증명.
+2. **완료 기능·결정:** P75 기능 보존. P85 신규 `src/ai-gate.mjs`(명시적 opt-in, 공급자 어댑터 미연동, 데이터/비밀 사전 차단, 가격·토큰·세션 상한, 예상 최대 2회 호출 비용 예약/보수적 소비 처리, 멱등 키, 429 제한 재시도, 취소/타임아웃, 감사 SHA, 중단 후 review_hold), `src/app.mjs` 키보드/ARIA 개선. 무제한 JSX/무단 송신안 대신 격리 컴포넌트+소유자 승인/비용 상한 선택. 12브리프 TSX typecheck·레거시 React 로컬 렌더 검증기는 기술 준비도 측정용.
+3. **테스트·성공/실패:** 정확 로컬 코드와 GitHub blob 8/8 동등. Node22 `npm test`: **67 PASS/0 FAIL/0 SKIP**. `python scripts/browser_qa.py`: **30 PASS** (Chromium same-source set_content, localhost HTTP 독립 GET200). `python scripts/accessibility_probe.py`: **12 PASS** (axe 아님). `python scripts/react_runtime_probe.py`: **12/12 실제 설치된 레거시 React UMD 렌더, 36 viewport, 0 JS error**. TypeScript 컴파일은 최소 React ambient shim이라 상용 타입 호환성 보증 불가. 모델 호출/Windows/완전 CI/Production 미실행.
+4. **완료/진행/대기/차단:** AC02/03/05/06/08/01/07/10 이전 75(잠정), **AC11 +3 = 78/100**, 나머지 **AC04 0/14, AC09 0/6, AC12 0/2**. 최종 85 미달, **RELEASE HOLD**. Production/Vercel **미적용**.
+5. **오류 근거·전환:** 초기 AI 정책 15건 중 1건은 `../secret` model ID 허용을 검증이 발견하여 경로형 ID 차단; 재테스트 15/15. 비용 게이트에서 재시도·순차 호출의 총량 누락을 발견해 worst-case 2회 상한/사용예상 차감을 추가, 이후 18/18. Chromium localhost direct URL은 기존 환경 정책 차단이므로 `set_content` 사용, 동일 방법 반복 실패 금지. axe-core 패키지 로컬 부재/외부 패키지 fetch 실패로 AC09 미통과. 실제 AI 공급자 호출은 사용자 승인 없으므로 수행 안 함.
+6. **GitHub 저장소·SHA·경로:** Private `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`. 테스트 코드 SHA `3d2d71d1e2887eaf55214acca146eca1b6f11b92`; 문서 SHA는 최종 commit/HEAD 조회. `main@191289d19f7eb6203a2a6beb5e8efbcf10bc844d` 보존, 기존 [P75 Draft PR #1](https://github.com/hibi89/frontend-foundry-ax/pull/1) 변경·머지하지 않음. 주요 파일 `src/ai-gate.mjs`, `tests/ai-gate.test.mjs`, `src/app.mjs`, `scripts/*probe*`, `docs/FFAX_P85_WORKSTREAM_EVIDENCE_20261112.md`.
+7. **배포·URL·실행·환경:** Vercel/Production 없음(미적용). `npm start` loopback `127.0.0.1:4173`, `npm test`; Python Playwright/Chromium, Node22, TypeScript5.8 global. 외부 AI provider/인증 환경변수 없음. 소비자 Windows10/11 브라우저 접근은 미검증.
+8. **원본·백업·인증:** main, 기존 P75 브랜치, 고객 저장소, Worknova/Kuodra/RAG/DBVORA 데이터, 기존 원본 이미지, 비밀, 결제·권한·환경설정 모두 무변경. 이전 P75 sha `2b58e4cd7e32210d3ad20ee580aa95b694af0769`는 복구 기준. 고객 코드·프롬프트·토큰을 GitHub/Public hub에 업로드 안 함. No force push.
+9. **다음 작업·승인·완료 기준:** (a) 실제 LLM/provider+비용·데이터송신 승인 이후 정식 React 빌드/타입체크+12 brief E2E(AC04), (b) axe + 독립 수동 UX 검토(AC09), (c) 깨끗한 신규 환경 CI + D1–D5(AC12), (d) 원격 GitHub 소스/테스트 재검증. 100%는 AC 전체+Release Gates. **85 수치 맞추기 위한 rubric 변경 금지.**
+10. **갱신·검증 범위:** 2026-11-12 KST, 로컬 Linux 실제 실행·GitHub 정확 Blob parity·현재 코드 SHA. 배포/실 모델/인간 수락 미검증. 해총 크몽 브랜치 동기화는 별도 최신 HEAD + non-force 커밋 후 확인.
+
+**새 채팅 읽기:** HANDOFF→STATUS→AGENTS→REQUIREMENTS→ACCEPTANCE_MATRIX→P85 증거→실제 소스. 아래의 P75 기록은 당시 기준 역사적 기록.
+---
+
 # FFAX P75 — latest 10-point handoff (2026-11-12 KST)
 
 1. **Goal/requirements:** Local-first AI frontend product. Fixed scope `REQUIREMENTS.md` and score matrix `docs/ACCEPTANCE_MATRIX.md`; no scope downgrade.
