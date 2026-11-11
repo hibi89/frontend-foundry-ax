@@ -24,7 +24,7 @@ export const COMPONENT_TYPES = Object.keys(REGISTRY);
 export const DEFAULT_PROMPT = '글로벌 프리랜서 마켓플레이스를 고급 다크 테마로 만들어줘. 상품 검색, 회원 프로필, AI 협상 화면을 넣어줘. 결제 및 백엔드 API는 변경하지 마.';
 const terms = [
   { key: /마켓|프리랜서|상품|shop|market/i, name: '마켓플레이스', pages: ['홈', '검색', '상품 상세', '프로필'] },
-  { key: /RAG|문서|검색|chat|챗봇/i, name: '문서 AI 워크스페이스', pages: ['문서 업로드', '질문과 답변', '출처'] },
+  { key: /RAG|문서|chat|챗봇/i, name: '문서 AI 워크스페이스', pages: ['문서 업로드', '질문과 답변', '출처'] },
   { key: /금융|주식|financ|증권|투자/i, name: '금융 분석', pages: ['대시보드', '시장 분석', '위험 요약'] },
   { key: /관리자|admin|직원|운영|CRM/i, name: '운영 관리', pages: ['대시보드', '고객 목록', '설정'] },
   { key: /데이터|통계|analytics|차트/i, name: '데이터 분석', pages: ['대시보드', '데이터 테이블', '분석 차트'] },
@@ -182,7 +182,7 @@ export function createReference(doc, imageName, rights, palette, origin='user-pr
   if (rights !== true) throw new Error('이미지 사용 권한 확인이 필요합니다.');
   if (!Array.isArray(palette) || palette.length < 2 || palette.some(s => !/^#[0-9a-f]{6}$/i.test(s))) throw new Error('색상 추출 실패');
   const next=clone(doc);
-  next.reference={name:limitText(imageName,120),rightsConfirmed:true,origin:limitText(origin,120),colors:palette.slice(0,4),candidates:[{id:'A',tone:'muted',color:palette[0]},{id:'B',tone:'vivid',color:palette[1]}],reviewed:false};
+  next.reference={name:limitText(imageName,120),rightsConfirmed:true,origin:limitText(origin,120),colors:palette.slice(0,4),candidates:[{id:'A',tone:'muted',color:palette[0],layout:'stack'},{id:'B',tone:'vivid',color:palette[1],layout:'grid'}],reviewed:false};
   next.version++;
   return next;
 }
@@ -193,6 +193,6 @@ export function approveReference(doc, candidateId) {
   const candidate=doc.reference.candidates.find(c=>c.id===candidateId);
   if(!candidate) throw new Error('참고 이미지 후보가 없습니다.');
   const next=clone(doc);
-  next.reference.reviewed=true;next.reference.approvedCandidate=candidateId;next.reference.selectedColor=candidate.color;
+  next.reference.reviewed=true;next.reference.approvedCandidate=candidateId;next.reference.selectedColor=candidate.color;next.layout=candidate.layout;
   next.version++;return next;
 }
