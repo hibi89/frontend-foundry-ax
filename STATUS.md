@@ -1,3 +1,31 @@
+# FFAX P75 — 2026-11-12 KST, current branch checkpoint
+
+- **Provisional technical score: 75/100** (P50 50 + AC-01 8 + AC-07 12 + AC-10 5). Fixed v1 requirements/weights unchanged; release **HOLD**.
+- **Product:** `hibi89/frontend-foundry-ax@feature/ffax-workbench-p75-20261112`, **tested code SHA `5cdba6922584df3e3824d105d8345307670ea5ca`**. Previous main `191289d19f7eb6203a2a6beb5e8efbcf10bc844d` preserved.
+- **Code:** two React fixture imports with read-only SHA manifest/isolated clone; owner-approved CSS-only UI patch and safe rollback; ten service/API flows and transpiled TSX handlers; Git review plan and local real `git revert`.
+- **Evidence:** [P75 engineering proof](docs/FFAX_P75_ENGINEERING_EVIDENCE_20261112.md); Node22 Linux **49 PASS/0 FAIL/0 SKIP**, Chromium same-source set_content 30 PASS/0 FAIL, CLI import→approve→rollback SHA exact. Actual [Draft PR #1](https://github.com/hibi89/frontend-foundry-ax/pull/1) OPEN/UNMERGED.
+- **Limits:** actual AI model, React runtime/production bundle, remote GitHub project importer, buyer Windows, real service API contract, axe/human, clean CI, Vercel/Production not verified. No paid API or customer source transferred.
+- **Kmong sync:** FFAX is separate incubating candidate; active 16 other products are neither silently renumbered nor modified.
+- **Next:** AC04 real React build/model adapter & privacy budget approval; AC09 accessibility+owner UI; AC11 failure/budget and AC12 clean CI+end-to-end. Do not promise full 75% customer-ready product.
+
+---
+
+# STATUS.md — FFAX current checkpoint 2026-11-12 KST
+
+- **Repo:** `hibi89/frontend-foundry-ax` Private · branch `feature/ffax-workbench-p50-20261112` · verified tested code SHA `e2d9355577e20cbe9d70d80f8bbb9a4263f2de08`.
+- **v1.0 completion rubric:** **50/100 provisional technical milestone** (AC-02 8 + AC-03 12 + AC-05 6 + AC-06 12 + AC-08 12); no other ACs claimed. See [P50 evidence](docs/FFAX_P50_ENGINEERING_EVIDENCE_20261112.md). Original 100-point weights unchanged.
+- **Code:** local Node/JS workbench, 12 fixed Korean briefs, 2 design alternatives, 13 components, 3 themes, image-rights gate+2 approved variants, property edits/move/undo/redo, React TSX prototype export, Node localhost server and Playwright QA source.
+- **Evidence:** Node v22.16.0 Linux `npm test` **24 PASS/0 FAIL/0 SKIP**; headless Chromium **30 PASS/0 FAIL** with actual same HTML/CSS/JS via `set_content`; Chromium navigation to localhost **BLOCKED by environment**, not claimed PASS. Real Node HTTP GET200. 375/768/1440 captures created locally. XSS guard test and intentional overflow fail→fix pass.
+- **Not implemented / not proven:** actual LLM API, production React runtime + typecheck+full render, existing GitHub import/PR/rollback automated flow, API contract regression on customer products, external customer collaboration, axe+human usability acceptance, CI, real Windows browser, Vercel Production.
+- **Release:** **RELEASE HOLD**; user final design approval gate pending; no public deployment.
+- **Poster:** `assets/concepts/ffax-v1-vision.webp` exact image blob SHA `01d42b4e74eed25a3b23ec6966f77b6bd7b22e54`, encoded from approved visual, original PNG preserved separately.
+- **Parent/main preservation:** main `191289d19f7eb6203a2a6beb5e8efbcf10bc844d` unchanged, no outside product changes.
+- **Next:** AC-01+04+07 highest priority, 2 sample React apps and frozen fixtures, model API/cost/security approval, actual browser URL/Windows, CI/axe, safe GitHub PR integration; apply strictly measured AC.
+- **Central Kmong sync:** separate incubating FFAX entry, **do not silently change established active16 denominator**. Hub sync recorded after exact product commit review.
+
+---
+## Historical baseline (before implementation)
+
 # STATUS.md — FFAX 상태판
 
 **최종 기록:** 2026-11-12 KST  
@@ -34,3 +62,4 @@
 
 ## 기준 업데이트 규칙
 제품 기능 관련 코드를 처음 작성하기 전까지 `0%` 유지. 매 작업 종료 시 AC별 근거·GitHub SHA·테스트 결과를 추적. 마감 또는 사용자 요청만으로 임의 점수 상승 금지.
+

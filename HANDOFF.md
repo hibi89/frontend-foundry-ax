@@ -1,3 +1,37 @@
+# FFAX P75 — latest 10-point handoff (2026-11-12 KST)
+
+1. **Goal/requirements:** Local-first AI frontend product. Fixed scope `REQUIREMENTS.md` and score matrix `docs/ACCEPTANCE_MATRIX.md`; no scope downgrade.
+2. **Implemented/decisions:** On new `feature/ffax-workbench-p75-20261112`, added read-only React/TSX sample inspection, isolated manifest clone, SHA-bound allowlisted CSS-only patch with explicit approval and backup, abort/rollback, two React fixtures, ten service/API and ten JSX callback checks, draft Git PR gate. Chose safety B over unrestricted source rewrite A. Original P50 visual workbench preserved.
+3. **Tests and commands:** `npm test` **49 PASS/0 FAIL/0 SKIP** Node22 Linux; `npm run test:browser` Chromium **30 PASS** (same HTML/CSS/JS injected, no direct localhost navigation). Fixture CLI inspect→import→preview→apply→original digest→rollback verified; actual local `git revert` returns byte-exact original. React callbacks use stub, **not real React runtime**; no real buyer Windows, real product API or GitHub remote import E2E.
+4. **Completion / blocked:** **75/100 provisional engineering** (AC02 8 + AC03 12 + AC05 6 + AC06 12 + AC08 12 + AC01 8 + AC07 12 + AC10 5); remaining AC04 14, AC09 6, AC11 3, AC12 2. **RELEASE HOLD**.
+5. **Errors & pivots:** Initial duplicate-job test found SOURCE_SHA_MISMATCH instead of DUPLICATE → order of guard fixed, 39 PASS. Initial market JSX callback test triggered EMPTY_SEARCH because query wasn't entered → simulated real input/change+rerender, full 49 PASS. Initial npm registry unavailable due DNS; no repeated network install. Chromium navigation blocked, same-source injected DOM retained as limited coverage. No breaking failures left in tested scope.
+6. **Repo / branch / SHA:** Private `hibi89/frontend-foundry-ax@feature/ffax-workbench-p75-20261112` tested code `5cdba6922584df3e3824d105d8345307670ea5ca`; main remains `191289d19f7eb6203a2a6beb5e8efbcf10bc844d`, P50 branch `833804a076a3daf79a46773a34bb3b0db5cc2712`. [Draft PR #1](https://github.com/hibi89/frontend-foundry-ax/pull/1) OPEN, DRAFT, not merged. Paths `src/workspace.mjs`, `src/github-review.mjs`, `scripts/workspace_cli.mjs`, `fixtures/react-*`, `tests/*`, `docs/FFAX_P75_ENGINEERING_EVIDENCE_20261112.md`.
+7. **Production/environment:** No Vercel/Production URL or deployment; **not applicable**. Local Node>=20 and TypeScript dependency; `npm start` loopback `127.0.0.1:4173`. Browser automation needs Chromium/Playwright separately. Linux Node v22.16/Python3.13 measured; Windows native unverified.
+8. **Original / backups / privacy:** All work on new private feature branch, main and other program repos unchanged; only synthetic fixture data; no secrets or customer data/GitHub private source transferred to models. UI patch backup+SHA verified, Git branch revert in isolated temp repo passed; no force push or deploy.
+9. **Next steps / approvals:** Prioritize true LLM provider abstraction/controlled cost, React build+render on 12 frozen prompts (AC04), axe+human accessibility(AC09), model failure/privacy budget(AC11), real clean-install CI + D1–D5(AC12). Access private customer repos, paid API, auth/security or production needs separate explicit approval. Completion requires 100+all release gates.
+10. **Time / check range:** 2026-11-12 KST, tested files byte-identical with GitHub blobs at `5cdba6922584df3e3824d105d8345307670ea5ca`; current document commit SHA must be re-fetched after writing. Local tests 49/49, injected Chromium 30/30, real Draft PR, no complete React runtime/Windows/CI/Production validation.
+
+New chat read order: `HANDOFF.md` → `STATUS.md` → `AGENTS.md` → `REQUIREMENTS.md` → `docs/ACCEPTANCE_MATRIX.md` → [P75 evidence](docs/FFAX_P75_ENGINEERING_EVIDENCE_20261112.md) → actual source.
+
+---
+
+# FFAX P50 — latest handoff (2026-11-12 KST)
+
+1. **Goal/requirements/tech:** FFAX local-first frontend workshop, eventual AI prompt→design→React→visual editor→QA→reviewed integration. v1 rubric `docs/ACCEPTANCE_MATRIX.md` and detailed `REQUIREMENTS.md`, `docs/PRODUCT_SPEC_V1.md`.
+2. **Implemented/decision:** Chose B structured components/typed commands over A freeform JSX editing. Added `index.html`, `styles.css`, `src/core.mjs`, `src/app.mjs`, `src/server.mjs`, tests, QA script. Brief classifier is rule-based, not actual LLM. 13 UI components/3 themes, reference image 2 variant approvals, editor + TSX export + QA.
+3. **Tests:** `npm test` Node22 Linux **24 PASS/0 FAIL/0 SKIP**; `python scripts/browser_qa.py` Linux Chromium same-source set_content **30 PASS/0 FAIL**. Real localhost HTTP GET200 independent. Image-rights negative, XSS guard, edits/undo, 3 width screenshots, deliberate overflow FAIL→PASS, console error0/network failure0. Actual browser navigation blocked by ERR_BLOCKED_BY_ADMINISTRATOR; Chromium URL/Win/real React build unverified.
+4. **Status:** provisional milestone **50/100** AC02 8, AC03 12, AC05 6, AC06 12, AC08 12; all other AC0. RELEASE HOLD. This does not imply finished v1/sale/production.
+5. **Failure/pivot:** Node fixture initially 1 FAIL expectation mistake fixed; 2 intent-classification FAIL from broad '검색' → regex narrowed and full node24 pass; localhost Chromium navigation blocked by environment policy → stop same retry, load same HTML/CSS/JS into actual Chromium set_content and mark limited. Do not misrepresent as live URL/Windows.
+6. **GitHub:** `hibi89/frontend-foundry-ax@feature/ffax-workbench-p50-20261112`; code HEAD `e2d9355577e20cbe9d70d80f8bbb9a4263f2de08`, main baseline `191289d19f7eb6203a2a6beb5e8efbcf10bc844d` untouched. After this docs commit recheck feature HEAD. Key files: `src/*`, `tests/core.test.mjs`, `scripts/browser_qa.py`, `docs/FFAX_P50_ENGINEERING_EVIDENCE_20261112.md`. Poster asset blob SHA `01d42b4e74eed25a3b23ec6966f77b6bd7b22e54`.
+7. **Production/env:** no Vercel project/Production, **미적용**; local Node>=20 `npm install --ignore-scripts && npm start` -> `http://127.0.0.1:4173`. Linux Node22+Chromium via Python Playwright probe, not Windows.
+8. **Original/backup/security:** main baseline preserved, original PNG source in conversation/local download, GitHub contains generated WebP vision visual. No secrets, keys, customer data, paid calls, third-party source import or existing WORKNOVA/KUODRA/RAG/DBVORA modifications. No force-push or public source disclosure. Generated React code is prototype, not audited.
+9. **Next and approval:** implement AC01 safe GitHub read/project stores; AC04 model adapter and actual React build, cost & external data transfer **approval required**; AC07 real 2 sample app regression & rollback; AC09 axe/manual, AC10 Git PR approval, AC11 budgets/security/failure, AC12 clean install+CI+D1–D5. Do not raise 50 without exact AC evidence; if failures invalidate an AC, deduct.
+10. **KST/source-of-truth:** 2026-11-12 KST, verified code SHA `e2d9355577e20cbe9d70d80f8bbb9a4263f2de08`; current docs SHA re-fetch. Node24/Chromium30 limited, CI/Production not run. Hub records FFAX as **incubation** separately from active16.
+
+Read next time: `HANDOFF.md` → `STATUS.md` → `AGENTS.md` → `REQUIREMENTS.md` → `docs/ACCEPTANCE_MATRIX.md` → source. Legacy sections below are historical, not current.
+
+---
+
 # HANDOFF.md — FFAX 인수인계
 
 **갱신:** 2026-11-12 KST  
