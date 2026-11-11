@@ -2,7 +2,7 @@
  * Not a substitute for a browser loaded with the genuine React runtime; that remains AC04. */
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';import {resolve,dirname,join} from 'node:path';import {fileURLToPath} from 'node:url';import {createRequire} from 'node:module';import vm from 'node:vm';
-const require=createRequire(import.meta.url),ts=require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript');
+const require=createRequire(import.meta.url);let ts;try{ts=require('typescript');}catch{const {execFileSync}=await import('node:child_process');ts=require(execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim()+'/typescript');}
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 for(const name of ['react-market','react-analytics'])test(`AC07 ${name} five real TSX button callbacks invoke original service API contracts`,async()=>{
  const base=join(root,'fixtures',name);

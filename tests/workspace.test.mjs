@@ -7,7 +7,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {inspectReactProject,importReactProject,createUIPatch,previewUIPatch,applyApprovedUIPatch,rollbackUIPatch,verifyOriginalUnchanged,createReviewPlan} from '../src/workspace.mjs';
-const require=createRequire(import.meta.url),ts=require('/opt/nvm/versions/node/v22.16.0/lib/node_modules/typescript');
+const require=createRequire(import.meta.url);let ts;try{ts=require('typescript');}catch{const {execFileSync}=await import('node:child_process');ts=require(execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim()+'/typescript');}
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const fixtures=['react-market','react-analytics'];
 const digest=s=>createHash('sha256').update(s).digest('hex');
