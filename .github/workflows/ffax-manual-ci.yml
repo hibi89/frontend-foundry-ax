@@ -20,7 +20,9 @@ jobs:
       - name: Unit and synthetic fixture regression
         run: npm test
       - name: Structured TSX contract checks
-        run: npm run test:model-contract
+        run: |
+          npm run test:model-contract
+          npm run test:provider-contract
   browser-qa:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -44,5 +46,6 @@ jobs:
           python scripts/manual_browser_probe.py
           python scripts/accessibility_probe.py
           python scripts/contrast_probe.py
+          python scripts/axe_offline_audit.py
       - name: Local end-to-end rehearsal
         run: node scripts/local_acceptance_gate.mjs

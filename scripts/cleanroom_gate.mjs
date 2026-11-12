@@ -13,6 +13,7 @@ const clean=await mkdtemp(join(tmpdir(),'ffax-cleanroom-'));
 const steps=[
  ['Node automated regressions','node',['--test','tests/core.test.mjs','tests/ai-gate.test.mjs','tests/ai-structured-output.test.mjs','tests/manual-ai-ui.test.mjs','tests/workspace.test.mjs','tests/react-tsx-interactions.test.mjs','tests/github-review.test.mjs','tests/git-revert.test.mjs']],
  ['Structured model TSX contract','node',['scripts/model_contract_probe.mjs']],
+ ['Provider adapter 12-prompt offline contract','node',['scripts/provider_contract_probe.mjs']],
  ['Manual bridge in Chromium','python',['scripts/manual_browser_probe.py']],
  ['Browser QA','python',['scripts/browser_qa.py']],
  ['Keyboard and semantics','python',['scripts/accessibility_probe.py']],
