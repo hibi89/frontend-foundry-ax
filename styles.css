@@ -9,3 +9,9 @@
 @media(max-width:1150px){.workspace{grid-template-columns:minmax(220px,280px) minmax(320px,1fr)}.inspector{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px}.inspector .panel-title,.inspector .helper,.inspector .code-preview{grid-column:1/-1}.inspector .panel-title{margin-bottom:0}.inspector label{margin:8px 0 0}.steps span{padding:6px 4px}}@media(max-width:780px){.heading{display:block}.heading-badges{margin-top:14px}.workspace{grid-template-columns:1fr}.inspector{display:block}.steps{display:none}.canvas-scroll{min-height:350px;padding:8px}.ff-canvas{min-height:380px;padding:12px}.brand small{display:none}}@media(max-width:450px){.status-pill{font-size:9px}.canvas-toolbar{flex-wrap:wrap}.qa-heading{flex-direction:column;align-items:stretch}.export-row{flex-direction:column}}
 
 .ff-button.neutral{background:#475569;color:white}.reference-choices{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.reference-candidate{display:flex;gap:6px;align-items:center;background:#1a2340;border:1px solid #465578;padding:7px;border-radius:7px;color:#d8e4ff;font-size:11px}.reference-candidate .swatch{width:17px;height:17px;border-radius:5px;border:1px solid #b5c1db}.reference-candidate.selected{outline:2px solid #8b5cf6}.reference-candidate:focus-visible{outline:2px solid #7dd3fc}
+
+/* P85 contrast adjustments: keep violet identity while improving button/label legibility. */
+.ff-button,.ff-modal button{background:color-mix(in srgb,var(--accent) 60%,#0b1026);color:#ffffff}
+.ff-badge,.ff-hero .eyebrow{color:color-mix(in srgb,var(--accent) 62%,var(--ink) 38%)}
+
+.theme-daylight .ff-input span,.theme-daylight .ff-stat small,.theme-daylight .ff-card p{color:#35445b}
