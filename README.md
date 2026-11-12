@@ -1,3 +1,7 @@
+> **2026-11-12 FFAX 85% 재도전 — 검증된 78/100점 잠정 유지.** 실제 구현·검증은 증가했지만 AC04/AC09/AC12의 필수 수락 게이트는 미완료다. [이번 구현 및 재현 로그](docs/FFAX_P85_SECOND_PASS_20261112.md). 새 코드: 구조화된 모델 출력→등록 컴포넌트→React TSX 안전 변환, 12개 합성 타입 검사, D1–D5 로컬 통합 시나리오, 3테마×3폭 대비 검수. **실제 모델·axe·GitHub CI·배포는 미검증**. 실행: `npm run check:offline` (Node>=20, TypeScript CLI, Python Playwright/Chromium 및 레거시 React UMD 경로 필요).
+
+---
+
 > **2026-11-12 FFAX P85 워크스트림:** 검증된 고정 평가표 **78/100점 잠정** (이전75 + AC11 3). **85점 목표 미달 / RELEASE HOLD**. `feature/ffax-workbench-p85-20261112`의 [P85 범위·실측·한계](docs/FFAX_P85_WORKSTREAM_EVIDENCE_20261112.md)를 먼저 확인. 외부 AI 실연동, axe/수동 UX 검토, clean CI는 미검증. 아래 P75 README는 이전 체크포인트.
 
 ---

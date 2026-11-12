@@ -1,3 +1,20 @@
+# FFAX P85 재도전 — 현재 78/100 기술 검증 인수인계 (2026-11-12 KST)
+
+1. **목표·용도·요구·기술:** FFAX는 사용자 프롬프트→디자인 2안→React 컴포넌트/시각 편집→브라우저 QA→승인된 Git 리뷰 흐름. 최초 `REQUIREMENTS.md` 및 `docs/ACCEPTANCE_MATRIX.md`의 12개 AC 총100점은 변경 금지, 현재 78 잠정. 로컬 Node>=20/TypeScript/Python Playwright 기반.
+2. **완료 기능·설계 결정:** P75와 P78 정상 기능 전부 보존. 새 `src/ai-structured-output.mjs`: A 모델 자유 JSX 실행(고위험) 대신 B 승인·엄격 스키마·등록된 UI 컴포넌트만 생성/React 소스 직렬화(선택). `tests/ai-structured-output.test.mjs`, `scripts/model_contract_probe.mjs`, `scripts/local_acceptance_gate.mjs`, `scripts/contrast_probe.py` 및 `styles.css` 대비 개선. 실 AI 공급자는 미연결.
+3. **테스트 명령·성공/실패·검증/미검증:** `npm run check:offline` (로컬 Node v22.16): `npm test` 86 PASS/0 FAIL/0 SKIP; 구조화 합성 12/12 TypeScript PASS; 구버전 설치 React UMD 실제 렌더12/12·3폭36; Chromium DOM 주입 QA30 PASS; 키보드·라벨12 PASS; 3테마×3폭 계산 텍스트 대비738 검사에서 실패후보0; D1–D5 로컬 통합5/5 PASS. 실 LLM, axe-core, 소유자 UX 검수, 최신 React production, Win, GitHub CI, localhost URL browser, 실 서비스는 **NOT VERIFIED**.
+4. **완료/진행/대기/차단:** 고정 루브릭 P78 78/100 유지. AC04 14점 실 AI 생성 미달, AC09 6점 axe+수동 UX 승인 미달, AC12 2점 clean CI/E2E 릴리스 미달. **85 목표 미달, RELEASE HOLD**.
+5. **실패 근거·원인·시도·대안·재시도 금지:** npm registry DNS 실패로 의존성 잠금파일 생성/axe-core 설치 불가. Chromium localhost `ERR_BLOCKED_BY_ADMINISTRATOR`, 기존과 같은 방식 재시도 중단하고 실제 Chromium에 동일 로컬 코드 주입하여 한정 검수. 가상 AI 출력은 실제 LLM 호출 증거로 대체 불가. 초기 콘트라스트 테스트는 color(srgb)을 배경 투명으로 오판하는 허위 결과를 발견해 CSS4 색상 해석 추가, 실제 ocean/daylight 버튼·텍스트 대비 수정 후 738/738 만족. 유료 AI·권한·배포 무단 변경 금지.
+6. **저장소·브랜치·SHA·경로:** `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112` 기능 SHA `9733dbf72810e03d85ca29811f53ae368a8a651a`(로컬 변경파일 7종 Git Blob parity 확인). 기존 main `191289d...` 보존. 중요 `src/ai-structured-output.mjs`, `tests/ai-structured-output.test.mjs`, `scripts/{model_contract_probe.mjs,local_acceptance_gate.mjs,contrast_probe.py}`, `styles.css`, `docs/FFAX_P85_SECOND_PASS_20261112.md`.
+7. **Production URL·Vercel·실행 환경:** FFAX Vercel 프로젝트 없음, Production **미적용**. 로컬 `npm start` 서버 `127.0.0.1:4173`; Playwright 직접 URL 네비게이션 환경 정책 차단, injected DOM 한정. CI NOT RUN.
+8. **원본·백업·인증 관리·수정 금지:** 개발 feature만 변경, 기존 원본 `main`/WORKNOVA·KUODRA·RAG·DBVORA 등 전부 미변경. 실제 고객 자료·.env·키 입력/업로드·요금·GitHub 권한·Vercel 무변경. Git fast-forward 커밋, 롤백은 기존 SHA를 기준으로 정상 revert. 콘셉트 원본 이미지는 과거 자산이며 바이너리 변경 없음.
+9. **다음 우선순위·절차·완료기준·승인:** AC04 우선: 외부 모델·전송 데이터·가격·호출 상한 명시 승인 후 실모델 12 브리프 타입체크/브라우저 렌더. AC09는 axe-core 공식 테스트·키보드/대비·사용자 UX 수락, AC12는 클린 설치+GitHub CI+통합 D1–D5. 그 전에는 점수 인상 금지. Merge/Production은 별도 승인.
+10. **갱신 일시·확인 범위·문서 기준 SHA:** 2026-11-12 KST. 정확 로컬 개발 기능 `9733dbf72810e03d85ca29811f53ae368a8a651a`, Node/Chromium 제한 실행 확인. 최종 문서 커밋은 본 작성 후 원격 ref 재조회해 확정, 문서-only 점수 상승 없음. FFAX 독립 크몽 후보, 활성16종 분모 불변.
+
+**읽기 순서:** `HANDOFF.md` → `STATUS.md` → `AGENTS.md` → `REQUIREMENTS.md` → `docs/ACCEPTANCE_MATRIX.md` → `docs/FFAX_P85_SECOND_PASS_20261112.md` → 실제 소스.
+
+---
+
 # FFAX P85 목표 작업 — 78/100 검증 체크포인트 인수인계 (2026-11-12 KST)
 
 1. **목표·요구·기술:** FFAX AI 기획→디자인→React 소스→시각 편집→브라우저 QA→안전한 Git 통합. 12개 AC 총100점의 최초 스펙 그대로. 현재 Node/JS local-first + TypeScript 기반. 목표는 85이지만 실제 **78/100**만 증명.

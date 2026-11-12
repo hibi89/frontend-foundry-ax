@@ -1,3 +1,13 @@
+## 2026-11-12 KST — FFAX P85 재도전 후 검증 범위 확대 / 현재 78/100 잠정
+- **Repo/branch/code SHA:** Private `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`; 이번 정확 로컬 원본과 Git Blob SHA를 대조한 기능 코드 9733dbf72810e03d85ca29811f53ae368a8a651a. 기존 `main@191289d19f7eb6203a2a6beb5e8efbcf10bc844d` 및 실제 다른 제품 무변경.
+- **기능 변경:** `src/ai-structured-output.mjs` 모델 응답 JSON 스키마/컴포넌트·테마·개수 allowlist, 명시적 preview 승인, HTML/코드 주입 차단. 12개 합성 시안 TypeScript 검사, 로컬 D1–D5 통합 재현, 3개 테마·3개 뷰포트의 텍스트 색 대비 결함 수정. 재사용 13 컴포넌트/기존 편집기·원본 보존 흐름 유지.
+- **실행 결과:** Node 86 PASS / 0 FAIL / 0 SKIP; 모델 계약 합성 12/12 TypeScript PASS; 기존 rule generator의 레거시 React UMD 12/12 렌더·36 viewport PASS; Chromium 같은 소스 주입 30/30 PASS; 경량 키보드·레이블 12/12 PASS; Chromium 계산 텍스트 대비 738건/9 조합 미달 후보 0; D1–D5 5/5 로컬 PASS. [세부 범위](docs/FFAX_P85_SECOND_PASS_20261112.md).
+- **미검증:** 실제 LLM 공급자 호출/최신 React 배포 빌드, axe-core 정식 접근성/사용자 시각 승인, GitHub Actions clean CI, 직접 localhost Chromium navigation(`ERR_BLOCKED_BY_ADMINISTRATOR`), 실제 고객 Windows/Production. 외부 API 과금·고객 데이터 전송·Production·권한 변경 없음.
+- **완성률 판정:** **78/100 잠정 유지** (AC01 8, AC02 8, AC03 12, AC05 6, AC06 12, AC07 12, AC08 12, AC10 5, AC11 3). **AC04 0/14, AC09 0/6, AC12 0/2**. 85 목표 **미달**; 릴리스 **HOLD**. 로컬 테스트 숫자만으로 합격 항목을 늘리지 않음.
+- **다음:** 모델/provider·비용·허용 입력 승인 → 실제 AI 생성의 12 브리프 빌드·렌더 → 외부 저작권·고객 데이터 보호. axe-core 공식 검사 + 수동 UX 리뷰, clean CI 실행은 별도 권한·비용 조건 확인 후. 크몽 허브는 활성16종 점수 유지, FFAX 독립 후보.
+
+---
+
 ## 2026-11-12 KST — P85 목표 작업 진행 / 검증된 기준 **78/100 잠정**
 - **고정 100점 기준 유지:** P75 75점 + **AC11 비용·보안·복구 3점 PASS** = **78점**. 85점은 **아직 미달**이며 타 항목을 부분 테스트만으로 가산하지 않는다.
 - **기능 SHA:** `3d2d71d1e2887eaf55214acca146eca1b6f11b92` · `feature/ffax-workbench-p85-20261112` (Private). 로컬 8개 수정 파일과 GitHub Blob SHA **8/8 정확 일치**. 이전 `main@191289d19f7eb6203a2a6beb5e8efbcf10bc844d` 변경 없음.
