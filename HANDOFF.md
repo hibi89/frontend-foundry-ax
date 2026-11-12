@@ -1,3 +1,17 @@
+# FFAX 2026-11-12 KST — Approved provider adapter checkpoint (10 points)
+1. Objective: FFAX v1.0 user brief→AI design→React code→visual editor→QA→reviewed Git, original 12-AC 100-point rubric unchanged.
+2. Delivered/decision: A direct unbounded model calls vs B explicitly opt-in HTTPS model adapter with owner origin/model, policy ledger, strict response and review. **B implemented only as readiness**, not actual provider operation; formal axe harness and UX checklist.
+3. Tests: tested source SHA a206561bd7efef46bb76ecba321280bb5af8f444; eight new/modified files remote/local Git blobs 8/8 identical. Linux Node22 npm test **96 PASS / 0 FAIL / 0 SKIP**; 12/12 mocked adapter responses and TSX transpile, Chromium injected 30/30, keyboard labels 12/12, React UMD12+36 widths, cleanroom7/7, D1–D5 local5/5. axe executable exit2 NOT VERIFIED; no actual AI/Actions/Windows/Production.
+4. Scope state: **78/100 provisional maintained (+0)**, 85 target not reached. AC04(14), AC09(6), AC12(2) = 0. All release gates HOLD.
+5. Errors/pivot: earlier LZSS source-transfer attempt failed UTF-8 integrity; switched to individually committed exact text and compared 8 Git Blob SHA successfully. Offline axe binary unavailable; do not mark PASS or falsely claim installer success. No repeated uncontrolled external model/API calls.
+6. Repo/branch/SHA: private hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112 source before docs a206561bd7efef46bb76ecba321280bb5af8f444; main baseline 191289d19f7eb6203a2a6beb5e8efbcf10bc844d preserved. Important src/provider-adapter.mjs, tests/provider-adapter.test.mjs, scripts/provider_contract_probe.mjs, scripts/axe_offline_audit.py, docs/OWNER_UX_REVIEW_V1.md.
+7. Production/env: Node>=20 + Python Playwright and Chromium; local only 127.0.0.1:4173, no Vercel, Production 미적용. CI workflow_dispatch ONLY / actual jobs0.
+8. Originals/security: existing FFAX main and other Kmong products untouched, private sources only private repo, no tokens/customer data/real provider calls/billing/permissions changes. Normal Git revert from before checkpoint.
+9. Next steps: owner approves provider/domain/token budget/data class→real 12 prompt runs, actual React build, isolated remote integration; install axe and formal audit+user UI signoff; after Actions quota approval run clean CI. Completion requires all applicable RG gates, not just 85 score.
+10. Updated 2026-11-12 KST; GitHub source SHA listed, latest document SHA must be fetched after push. Verified local scope above; unverified real API/axe/CI/UX/Production. Public hub must only receive metadata, preserve active16 denominator.
+
+---
+
 # FFAX P85 third pass — 10-point handoff (2026-11-12 KST)
 
 1. **Goal/requirements/tech:** FFAX local-first AI frontend design/visual editor/QA/Git review, fixed `REQUIREMENTS.md` and `docs/ACCEPTANCE_MATRIX.md` 100-point definition unchanged; score **78/100 provisional**, not 85.

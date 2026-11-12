@@ -1,3 +1,8 @@
+## 2026-11-12 — AI provider adapter + formal audit preparation (P78 retained)
+- Local-first production provider adapter contract added, but **no paid/live LLM request**. Node **96/96 PASS**, 12/12 mocked design messages, Chromium 30/30, React UMD 12/12, cleanroom 7/7.
+- axe 4.14 audit script added; local binary missing so **NOT VERIFIED**, actual user UX approval pending. CI manual-only, not executed. **78/100 provisional unchanged**, RELEASE HOLD.
+- [Detailed evidence](docs/FFAX_P85_PROVIDER_ADAPTER_GATE_20261112.md) · [Owner UX approval checklist](docs/OWNER_UX_REVIEW_V1.md).
+
 ## 2026-11-12 KST — FFAX P85 third pass / verified 78/100 retained
 - Private product `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112` **exact code SHA `ffd04a8f452ef3f7523201767b1f18cd3d18fb31`**. Read-back of new UI/parser/test/workflow blobs matched local Git hashes. Previous main remains `191289d19f7eb6203a2a6beb5e8efbcf10bc844d`.
 - New UI: owner consented manual request copy → strict JSON model output paste → explicit design review → visual canvas/TSX update. Auto-provider calls, source upload, autonomous GitHub push and deployment: **none**.

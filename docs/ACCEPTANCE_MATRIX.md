@@ -1,3 +1,5 @@
+> **2026-11-12 provider adapter preparation:** Confirmed 8/8 source blobs; Node96, mocked provider contract12, limited Chromium30, React UMD12, cleanroom7. **AC04 0, AC09 0, AC12 0; total remains 78/100 provisional (85 not reached).** Formal axe binary absent (exit2), live model/CI/owner UI review not run. [Details](FFAX_P85_PROVIDER_ADAPTER_GATE_20261112.md).
+
 > **2026-11-12 P85 third pass:** Verified `78/100` provisional remains unchanged despite successful manual AI JSON import/visual editor and clean-room checks. **No actual model API call, formal axe + user UI approval, or completed GitHub Actions run**, so AC04(14), AC09(6), AC12(2) remain 0. [Third-pass proof](FFAX_P85_MANUAL_BRIDGE_AND_CLEANROOM_20261112.md). **85% not reached, RELEASE HOLD**.
 
 > **2026-11-12 P85 재도전:** 최종 78/100 잠정 유지. 새 안전한 모델 출력 JSON 게이트, 12개 합성 타입 검사, D1-D5 로컬 5/5, 3테마×3뷰포트 텍스트 대비 738건 검사를 추가했다. 실모델/axe/clean CI/사용자 최종승인 미검증이므로 AC04/09/12는 0점. [재도전 상세](FFAX_P85_SECOND_PASS_20261112.md).

@@ -1,3 +1,8 @@
+## 2026-11-12 — AI provider adapter + formal audit preparation (P78 retained)
+- Local-first production provider adapter contract added, but **no paid/live LLM request**. Node **96/96 PASS**, 12/12 mocked design messages, Chromium 30/30, React UMD 12/12, cleanroom 7/7.
+- axe 4.14 audit script added; local binary missing so **NOT VERIFIED**, actual user UX approval pending. CI manual-only, not executed. **78/100 provisional unchanged**, RELEASE HOLD.
+- [Detailed evidence](docs/FFAX_P85_PROVIDER_ADAPTER_GATE_20261112.md) · [Owner UX approval checklist](docs/OWNER_UX_REVIEW_V1.md).
+
 > **2026-11-12 FFAX P85 third pass — 78/100 provisional (unchanged), 85 target NOT reached.** [Manual AI bridge + six-step clean-room verification](docs/FFAX_P85_MANUAL_BRIDGE_AND_CLEANROOM_20261112.md). Added browser approval flow: copy an explicitly vetted UI prompt to a model yourself, paste strict JSON, approve, and edit the resulting UI. **This is manual AI-assisted review, not live API generation.** Local Node 91 PASS / browser 30 + manual bridge 10 PASS / a11y basics 12 PASS / contrast 828 checks / clean-room 6 PASS. GitHub Actions config manual-dispatch only, **never run**; real LLM, axe, owner UX signoff, clean CI and Production remain unverified. 
 
 ---
