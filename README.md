@@ -1,3 +1,7 @@
+> **2026-11-12 FFAX P85 third pass — 78/100 provisional (unchanged), 85 target NOT reached.** [Manual AI bridge + six-step clean-room verification](docs/FFAX_P85_MANUAL_BRIDGE_AND_CLEANROOM_20261112.md). Added browser approval flow: copy an explicitly vetted UI prompt to a model yourself, paste strict JSON, approve, and edit the resulting UI. **This is manual AI-assisted review, not live API generation.** Local Node 91 PASS / browser 30 + manual bridge 10 PASS / a11y basics 12 PASS / contrast 828 checks / clean-room 6 PASS. GitHub Actions config manual-dispatch only, **never run**; real LLM, axe, owner UX signoff, clean CI and Production remain unverified. 
+
+---
+
 > **2026-11-12 FFAX 85% 재도전 — 검증된 78/100점 잠정 유지.** 실제 구현·검증은 증가했지만 AC04/AC09/AC12의 필수 수락 게이트는 미완료다. [이번 구현 및 재현 로그](docs/FFAX_P85_SECOND_PASS_20261112.md). 새 코드: 구조화된 모델 출력→등록 컴포넌트→React TSX 안전 변환, 12개 합성 타입 검사, D1–D5 로컬 통합 시나리오, 3테마×3폭 대비 검수. **실제 모델·axe·GitHub CI·배포는 미검증**. 실행: `npm run check:offline` (Node>=20, TypeScript CLI, Python Playwright/Chromium 및 레거시 React UMD 경로 필요).
 
 ---

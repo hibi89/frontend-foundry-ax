@@ -1,3 +1,12 @@
+## 2026-11-12 KST — FFAX P85 third pass / verified 78/100 retained
+- Private product `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112` **exact code SHA `ffd04a8f452ef3f7523201767b1f18cd3d18fb31`**. Read-back of new UI/parser/test/workflow blobs matched local Git hashes. Previous main remains `191289d19f7eb6203a2a6beb5e8efbcf10bc844d`.
+- New UI: owner consented manual request copy → strict JSON model output paste → explicit design review → visual canvas/TSX update. Auto-provider calls, source upload, autonomous GitHub push and deployment: **none**.
+- `npm test` **91 PASS/0 FAIL**; Chromium existing 30 PASS + manual AI browser 10 PASS; lightweight accessibility 12 PASS; computed contrast 828 candidates 0 low; synthetic TSX typecheck12, D1-D5 local5; isolated copy `scripts/cleanroom_gate.mjs` 6-step PASS. Actual local URL browser, real LLM, axe, actual GitHub Actions execution, Windows/native customer and Production **unverified**.
+- New `.github/workflows/ffax-manual-ci.yml` uses **manual dispatch only**; not run to avoid unapproved private Actions minutes/cost. **78/100 unchanged** AC04(14)/AC09(6)/AC12(2) = 0. **85 goal NOT reached / RELEASE HOLD**.
+- [Evidence](docs/FFAX_P85_MANUAL_BRIDGE_AND_CLEANROOM_20261112.md). No changes to other Kmong products. FFAX remains separate candidate, not active 16.
+
+---
+
 ## 2026-11-12 KST — FFAX P85 재도전 후 검증 범위 확대 / 현재 78/100 잠정
 - **Repo/branch/code SHA:** Private `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`; 이번 정확 로컬 원본과 Git Blob SHA를 대조한 기능 코드 9733dbf72810e03d85ca29811f53ae368a8a651a. 기존 `main@191289d19f7eb6203a2a6beb5e8efbcf10bc844d` 및 실제 다른 제품 무변경.
 - **기능 변경:** `src/ai-structured-output.mjs` 모델 응답 JSON 스키마/컴포넌트·테마·개수 allowlist, 명시적 preview 승인, HTML/코드 주입 차단. 12개 합성 시안 TypeScript 검사, 로컬 D1–D5 통합 재현, 3개 테마·3개 뷰포트의 텍스트 색 대비 결함 수정. 재사용 13 컴포넌트/기존 편집기·원본 보존 흐름 유지.

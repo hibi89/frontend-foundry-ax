@@ -1,3 +1,20 @@
+# FFAX P85 third pass — 10-point handoff (2026-11-12 KST)
+
+1. **Goal/requirements/tech:** FFAX local-first AI frontend design/visual editor/QA/Git review, fixed `REQUIREMENTS.md` and `docs/ACCEPTANCE_MATRIX.md` 100-point definition unchanged; score **78/100 provisional**, not 85.
+2. **Completed and rationale:** Added manual AI approval/copy→strict model JSON import→live visual editing, shared strict schema parser, common credential/PII rejection, 10 browser-case probe, clean-room isolated gate and manual-only workflow YAML. Preferred reversible owner-mediated design review over unapproved paid live API.
+3. **Tests:** Node22 Linux `npm test` **91 PASS/0 FAIL/0 SKIP**; same-source Chromium browser30 and manual bridge10; light accessibility12; 3themes×3width contrast828 checks/0 low; model synthetic TSX12 typecheck; local D1–D5 5/5; cleanroom6/6. **NOT** live LLM/axe/GitHub CI/Production or native Windows.
+4. **State/blocked:** AC01/02/03/05/06/07/08/10/11 weighted sum **78**, AC04/09/12 zero. **RELEASE HOLD**; no reliable 85 achievement evidence. Manual model UX does not replace automatic model provider.
+5. **Failures/pivot:** External npm/axe registry previously DNS blocked; no repetitive unpaid/paid network attempt. Chromium URL navigation previously blocked; same actual HTML/CSS/JS DOM-injection used with caveat. First new unit test assertion mismatch fixed, then Node 91/91; no unresolved failing local scoped tests. No Actions run to avoid unapproved quota/cost.
+6. **Repo/branch/source SHA:** private `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`, **tested source commit `ffd04a8f452ef3f7523201767b1f18cd3d18fb31`**, previous main `191289d19f7eb6203a2a6beb5e8efbcf10bc844d` unchanged; draft PR1 remains unmerged. Key `src/core.mjs`, `src/ai-structured-output.mjs`, `src/app.mjs`, `index.html`, `scripts/manual_browser_probe.py`, `scripts/cleanroom_gate.mjs`, `tests/manual-ai-ui.test.mjs`, workflow and [evidence](docs/FFAX_P85_MANUAL_BRIDGE_AND_CLEANROOM_20261112.md).
+7. **Production/execution:** Vercel/Production **not applicable**, local `npm start` Node>=20 `http://127.0.0.1:4173`; CLI tests above and TS/Playwright/Pillow/Chromium optional. GitHub Actions workflow manual-only/unrun.
+8. **Original/data/security:** Private repository and main protected. No customer data, keys, privileged upload, external AI calls, Git merge, other repositories or billing changes. Existing P75/P78 functionality remains. For rollback normal Git revert from code SHA; no force push.
+9. **Next steps/approvals:** Actual model adapter and 12 prompts/modern React build (AC04) **requires provider/price/data-transmission approval**. axe-core audit + actual user UX acceptance (AC09). Clean CI green D1-D5 with authorized Actions quota (AC12). Must earn criteria before score increases, preserve existing functionality, update hub.
+10. **Checked time/source scope:** 2026-11-12 KST; local Node91/Chromium40/clean-room6; remote source SHA `ffd04a8f452ef3f7523201767b1f18cd3d18fb31`; latest documentation SHA re-fetch after commit. Release gates RG01-RG06 incomplete. 
+
+Historical handoffs below retained.
+
+---
+
 # FFAX P85 재도전 — 현재 78/100 기술 검증 인수인계 (2026-11-12 KST)
 
 1. **목표·용도·요구·기술:** FFAX는 사용자 프롬프트→디자인 2안→React 컴포넌트/시각 편집→브라우저 QA→승인된 Git 리뷰 흐름. 최초 `REQUIREMENTS.md` 및 `docs/ACCEPTANCE_MATRIX.md`의 12개 AC 총100점은 변경 금지, 현재 78 잠정. 로컬 Node>=20/TypeScript/Python Playwright 기반.
