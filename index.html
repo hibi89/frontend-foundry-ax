@@ -24,6 +24,20 @@
       <button id="analyze" class="primary-btn" type="button">✦ 요구 분석 · 디자인 2안</button>
       <section class="brief-area" aria-label="분석 결과"><p class="subheading">구조화된 요구사항</p><div id="brief-summary" class="brief-text" role="status">요구사항을 입력하고 분석하세요.</div><div id="design-options" class="design-options"></div></section>
       <div class="section-rule"></div>
+      <section class="manual-ai-area" aria-label="승인형 AI JSON 디자인 가져오기">
+        <p class="subheading">AI 디자인 요청 · 수동 복사 방식</p>
+        <p class="helper">이 앱은 외부 모델에 연결하지 않습니다. 사용자가 직접 민감정보를 확인하고 요청서를 복사할 수 있습니다.</p>
+        <label class="check"><input id="manual-copy-consent" type="checkbox" /> 외부 AI에 전달할 문장에 비밀정보·고객정보가 없음을 확인했습니다.</label>
+        <button id="manual-build-request" type="button" class="ghost-btn">안전한 AI 요청서 만들기</button>
+        <label for="manual-request">AI에 복사할 요청서</label>
+        <textarea id="manual-request" rows="3" readonly placeholder="복사 전 동의 확인이 필요합니다"></textarea>
+        <label for="manual-response">AI가 반환한 JSON 붙여넣기 (코드 실행 없음)</label>
+        <textarea id="manual-response" rows="4" maxlength="50000" placeholder='{"schema":"ffax-model-design.v1",...}'></textarea>
+        <label class="check"><input id="manual-design-approval" type="checkbox" /> 검토 후 시안을 현재 편집 화면에 적용합니다.</label>
+        <button id="manual-apply-response" type="button" class="ghost-btn">검증 후 시안 적용</button>
+        <div id="manual-review-status" class="helper" role="status">AI API 미연동 · 수동 요청/검토용 기능</div>
+      </section>
+      <div class="section-rule"></div>
       <p class="subheading">참고 이미지 (선택)</p>
       <label for="reference-file">본인이 사용할 권리가 있는 이미지</label>
       <input id="reference-file" type="file" accept="image/png,image/jpeg,image/webp" />

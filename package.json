@@ -1,6 +1,6 @@
 {
   "name": "frontend-foundry-ax",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "description": "FFAX local-first frontend workbench with structured AI output boundary, safe React fixture reviews, offline QA and accessibility contrast probes.",
@@ -17,7 +17,9 @@
     "test:model-contract": "node scripts/model_contract_probe.mjs",
     "test:contrast": "python scripts/contrast_probe.py",
     "test:local-acceptance": "node scripts/local_acceptance_gate.mjs",
-    "check:offline": "npm test && npm run test:model-contract && npm run test:react-runtime && npm run test:accessibility && npm run test:local-acceptance"
+    "check:offline": "npm test && npm run test:model-contract && npm run test:react-runtime && npm run test:accessibility && npm run test:local-acceptance",
+    "test:manual-browser": "python scripts/manual_browser_probe.py",
+    "test:cleanroom": "node scripts/cleanroom_gate.mjs"
   },
   "engines": {
     "node": ">=20"

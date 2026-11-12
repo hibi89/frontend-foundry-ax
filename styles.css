@@ -15,3 +15,10 @@
 .ff-badge,.ff-hero .eyebrow{color:color-mix(in srgb,var(--accent) 62%,var(--ink) 38%)}
 
 .theme-daylight .ff-input span,.theme-daylight .ff-stat small,.theme-daylight .ff-card p{color:#35445b}
+
+/* Owner-controlled local AI review. No background provider transmission. */
+.manual-ai-area { display: grid; gap: 10px; }
+.manual-ai-area .subheading { margin: 0; }
+.manual-ai-area textarea { width: 100%; min-height: 76px; resize: vertical; }
+.manual-ai-area #manual-response { min-height: 112px; }
+.manual-ai-area .check { align-items: start; line-height: 1.5; }

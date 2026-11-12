@@ -196,3 +196,48 @@ export function approveReference(doc, candidateId) {
   next.reference.reviewed=true;next.reference.approvedCandidate=candidateId;next.reference.selectedColor=candidate.color;next.layout=candidate.layout;
   next.version++;return next;
 }
+
+const OWN = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+const text = (v, max) => typeof v === 'string' && v.length >= 1 && v.length <= max && !/[\u0000-\u0008\u000b\u000e-\u001f]/.test(v);
+const keys = (o, allowed) => Object.keys(o).every(k => allowed.includes(k));
+
+/** Parse an LLM's plain JSON, not Markdown or executable source. */
+export function parseModelDesign(json, { ownerBrief, approval = '' } = {}) {
+  if (approval !== 'APPROVE_DESIGN_PREVIEW') throw new Error('DESIGN_PREVIEW_APPROVAL_REQUIRED');
+  if (!text(ownerBrief, 2000) || ownerBrief.trim().length < 8) throw new Error('OWNER_BRIEF_REQUIRED');
+  if (typeof json !== 'string' || json.length > 50_000 || json.length < 20) throw new Error('MODEL_JSON_SIZE_INVALID');
+  if (/(?:sk-[a-z0-9_-]{12,}|gh[opusr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|AIza[a-z0-9_-]{20,}|-----BEGIN[^\n]*PRIVATE KEY-----|(?:secret|password|api[_-]?key|access[_-]?token|authorization)\s*[:=]\s*\S+|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b)/i.test(json)) throw new Error('SENSITIVE_MODEL_CONTENT_REFUSED');
+  let data;
+  try { data = JSON.parse(json); } catch { throw new Error('MODEL_JSON_PARSE_FAILED'); }
+  if (!data || typeof data !== 'object' || Array.isArray(data) || !keys(data, ['schema','title','theme','layout','components'])) throw new Error('MODEL_SCHEMA_INVALID');
+  if (data.schema !== 'ffax-model-design.v1' || !text(data.title, 100) || !OWN(THEME_OPTIONS, data.theme) || !['stack','grid'].includes(data.layout)) throw new Error('MODEL_SCHEMA_INVALID');
+  if (!Array.isArray(data.components) || data.components.length < 1 || data.components.length > 40) throw new Error('MODEL_COMPONENTS_INVALID');
+  const components = data.components.map((item,i) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item) || !keys(item,['type','text','color','spacing','align']) || !OWN(REGISTRY,item.type) || !text(item.text,180)) throw new Error('MODEL_COMPONENT_INVALID');
+    const node = makeComponent(item.type, 'generated-' + (i+1), item.text);
+    if (OWN(item,'color')) { if (!['accent','neutral'].includes(item.color)) throw new Error('MODEL_COLOR_INVALID'); node.color = item.color; }
+    if (OWN(item,'spacing')) { if (![8,16,24,32].includes(item.spacing)) throw new Error('MODEL_SPACING_INVALID'); node.spacing = item.spacing; }
+    if (OWN(item,'align')) { if (!['start','center','end'].includes(item.align)) throw new Error('MODEL_ALIGN_INVALID'); node.align = item.align; }
+    return node;
+  });
+  const brief = buildBrief(ownerBrief);
+  const doc = {version:1, title:data.title, theme:data.theme, layout:data.layout, approach:'MODEL',
+    brief:{...brief, raw:'[owner-approved brief stored in local session only]'},
+    reference:null, components};
+  assertDocument(doc);
+  return {document:doc, reactSource:exportReact(doc), metadata:{schema:data.schema, components:doc.components.length, ownerApproval:true,
+    codeEvaluation:false, externalNetwork:false, directRepositoryWrite:false, sourceCopy:false}};
+}
+
+
+/**
+ * Local-only prompt packet. Owner may choose to copy ONLY a non-sensitive brief
+ * into a separate model UI. This method performs zero network requests.
+ */
+export function makeManualAIPrompt(ownerBrief, {ownerConsent=false}={}) {
+  if(ownerConsent!==true) throw new Error('MANUAL_COPY_CONSENT_REQUIRED');
+  if(!text(ownerBrief,2000)||ownerBrief.trim().length<8) throw new Error('OWNER_BRIEF_REQUIRED');
+  const risky=/(?:sk-[a-z0-9_-]{12,}|gh[opusr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,}|AIza[a-z0-9_-]{20,}|-----BEGIN[^\n]*PRIVATE KEY-----|\.env\b|(?:secret|password|api[_-]?key|access[_-]?token|authorization)\s*[:=]\s*\S+|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|주민등록번호|비공개\s*소스)/i;
+  if(risky.test(ownerBrief)) throw new Error('SENSITIVE_INPUT_REFUSED');
+  return `당신은 UI 구조 JSON만 반환하는 도우미입니다. 요구사항: ${ownerBrief.trim()}\n\n반환 형식: 오직 JSON 객체(마크다운 코드블록 금지). schema는 \"ffax-model-design.v1\", theme은 midnight/ocean/daylight, layout은 stack/grid, title은 100자 이하. components는 1~40개로 구성하고 각 항목은 {\"type\":\"Card\",\"text\":\"설명\",\"color\":\"accent\",\"spacing\":16,\"align\":\"start\"} 형태. type 허용값: ${COMPONENT_TYPES.join(', ')}. 외부 URL, 스크립트, 인증정보, API 코드, 이미지, 실제 고객정보는 포함하지 마세요. 응답은 완성된 UI가 아니라 사용자가 검토할 구조화 초안입니다.`;
+}

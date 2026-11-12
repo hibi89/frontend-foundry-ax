@@ -1,4 +1,4 @@
-import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference } from './core.mjs';
+import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign } from './core.mjs';
 const el=id=>document.getElementById(id);
 const promptEl=el('prompt');promptEl.value=DEFAULT_PROMPT;
 let brief=buildBrief(DEFAULT_PROMPT);let history=new DocumentHistory(newDocument(brief,'A'));
@@ -116,6 +116,21 @@ el('add-component').addEventListener('click',()=>{run({kind:'insert',type:'Card'
 el('remove-component').addEventListener('click',()=>{if(selected)run({kind:'remove',id:selected});});
 document.querySelectorAll('[data-width]').forEach(b=>b.addEventListener('click',()=>{viewport=Number(b.dataset.width);renderCanvas();}));
 el('run-qa').addEventListener('click',()=>checkQA().catch(e=>log(`QA 오류: ${e.message}`,true)));
+el('manual-build-request').addEventListener('click',()=>{
+  try {
+    el('manual-request').value=makeManualAIPrompt(promptEl.value,{ownerConsent:el('manual-copy-consent').checked});
+    el('manual-review-status').textContent='요청서가 로컬에서 만들어졌습니다. 앱이 자동 전송하지 않습니다.';
+  }catch(e){el('manual-request').value='';el('manual-review-status').textContent=e.message;}
+});
+el('manual-apply-response').addEventListener('click',()=>{
+  try {
+    const out=parseModelDesign(el('manual-response').value,{ownerBrief:promptEl.value,
+      approval:el('manual-design-approval').checked?'APPROVE_DESIGN_PREVIEW':''});
+    history.past.push(history.present);history.present=out.document;history.future=[];
+    selected=out.document.components[0]?.id||null;updateAll();
+    el('manual-review-status').textContent=`검증된 ${out.metadata.components}개 컴포넌트가 로컬 미리보기에 적용됨. 자동 배포 없음.`;
+  }catch(e){el('manual-review-status').textContent=`거부: ${e.message}`;}
+});
 el('apply-reference').addEventListener('click',updateReference);
 el('export-react').addEventListener('click',()=>save('GeneratedScreen.tsx',exportReact(history.present),'text/plain'));
 el('export-json').addEventListener('click',()=>save('FFAX-project.json',JSON.stringify(history.present,null,2),'application/json'));
