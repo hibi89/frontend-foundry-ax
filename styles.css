@@ -22,3 +22,5 @@
 .manual-ai-area textarea { width: 100%; min-height: 76px; resize: vertical; }
 .manual-ai-area #manual-response { min-height: 112px; }
 .manual-ai-area .check { align-items: start; line-height: 1.5; }
+
+.import-project-control{border:1px solid #34435d;border-radius:8px;color:#d5e0f6;display:inline-flex;flex-direction:column;gap:5px;padding:9px 12px;font-size:11px;cursor:pointer;background:#151e31;min-width:0}.import-project-control input{max-width:100%;font-size:11px}.import-project-control:focus-within{outline:2px solid #7dd3fc;outline-offset:2px}#project-import-status{white-space:normal;margin-top:12px}

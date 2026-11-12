@@ -151,6 +151,52 @@ export function renderNode(node) {
     default: return `<article ${attrs}><strong>${tx}</strong><p>컴포넌트 스타일 미리보기</p></article>`;
   }
 }
+/** Explicit local JSON project handoff. No network, script execution or auto-apply. */
+export const FFAX_PROJECT_SCHEMA = 'ffax-local-project.v1';
+const plain = v => v !== null && typeof v === 'object' && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
+const exactKeys = (v, allowed) => plain(v) && Object.keys(v).every(k => allowed.includes(k));
+const safeLine = (v, max) => typeof v === 'string' && v.length > 0 && v.length <= max && !/[\u0000-\u001f\u007f]/.test(v);
+const safeCollection = (xs, count, maxLength) => Array.isArray(xs) && xs.length <= count && xs.every(x => safeLine(x, maxLength));
+const isColor = c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);
+const briefKeys = ['objective','raw','pages','features','constraints','theme','users','widthTargets','approvalRequired','approaches'];
+const referenceKeys = ['name','rightsConfirmed','origin','colors','candidates','reviewed','approvedCandidate','selectedColor'];
+export function validateProjectImport(doc) {
+  if (!exactKeys(doc, ['version','title','theme','layout','approach','brief','reference','components'])) throw new Error('PROJECT_STRUCTURE_INVALID');
+  if (!Number.isSafeInteger(doc.version) || doc.version < 1 || doc.version > 1000000 || !safeLine(doc.title, 120) || !['stack','grid'].includes(doc.layout) || !Object.hasOwn(THEME_OPTIONS, doc.theme) || !['A','B','MODEL'].includes(doc.approach)) throw new Error('PROJECT_HEADER_INVALID');
+  const b=doc.brief;
+  if (!exactKeys(b, briefKeys) || !safeLine(b.objective, 120) || !safeLine(b.raw, 2000) || !safeLine(b.users, 120) || !Object.hasOwn(THEME_OPTIONS, b.theme) || b.approvalRequired !== true || !safeCollection(b.pages, 7, 120) || b.pages.length < 1 || !safeCollection(b.features, 30, 150) || !safeCollection(b.constraints, 30, 180) || !Array.isArray(b.widthTargets) || JSON.stringify(b.widthTargets) !== '[375,768,1440]') throw new Error('PROJECT_BRIEF_INVALID');
+  if (!Array.isArray(b.approaches) || b.approaches.length !== 2 || b.approaches.some((a,i) => !exactKeys(a,['id','label','theme','layout','description']) || a.id !== ['A','B'][i] || !safeLine(a.label,100) || !safeLine(a.description,200) || !Object.hasOwn(THEME_OPTIONS,a.theme) || !['stack','grid'].includes(a.layout))) throw new Error('PROJECT_APPROACH_INVALID');
+  const ref=doc.reference;
+  if (ref !== null) {
+    if (!exactKeys(ref,referenceKeys) || ref.rightsConfirmed !== true || !safeLine(ref.name,120) || !safeLine(ref.origin,120) || !Array.isArray(ref.colors) || ref.colors.length < 2 || ref.colors.length > 4 || !ref.colors.every(isColor) || !Array.isArray(ref.candidates) || ref.candidates.length !== 2 || typeof ref.reviewed !== 'boolean') throw new Error('PROJECT_REFERENCE_INVALID');
+    for(let i=0;i<2;i++) {const c=ref.candidates[i];if(!exactKeys(c,['id','tone','color','layout']) || c.id!==['A','B'][i] || !['muted','vivid'].includes(c.tone) || !isColor(c.color) || !ref.colors.includes(c.color) || !['stack','grid'].includes(c.layout)) throw new Error('PROJECT_REFERENCE_INVALID');}
+    if(ref.reviewed) {
+      const selected=ref.candidates.find(c=>c.id===ref.approvedCandidate);
+      if (!selected || ref.selectedColor!==selected.color || doc.layout!==selected.layout) throw new Error('PROJECT_REFERENCE_APPROVAL_INVALID');
+    } else if(Object.hasOwn(ref,'selectedColor') || Object.hasOwn(ref,'approvedCandidate')) throw new Error('PROJECT_REFERENCE_UNAPPROVED');
+  }
+  if (!Array.isArray(doc.components) || doc.components.length > 80) throw new Error('PROJECT_COMPONENTS_INVALID');
+  const ids=new Set();
+  for(const c of doc.components){
+    if (!exactKeys(c,['id','type','text','color','spacing','align']) || !safeLine(c.id,80) || !/^[A-Za-z0-9_-]+$/.test(c.id) || ids.has(c.id) || !Object.hasOwn(REGISTRY,c.type) || typeof c.text!=='string' || c.text.length>180 || /[\u0000-\u001f\u007f]/.test(c.text) || !['accent','neutral'].includes(c.color) || ![8,16,24,32].includes(c.spacing) || !['start','center','end'].includes(c.align)) throw new Error('PROJECT_COMPONENT_INVALID');
+    ids.add(c.id);
+  }
+  assertDocument(doc);
+  return true;
+}
+export function exportLocalProject(doc) {
+  validateProjectImport(doc);
+  return JSON.stringify({schema: FFAX_PROJECT_SCHEMA, project: doc}, null, 2);
+}
+export function importLocalProject(json) {
+  if (typeof json !== 'string' || json.length > 262144 || json.length < 32) throw new Error('PROJECT_FILE_SIZE_INVALID');
+  let archive;
+  try {archive=JSON.parse(json);} catch {throw new Error('PROJECT_JSON_INVALID');}
+  if (!exactKeys(archive,['schema','project']) || archive.schema!==FFAX_PROJECT_SCHEMA) throw new Error('PROJECT_SCHEMA_INVALID');
+  validateProjectImport(archive.project);
+  return clone(archive.project);
+}
+
 export function renderMarkup(doc) {
   assertDocument(doc);
   const t=THEME_OPTIONS[doc.theme];

@@ -1,4 +1,4 @@
-import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign } from './core.mjs';
+import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign,exportLocalProject,importLocalProject } from './core.mjs';
 const el=id=>document.getElementById(id);
 const promptEl=el('prompt');promptEl.value=DEFAULT_PROMPT;
 let brief=buildBrief(DEFAULT_PROMPT);let history=new DocumentHistory(newDocument(brief,'A'));
@@ -133,7 +133,28 @@ el('manual-apply-response').addEventListener('click',()=>{
 });
 el('apply-reference').addEventListener('click',updateReference);
 el('export-react').addEventListener('click',()=>save('GeneratedScreen.tsx',exportReact(history.present),'text/plain'));
-el('export-json').addEventListener('click',()=>save('FFAX-project.json',JSON.stringify(history.present,null,2),'application/json'));
+el('export-json').addEventListener('click',()=>{
+  try { save('FFAX-project.json',exportLocalProject(history.present),'application/json'); el('project-import-status').textContent='프로젝트 저장본을 로컬로 내려받았습니다. 자동 클라우드 저장은 하지 않습니다.';}
+  catch(e){ el('project-import-status').textContent='저장 거부: '+e.message; }
+});
+el('import-project').addEventListener('change',async (e)=>{
+  const input=e.target, file=input.files?.[0];
+  if(!file) return;
+  try {
+    if(!/\.json$/i.test(file.name) || file.size>262144 || file.size<32) throw new Error('PROJECT_FILE_SIZE_OR_TYPE_INVALID');
+    const doc=importLocalProject(await file.text());
+    if(!window.confirm('검증된 프로젝트를 현재 캔버스에 불러올까요?\n현재 편집 결과는 Undo로 복구할 수 있습니다.')) {
+      el('project-import-status').textContent='프로젝트 불러오기를 취소했습니다. 기존 화면 유지.';return;
+    }
+    const previous=history.present;
+    history.past.push(previous);if(history.past.length>history.max)history.past.shift();
+    history.present=doc;history.future=[];brief=doc.brief;
+    promptEl.value=(doc.brief.raw?.startsWith('[')?DEFAULT_PROMPT:doc.brief.raw);
+    selected=doc.components[0]?.id||null;updateAll();
+    el('project-import-status').textContent=`불러오기 완료 · ${doc.components.length}개 컴포넌트 · Undo 가능 · 외부 전송 없음`;
+  }catch(err){el('project-import-status').textContent='프로젝트 불러오기 거부: '+err.message;}
+  finally{input.value='';}
+});
 for(const type of COMPONENT_TYPES){const o=document.createElement('option');o.value=type;o.textContent=REGISTRY[type].label;el('component-type').append(o);}
 for(const [key,t] of Object.entries(THEME_OPTIONS)){const o=document.createElement('option');o.value=key;o.textContent=t.label;el('theme-select').append(o);}
 updateAll();
