@@ -1,3 +1,10 @@
+## 2026-11-12 KST — P85 fourth pass: safe local project save/reopen (78/100 retained)
+- **Status:** product engineering **78/100 provisional**; target 85 **not reached**. Fixed AC02/03/05/06/08/01/07/10/11 score unchanged; AC04(14), AC09(6), AC12(2) incomplete. **RELEASE HOLD**.
+- **Verified functional code:** `a76a962037b41d474699845378c2656e439f66f1` on private `feature/ffax-workbench-p85-20261112`. New `exportLocalProject`/`importLocalProject` strict versioned JSON format, allowlisted brief/ref/components, owner-confirmed import, no network/write, Undo recovery. Six source/test files exactly match locally tested Git Blob SHA.
+- **Local tests:** Node22 `npm test` **105 PASS / 0 FAIL / 0 SKIP**, Chromium injected same-source `python scripts/browser_qa.py` **30 PASS**, `python scripts/project_restore_probe.py` **9 PASS**, manual AI browser10 PASS, D1-D5 synthetic5 PASS. Direct Chromium localhost URL, native Windows and actual customer environments **NOT VERIFIED**.
+- **Security:** wrong schema, invalid layout, duplicate IDs, unknown component types, reference CSS injection, forged approval, malformed JSON and oversized files rejected without changing active canvas. Original source/main, prior user data/other products, auth, billing, deployment unchanged.
+- **Remaining gates:** real authorized model run, formal axe audit, owner visual acceptance, clean installed GitHub Actions green. No paid external AI call or private Actions run; no claim 85. [Detailed evidence](docs/FFAX_P85_LOCAL_PROJECT_RESTORE_20261112.md).
+
 ## 2026-11-12 — AI provider adapter + formal audit preparation (P78 retained)
 - Local-first production provider adapter contract added, but **no paid/live LLM request**. Node **96/96 PASS**, 12/12 mocked design messages, Chromium 30/30, React UMD 12/12, cleanroom 7/7.
 - axe 4.14 audit script added; local binary missing so **NOT VERIFIED**, actual user UX approval pending. CI manual-only, not executed. **78/100 provisional unchanged**, RELEASE HOLD.

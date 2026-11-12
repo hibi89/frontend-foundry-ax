@@ -1,3 +1,15 @@
+## 2026-11-12 KST — FFAX P85 fourth-pass handoff (10 required fields)
+1. **Goal/technical scope:** AI-generated and user-edited React workbench with safe local save/reopen, browser QA and Git review; `REQUIREMENTS.md` and unchanged `docs/ACCEPTANCE_MATRIX.md` govern v1.0.
+2. **Changes/choice:** Chose strict schema-checked project import (B, small maintenance and original protection) over evaluating arbitrary JSON/JS or overwriting source (A, unsafe). Added JSON archive export/import, allowlisted project metadata, owner-confirmation, Undo backup to UI and browser tests.
+3. **Verification:** Exact source SHA `a76a962037b41d474699845378c2656e439f66f1`. Node `npm test` 105/105 PASS, Chromium injected 30/30 PASS, project restore Chromium 9/9 PASS, manual AI UI 10/10 PASS; D1-D5 local5/5 PASS. Axe formal, native browser local URL, Windows, real LLM, GitHub CI **not verified**.
+4. **Status/progress:** **78/100 engineering provisional retained**, 85 goal NOT reached; AC04/09/12 incomplete. No Production; RELEASE HOLD.
+5. **Errors and pivot:** External axe dependency unavailable, did not claim formal audit. First new browser import test briefly failed because asynchronous file-read needed settling and test expected wrong Korean status phrase; corrected test wait/assertion, reran 9/9. No production incident, no dangerous retries.
+6. **Repo/branch/SHA/paths:** Private `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`; verified code commit `a76a962037b41d474699845378c2656e439f66f1`; base main `191289d19f7eb6203a2a6beb5e8efbcf10bc844d` untouched. Modified `src/core.mjs`, `src/app.mjs`, `index.html`, `styles.css`; new `tests/project-transfer.test.mjs`, `scripts/project_restore_probe.py`.
+7. **Production/environment:** `npm start` localhost 127.0.0.1:4173; Node22 Linux/Chromium injection; Vercel/Production **not applicable**; actual public URL none.
+8. **Originals/security:** Existing 16 product repos, customer data, OAuth/token, main, billing, GitHub permissions unchanged. Versioned JSON is local-only and can be rejected/canceled; source ZIP must be preserved separately. Git normal revert from previous SHA, no force push.
+9. **Next:** authorized model/provider + 12 fixed briefs with React real build to qualify AC04; local official axe audit + owner screenshot UX approval for AC09; approved GitHub Actions and clean install for AC12. Do not grant points without *all* evidence or replace user approval with model approval.
+10. **KST/verification range:** 2026-11-12 KST, local exact-blob test scope 105+30+9; docs SHA after this commit needs readback. Hub kmong candidate sync separate from active16.
+ 
 # FFAX 2026-11-12 KST — Approved provider adapter checkpoint (10 points)
 1. Objective: FFAX v1.0 user brief→AI design→React code→visual editor→QA→reviewed Git, original 12-AC 100-point rubric unchanged.
 2. Delivered/decision: A direct unbounded model calls vs B explicitly opt-in HTTPS model adapter with owner origin/model, policy ledger, strict response and review. **B implemented only as readiness**, not actual provider operation; formal axe harness and UX checklist.

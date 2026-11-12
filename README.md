@@ -1,3 +1,5 @@
+> **2026-11-12 P85 attempt (engineering score 78/100 retained):** Local JSON project save/reopen with strict validation, user confirmation and Undo recovery now works. Node105 PASS, Chromium UI30 + project restore9 PASS (injected-source scope). **This is not 85%, not deployed, release HOLD.** [Evidence](docs/FFAX_P85_LOCAL_PROJECT_RESTORE_20261112.md). 
+
 ## 2026-11-12 — AI provider adapter + formal audit preparation (P78 retained)
 - Local-first production provider adapter contract added, but **no paid/live LLM request**. Node **96/96 PASS**, 12/12 mocked design messages, Chromium 30/30, React UMD 12/12, cleanroom 7/7.
 - axe 4.14 audit script added; local binary missing so **NOT VERIFIED**, actual user UX approval pending. CI manual-only, not executed. **78/100 provisional unchanged**, RELEASE HOLD.

@@ -21,7 +21,8 @@
     "test:manual-browser": "python scripts/manual_browser_probe.py",
     "test:cleanroom": "node scripts/cleanroom_gate.mjs",
     "test:provider-contract": "node scripts/provider_contract_probe.mjs",
-    "test:axe": "python scripts/axe_offline_audit.py"
+    "test:axe": "python scripts/axe_offline_audit.py",
+    "test:project-restore": "python scripts/project_restore_probe.py"
   },
   "engines": {
     "node": ">=20"

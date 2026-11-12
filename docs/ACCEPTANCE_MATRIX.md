@@ -1,3 +1,5 @@
+> **2026-11-12 fourth pass:** Local project JSON import/export/undo with Node105 + browser9 PASS, **78/100 retained** under unchanged rubric. AC04 0, AC09 0, AC12 0; 85 target missed. [Evidence](FFAX_P85_LOCAL_PROJECT_RESTORE_20261112.md).
+
 > **2026-11-12 provider adapter preparation:** Confirmed 8/8 source blobs; Node96, mocked provider contract12, limited Chromium30, React UMD12, cleanroom7. **AC04 0, AC09 0, AC12 0; total remains 78/100 provisional (85 not reached).** Formal axe binary absent (exit2), live model/CI/owner UI review not run. [Details](FFAX_P85_PROVIDER_ADAPTER_GATE_20261112.md).
 
 > **2026-11-12 P85 third pass:** Verified `78/100` provisional remains unchanged despite successful manual AI JSON import/visual editor and clean-room checks. **No actual model API call, formal axe + user UI approval, or completed GitHub Actions run**, so AC04(14), AC09(6), AC12(2) remain 0. [Third-pass proof](FFAX_P85_MANUAL_BRIDGE_AND_CLEANROOM_20261112.md). **85% not reached, RELEASE HOLD**.
