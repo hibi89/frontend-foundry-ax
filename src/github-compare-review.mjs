@@ -10,7 +10,7 @@ const MAX_RESPONSE_BYTES=2097152;
 const MAX_FILES=300;
 const STATUSES=new Set(['added','removed','modified','renamed','copied','changed','unchanged']);
 const RESTRICTED=/(^|\/)(?:\.env(?:\.[^/]*)?|(?:id_[^.\/]+|[^/]+)\.(?:pem|key|p12|pfx)|credentials?(?:\/|[._-])|secrets?(?:\/|[._-]))/i;
-const PROTECTED=/(^|\/)(?:(?:api|auth|oauth|login|logout|session|security|middleware|routes?|payment|billing|db|database|prisma|schema|webhooks?)(?:\/|[._-])|(?:package(?:-lock)?\.json|pnpm-lock\.yaml|yarn\.lock|vite\.config\.[^.]+|next\.config\.[^.]+))$|(^|\/)\.github\/workflows\//i;
+const PROTECTED=/(^|\/)(?:(?:api|auth|oauth|login|logout|session|security|middleware|routes?|payment|billing|db|database|prisma|schema|webhooks?)(?:\/|[._-])|(?:package(?:-lock)?\.json|pnpm-lock\.yaml|yarn\.lock|vite\.config\.[^/]+|next\.config\.[^/]+)$)|(^|\/)\.github\/workflows\//i;
 function validatePath(p){
  return typeof p==='string'&&p.length>=1&&p.length<=500&&!/[\u0000-\u001f\\]/.test(p)&&
   !p.startsWith('/')&&!p.split('/').some(part=>part===''||part==='.'||part==='..');
