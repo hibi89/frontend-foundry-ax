@@ -112,7 +112,22 @@ export function applyCommand(doc, command) {
     if (i < 0 || !Number.isInteger(command.index) || command.index < 0 || command.index >= next.components.length) throw new Error('이동 순서가 유효하지 않습니다.');
     const [node] = next.components.splice(i, 1);next.components.splice(command.index, 0, node);
   } else if (command.kind === 'insert') {
-    const node = makeComponent(command.type, `node-${Date.now()}-${Math.floor(Math.random()*100000)}`);
+    if(next.components.length >= 80) throw new Error('COMPONENT_LIMIT_REACHED');
+    // Deterministic, collision-free for the current document. The archive schema is unchanged.
+    // Never derive IDs from wall-clock time or randomness: repeatable edits yield repeatable TSX.
+    const used=new Set(next.components.map(node=>node.id));
+    const greatest=next.components.reduce((max,node)=>{
+      const match=/^node-(\\d+)$/.exec(node.id);
+      const value=match?Number(match[1]):0;
+      return Number.isSafeInteger(value)?Math.max(max,value):max;
+    },0);
+    let candidate=greatest+1;
+    if(!Number.isSafeInteger(candidate)) throw Error('COMPONENT_ID_EXHAUSTED');
+    while(used.has('node-'+candidate)){
+      if(candidate>=Number.MAX_SAFE_INTEGER)throw Error('COMPONENT_ID_EXHAUSTED');
+      candidate++;
+    }
+    const node=makeComponent(command.type,'node-'+candidate);
     next.components.push(node);
   } else if (command.kind === 'remove') {
     if (i < 0) throw new Error('삭제 항목이 없습니다.');
