@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {auditPublicGitHubReactRepo,parseGitHubPublicRepo,GITHUB_AUDIT_MAX_FILES} from '../src/github-readonly-intake.mjs';
+import {auditPublicGitHubReactRepo,parseGitHubPublicRepo,GITHUB_AUDIT_MAX_FILES,comparePublicGitHubAudits} from '../src/github-readonly-intake.mjs';
 const commitSha='a'.repeat(40),treeSha='b'.repeat(40);
 function fixture(path,content){
  const bytes=Buffer.from(content,'utf8');
@@ -69,4 +69,41 @@ test('high-file repositories sample limited source files with explicit incomplet
  assert.equal(r.sourceFilesEligible,extra.length+3);
  assert.equal(r.remoteRequests,3+GITHUB_AUDIT_MAX_FILES);
  assert.ok(r.files.some(f=>f.path==='src/App.tsx'));
+});
+
+
+test('two public commit audits yield a bounded review-only hash comparison with no extra requests',async()=>{
+ const mock=mockGithub();
+ const before=await auditPublicGitHubReactRepo({repository:'testowner/ok-react',consent:true,fetchImpl:mock.fetchImpl});
+ const changedFiles=before.files.map(f=>f.path==='src/api.ts'
+  ? {...f,sha256:'c'.repeat(64)}:f);
+ const after={...before,sourceGitSha:'c'.repeat(40),sourceTreeSha:'d'.repeat(40),
+  files:[...changedFiles,{path:'src/NewPanel.tsx',size:20,sha256:'e'.repeat(64)}],
+  fileCount:changedFiles.length+1};
+ const reqCount=mock.requests.length;
+ const diff=comparePublicGitHubAudits(before,after);
+ assert.equal(mock.requests.length,reqCount);
+ assert.equal(diff.schema,'ffax-public-github-sample-comparison.v1');
+ assert.equal(diff.changed,2);assert.equal(diff.protectedFlowChanges,1);
+ assert.equal(diff.unchanged,2);assert.equal(diff.sampleIncomplete,false);
+ assert.equal(diff.changes.find(x=>x.path==='src/api.ts').kind,'modified');
+ assert.equal(diff.changes.find(x=>x.path==='src/NewPanel.tsx').kind,'only-in-current-sample');
+ assert.equal(diff.approvalEligible,false);assert.equal(diff.prCreated,false);assert.equal(diff.sourceWrites,0);
+ assert.equal(diff.remoteRequests,0);assert.ok(!JSON.stringify(diff).includes("fetch('/api/users')"));
+ const same=comparePublicGitHubAudits(before,before);
+ assert.equal(same.changed,0);assert.equal(same.sameCommit,true);
+});
+test('sample comparison explicitly refuses full-diff or safe-to-merge claims',async()=>{
+ const mock=mockGithub();
+ const before=await auditPublicGitHubReactRepo({repository:'testowner/ok-react',consent:true,fetchImpl:mock.fetchImpl});
+ const after={...before,sampled:true,sourceGitSha:'c'.repeat(40),files:before.files.filter(x=>x.path!=='src/api.ts'),fileCount:2};
+ const diff=comparePublicGitHubAudits(before,after);
+ assert.equal(diff.sampleIncomplete,true);
+ assert.equal(diff.changes[0].kind,'only-in-previous-sample');
+ assert.equal(diff.approvalEligible,false);
+ assert.match(diff.warning,/표본/);
+ assert.throws(()=>comparePublicGitHubAudits(before,{...after,root:'other/repository'}),/GITHUB_COMPARE_REPOSITORY_MISMATCH/);
+ assert.throws(()=>comparePublicGitHubAudits(before,{...after,fileCount:3}),/GITHUB_COMPARE_SNAPSHOT_INVALID/);
+ assert.throws(()=>comparePublicGitHubAudits(before,{...after,files:[...after.files,after.files[0]],fileCount:3}),/GITHUB_COMPARE_FILE_MANIFEST_INVALID/);
+ assert.throws(()=>comparePublicGitHubAudits(before,{...after,files:[{path:'.env',sha256:'f'.repeat(64),size:4}],fileCount:1}),/GITHUB_COMPARE_FILE_MANIFEST_INVALID/);
 });
