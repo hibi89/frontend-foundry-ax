@@ -245,6 +245,53 @@ el('import-project').addEventListener('change',async (e)=>{
   }catch(err){el('project-import-status').textContent='프로젝트 불러오기 거부: '+err.message;}
   finally{input.value='';}
 });
+
+// Device-local checkpoint is never auto-written or auto-restored. The browser stores
+// plaintext only after explicit informed consent. Loading does not fetch or execute code.
+el('device-checkpoint-save').addEventListener('click',async()=>{
+ const status=el('device-checkpoint-status'),check=el('device-checkpoint-consent');
+ if(!check.checked){status.textContent='저장 거부: 암호화되지 않은 기기 저장에 대한 명시적 동의가 필요합니다.';return;}
+ try{
+  const {saveDeviceCheckpoint}=await import('./device-checkpoint.mjs');
+  const result=await saveDeviceCheckpoint(history.present,{
+   storage:window.localStorage,consent:'APPROVE_PLAINTEXT_DEVICE_SAVE'
+  });
+  status.textContent='기기 복구점 저장 완료 · '+new Date(result.savedAt).toLocaleString('ko-KR')+
+   ' · SHA256 '+result.sha256.slice(0,16)+'… · 평문/이 브라우저 전용 · 외부 전송 없음';
+ }catch(err){status.textContent='기기 저장 실패: '+(err?.message||'UNKNOWN')+' · 현재 작업 유지';}
+ finally{check.checked=false;}
+});
+el('device-checkpoint-restore').addEventListener('click',async()=>{
+ const status=el('device-checkpoint-status');
+ if(!window.confirm('이 기기에 저장된 프로젝트를 현재 편집 화면으로 복구하시겠습니까?\n현재 화면은 Undo로 다시 가져올 수 있습니다.')) {
+  status.textContent='복구 취소 · 기존 편집 화면 유지';return;
+ }
+ try{
+  const {loadDeviceCheckpoint}=await import('./device-checkpoint.mjs');
+  const result=await loadDeviceCheckpoint({storage:window.localStorage,approval:'APPROVE_RESTORE_DEVICE_CHECKPOINT'});
+  const previous=history.present;
+  history.past.push(previous);if(history.past.length>history.max)history.past.shift();
+  history.present=result.document;history.future=[];
+  brief=result.document.brief;
+  promptEl.value=brief.raw?.startsWith('[')?DEFAULT_PROMPT:brief.raw;
+  selected=result.document.components[0]?.id||null;
+  updateAll();
+  status.textContent='복구 완료 · '+new Date(result.savedAt).toLocaleString('ko-KR')+
+   ' · SHA256 확인 PASS · Undo로 이전 화면 복원 가능 · 외부 전송 없음';
+ }catch(err){status.textContent='복구 거부: '+(err?.message||'UNKNOWN')+' · 기존 편집 화면 유지';}
+});
+el('device-checkpoint-delete').addEventListener('click',async()=>{
+ const status=el('device-checkpoint-status');
+ if(!window.confirm('이 브라우저의 FFAX 작업 복구점을 삭제하시겠습니까?\n현재 편집 화면은 지워지지 않습니다.')) {
+  status.textContent='기기 복구점 삭제 취소';return;
+ }
+ try{
+  const {deleteDeviceCheckpoint}=await import('./device-checkpoint.mjs');
+  deleteDeviceCheckpoint({storage:window.localStorage,approval:'APPROVE_DELETE_DEVICE_CHECKPOINT'});
+  status.textContent='이 브라우저의 FFAX 복구점만 삭제했습니다. 현재 편집 화면 유지';
+ }catch(err){status.textContent='기기 복구점 삭제 실패: '+(err?.message||'UNKNOWN');}
+});
+
 for(const type of COMPONENT_TYPES){const o=document.createElement('option');o.value=type;o.textContent=REGISTRY[type].label;el('component-type').append(o);}
 for(const [key,t] of Object.entries(THEME_OPTIONS)){const o=document.createElement('option');o.value=key;o.textContent=t.label;el('theme-select').append(o);}
 updateAll();
