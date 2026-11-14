@@ -1,3 +1,13 @@
+## 2026-11-14 KST — [새 채팅 정본] FFAX React 읽기전용 로컬 폴더 분석과 AI 동시실행 방지 검증
+
+- **사용자 최우선 범위:** 2026-11-14 14:30 KST까지 PC 사용 가능, 이후 ≥5h 모바일 전용. **프론트엔드+백엔드 완성 우선, 크몽 등록·가격/상세 페이지 작업 제외.** 13:00 공동 사용자 작업 알림은 이미 **실행 완료/disabled**; 반복 예약 금지.
+- **검증 기능 SHA `bdbbf0bbd2d8dcf1f53ac513e44522a47214a342`:** 기존 UI 13종·A/B 3폭/3테마·React19 독립 TSX 시맨틱+스타일 일치, 입력/Undo/Redo/JSON load/save, local Qwen 허가+명시동의, 정적 allowlist+Host 보안, 합성 React19 안전 채점기. 신규 `src/local-repo-intake.mjs`: 사용자 PC 브라우저 `webkitdirectory`로 명시 선택한 React TSX 폴더에서 `package.json`/허용 `src,public`만 파일 크기·개수·경로 제한 내 읽기, SHA256 + API/route/auth/event 건수 JSON 다운로드; `.env`·node_modules 제외, 네트워크 업로드/원본 코드 실행·변경0. `src/inference-gate.mjs`: Ollama 동시 실행 차단, 실패해도 gate 해제. GitHub 원격 read-only clone/import/인증+PR 자동 작성 아직 **미구현**.
+- **최신 CI [#43556707423](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43556707423) 4/4 SUCCESS**, Linux **138/138** / Windows **138/138** (0 FAIL/0 SKIP), 브라우저 Playwright Chromium synthetic React 폴더 선택→정보→JSON 저장과 외부 전송0·원본 변경0 PASS, CSS visual parity **18/18**, responsive A/B **6/6**, axe serious/critical0, cleanroom PASS. **실 Qwen inference가 아니라 단위·합성 브라우저 증거**.
+- **최신 ZIP:** Windows unsigned owner-source [artifact 14098043598](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43556707423), 25 entries, `SOURCE_SHA.txt=bdbbf0bbd2d8dcf1f53ac513e44522a47214a342`, inner ZIP SHA256 `c10255a1ab81039f333826067c075643e6b1763ebdc668c0b6e5e5a7e83bd2e7`, CRC PASS. 이전 ZIP/다른 기능 SHA와 혼동 금지; EXE가 아니라 Windows CMD source kit, 모델 미포함.
+- **회귀 원인/복구:** `f0fe97f8` JSX Stat style 구문오류 → `c9ccc8e3` 수정 PASS; `c4e48676` 및 `3bf44b2d` 브라우저 bootstrap top-level 새 import로 browser_qa FAIL → `bdbbf0bb` 사용 클릭시 dynamic import로 수정 후 최종 전체 4/4 PASS. 이전 실패 버전 판매/검수본으로 사용 금지.
+- **최종완성률:** 고정 기술 루브릭 **80/100 잠정**, 전체 승인 최종설계 공식 **UNASSESSED**, AC04 real Qwen **0/14**, AC09 실제 owner Windows 승인 **0/6**, RG06/실고객 GitHub import+PR/원격 통합 미검증; `[작업중]`, RELEASE HOLD, 크몽 등록0, Production N/A. 합성 PASS로 100% 가산 금지.
+- **다음:** 실 원격 GitHub React read-only 통합+API/auth 보존 diff/PR 및 component variants/브리프/QA 미충족 P0부터 구현. 기존 제품 보존, 비용0, CI 실증, source/STATUS/HANDOFF+중앙 허브 동기화. 사용자 PC 작업은 이미 다운로드한 실제 **최신** ZIP으로만 모델/7 UX를 실시하며 외출 시간 이후에는 대기.
+
 ## 2026-11-14 KST — FFAX per-brief 12-case real-model acceptance correctness VERIFIED, actual inference PENDING
 
 - **Verified code:** `abe82e806f30c7949684cc1f03ea0d497cd25561`; [GitHub Actions 43553254119](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43553254119) **4/4 SUCCESS** (Linux Node22 **128 PASS / 0 FAIL / 0 SKIP**, native Windows Node22 **128 PASS / 0 FAIL / 0 SKIP**); real Chromium 3-width A/B/axe/cleanroom/HTTP security PASS, React19 SSR/12 synthetic test cases pass. No actual Qwen inference claimed.
