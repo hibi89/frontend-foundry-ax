@@ -11,6 +11,7 @@ import {tmpdir} from 'node:os';
 import {parseModelDesign} from '../src/core.mjs';
 import {makeLocalFixtureDesign} from '../src/ai-structured-output.mjs';
 import {runLocalOllama} from '../src/local-ollama.mjs';
+import {assessProbe,strictDiagnostics,PROBE_TOTAL} from '../src/probe-policy.mjs';
 const require=createRequire(import.meta.url);
 const ts=require('typescript'),React=require('react'),ReactDOMServer=require('react-dom/server');
 const BRIEFS=[
@@ -39,7 +40,8 @@ if(saveReport){
  try{const s=(await readFile(join(process.cwd(),'SOURCE_SHA.txt'),'utf8')).trim();if(/^[0-9a-f]{40}$/.test(s))sourceSha=s;}catch{}
 }
 const tmp=await mkdtemp(join(process.cwd(),'.ffax-tsx-real-'));
-const files=[],outcomes=[];
+const outcomes=[];
+let failedTypeErrors=0;
 const abortOnLocalTransport=new Set(['LOCAL_MODEL_TIMEOUT','LOCAL_MODEL_UNAVAILABLE','LOCAL_MODEL_NOT_INSTALLED',
  'LOCAL_MODEL_INVENTORY_UNAVAILABLE','LOCAL_MODEL_INVENTORY_INVALID','LOCAL_MODEL_HTTP_ERROR',
  'LOCAL_MODEL_CONTENT_TYPE_INVALID','LOCAL_MODEL_LICENSE_NOT_CLEARED']);
@@ -50,7 +52,7 @@ async function checkpoint(stage,overrides={}){
  const report={schema:'ffax-react19-real-runtime.v1',mode:'ACTUAL_LOCAL_OLLAMA',stage,
   model,sourceSha,briefSha256,reactVersion:React.version,briefCount:12,attempted:outcomes.length,
   passed:count,failed:outcomes.length-count,skipped:12-outcomes.length,
-  typeErrors:null,success:false,autoApplied:false,ownerUxApproved:false,externalNetwork:false,
+  typeErrors:null,failedTypeErrors,success:false,autoApplied:false,ownerUxApproved:false,externalNetwork:false,
   results:outcomes,...overrides};
  const tmpFile=reportFile+'.tmp';
  await writeFile(tmpFile,JSON.stringify(report,null,2)+'\n','utf8');
@@ -59,12 +61,17 @@ async function checkpoint(stage,overrides={}){
 try {
  await checkpoint('RUNNING');
  for(const [i,prompt] of BRIEFS.entries()){
+  let candidateTypeErrors=0;
   try{
    const raw=live?(await runLocalOllama({prompt,model,consent:'APPROVE_LOCAL_MODEL_PROMPT_ONLY',timeoutMs:120000})).output:makeLocalFixtureDesign(i,prompt);
    // This is structural validation in an isolated test, NOT final owner UI acceptance.
    const doc=parseModelDesign(raw,{ownerBrief:prompt,approval:'APPROVE_DESIGN_PREVIEW'});
    const source=doc.reactSource,file=join(tmp,'Screen'+i+'.tsx');
-   await writeFile(file,source);files.push(file);
+   await writeFile(file,source);
+   // Strict TypeScript checks EACH candidate before it can contribute one PASS.
+   // A malformed candidate is rejected; it cannot invalidate ten other valid cases.
+   const typeIssues=strictDiagnostics(ts,file);
+   if(typeIssues.length){candidateTypeErrors=typeIssues.length;failedTypeErrors+=typeIssues.length;throw Error('TYPESCRIPT_INVALID');}
    const js=ts.transpileModule(source,{fileName:'Screen.tsx',reportDiagnostics:true,
      compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,esModuleInterop:true}});
    if((js.diagnostics||[]).some(d=>d.category===ts.DiagnosticCategory.Error))throw Error('TRANSPILE_INVALID');
@@ -73,32 +80,27 @@ try {
    new Function('require','module','exports',js.outputText)(require,mod,mod.exports);
    const rendered=ReactDOMServer.renderToStaticMarkup(React.createElement(mod.exports.default));
    if(!rendered.includes('<main')||rendered.includes('<script')||rendered.length<200)throw Error('RENDER_INVALID');
-   outcomes.push({i,pass:true,components:doc.document.components.length,renderedChars:rendered.length,
+   outcomes.push({i,pass:true,strictTypeChecked:true,react19Rendered:true,components:doc.document.components.length,renderedChars:rendered.length,
     outputSha256:live?createHash('sha256').update(raw).digest('hex'):null});
   }catch(e){
    const error=/^[A-Z_]+$/.test(e.message)?e.message:'MODEL_OUTPUT_FAILED';
-   outcomes.push({i,pass:false,error});
+   outcomes.push({i,pass:false,error,...(candidateTypeErrors?{rejectedTypeErrors:candidateTypeErrors}:{})});
    if(live&&abortOnLocalTransport.has(error))transportStop=error;
+   // Stop spending CPU/model calls once three failures make >=10/12 impossible.
+   if(live&&!transportStop&&outcomes.filter(x=>x.pass).length+PROBE_TOTAL-outcomes.length<10)
+    transportStop='LOCAL_PASS_THRESHOLD_UNREACHABLE';
   }
   await checkpoint(transportStop?'HALTED':'RUNNING',{reason:transportStop});
   if(live)console.error(`FFAX live model QA: ${outcomes.length}/12 tested; pass=${outcomes.filter(o=>o.pass).length}; ${transportStop?'HALTED '+transportStop:'continuing'}`);
   if(transportStop)break;
  }
- let diagnostics=[];
- if(files.length){
-  const opts={strict:true,noEmit:true,skipLibCheck:true,esModuleInterop:true,jsx:ts.JsxEmit.React,
-   target:ts.ScriptTarget.ES2020,module:ts.ModuleKind.NodeNext,moduleResolution:ts.ModuleResolutionKind.NodeNext};
-  const program=ts.createProgram(files,opts);
-  diagnostics=ts.getPreEmitDiagnostics(program).filter(d=>d.category===ts.DiagnosticCategory.Error).map(d=>({code:d.code,message:ts.flattenDiagnosticMessageText(d.messageText,' ').slice(0,140)}));
- }
- const count=outcomes.filter(o=>o.pass).length,threshold=live?10:12;
+ const verdict=assessProbe(outcomes,{live,haltReason:transportStop,acceptedTypeErrors:0});
  const report={schema:'ffax-react19-real-runtime.v1',mode:live?'ACTUAL_LOCAL_OLLAMA':'SYNTHETIC_NOT_AI',
-  reactVersion:React.version,briefCount:12,attempted:outcomes.length,passed:count,
-  failed:outcomes.length-count,skipped:12-outcomes.length,typeErrors:diagnostics.length,
-  stage:transportStop?'HALTED':'COMPLETED',reason:transportStop,
+  reactVersion:React.version,briefCount:PROBE_TOTAL,...verdict,
+  // typeErrors counts accepted cases only; invalid cases are rejected and reported separately.
+  typeErrors:verdict.acceptedTypeErrors,failedTypeErrors,
   model:live?model:null,sourceSha,briefSha256,
-  success:outcomes.length===12&&count>=threshold&&diagnostics.length===0,
-  autoApplied:false,ownerUxApproved:false,externalNetwork:false,results:outcomes,diagnostics:diagnostics.slice(0,10)};
+  autoApplied:false,ownerUxApproved:false,externalNetwork:false,results:outcomes,diagnostics:[]};
  await checkpoint(report.stage,report);
  console.log(JSON.stringify(report,null,2));
  if(!report.success)process.exitCode=1;
