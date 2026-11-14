@@ -1,4 +1,5 @@
 import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign,exportLocalProject,importLocalProject } from './core.mjs';
+import {bindPreviewActions} from './demo-interactions.mjs';
 const el=id=>document.getElementById(id);
 const promptEl=el('prompt');promptEl.value=DEFAULT_PROMPT;
 let brief=buildBrief(DEFAULT_PROMPT);let history=new DocumentHistory(newDocument(brief,'A'));
@@ -56,12 +57,17 @@ function renderCanvas(){
     const nodeId=node.getAttribute('data-node-id');node.setAttribute('draggable','true');node.setAttribute('tabindex','0');if(!node.matches('button,input,select,textarea,a,label') && !node.hasAttribute('role'))node.setAttribute('role','group');
     if(!node.matches('button,input,select,textarea,a,label'))node.setAttribute('aria-label',`편집 컴포넌트 ${REGISTRY[doc.components.find(x=>x.id===nodeId).type].label}`);
     if(nodeId===selected)node.classList.add('selected');
-    node.addEventListener('click',e=>{if(e.target.matches('input,button')&&!e.target.closest('.ff-modal')){e.preventDefault();}e.stopPropagation();selected=nodeId;updateAll(false);});
+    node.addEventListener('click',e=>{
+      if(e.target.closest('[data-demo-action], [data-demo-field]')){e.stopPropagation();return;}
+      if(e.target.matches('input,button')&&!e.target.closest('.ff-modal'))e.preventDefault();
+      e.stopPropagation();selected=nodeId;updateAll(false);
+    });
     node.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ') && e.target===node){e.preventDefault();selected=nodeId;updateAll(false);}});
     node.addEventListener('dragstart',e=>{dragId=nodeId;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',nodeId);});
     node.addEventListener('dragover',e=>e.preventDefault());
     node.addEventListener('drop',e=>{e.preventDefault();const id=dragId;dragId=null;const nextIndex=history.present.components.findIndex(n=>n.id===nodeId);if(id&&id!==nodeId&&nextIndex>=0){selected=id;run({kind:'move',id,index:nextIndex});}});
   }
+  bindPreviewActions(el('preview'));
   el('version-info').textContent=`Draft v${doc.version} · ${doc.components.length} components · no remote writes`;
   document.querySelectorAll('[data-width]').forEach(b=>{const active=Number(b.dataset.width)===viewport;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
 }
