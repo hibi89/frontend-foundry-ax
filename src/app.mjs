@@ -1,5 +1,4 @@
 import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign,exportLocalProject,importLocalProject } from './core.mjs';
-import {auditLocalReactFolder} from './local-repo-intake.mjs';
 const el=id=>document.getElementById(id);
 const promptEl=el('prompt');promptEl.value=DEFAULT_PROMPT;
 let brief=buildBrief(DEFAULT_PROMPT);let history=new DocumentHistory(newDocument(brief,'A'));
@@ -113,6 +112,8 @@ el('analyze-repo').addEventListener('click',async()=>{
  button.disabled=true;el('export-repo-audit').disabled=true;latestRepoAudit=null;
  display.textContent='로컬 폴더의 허용 파일을 읽기 전용으로 검사 중입니다.';
  try{
+  // Deferred loading preserves the no-network startup path and classic-script browser QA harness.
+  const {auditLocalReactFolder}=await import('./local-repo-intake.mjs');
   const result=await auditLocalReactFolder(el('repo-folder').files);
   latestRepoAudit=result;
   const hints=result.indicators;
