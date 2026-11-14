@@ -32,12 +32,15 @@ try:
     css=(ROOT/'styles.css').read_text(encoding='utf-8')
     core=(ROOT/'src/core.mjs').read_text(encoding='utf-8')
     app=(ROOT/'src/app.mjs').read_text(encoding='utf-8')
+    demo=(ROOT/'src/demo-interactions.mjs').read_text(encoding='utf-8')
     html=re.sub(r'<link rel="stylesheet"[^>]+>','',html)
     html=re.sub(r'<script type="module"[^>]+></script>','',html)
     core=re.sub(r'\bexport (?=(?:const|class|function)\b)','',core)
+    demo=re.sub(r'\bexport (?=(?:const|class|function)\b)','',demo)
+    app=re.sub(r'^import [^;]+;','',app,count=1)
     app=re.sub(r'^import [^;]+;','',app,count=1)
     module=('const __injectedCSS = '+json.dumps(css)+';\n'
-            'window.fetch=async()=>({text:async()=>__injectedCSS});\n'+core+'\n'+app)
+            'window.fetch=async()=>({text:async()=>__injectedCSS});\n'+core+'\n'+demo+'\n'+app)
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-gpu'])
         ctx=browser.new_context(viewport={'width':1440,'height':900},accept_downloads=True)
