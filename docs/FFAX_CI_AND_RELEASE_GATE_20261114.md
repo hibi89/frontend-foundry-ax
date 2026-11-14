@@ -1,4 +1,4 @@
-# FFAX 2026-11-14 KST — CI cleanroom release-candidate verification (not a retail release)
+> **2026-11-14 owner one-click acceptance packaging:** Code SHA `36d2b7ea7ad7a79988c632a18a9dd809c6f1390b`; [CI 43545601889 4/4 SUCCESS](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43545601889), owner 22-file ZIP includes `package.json`, `scripts/react_real_probe.mjs`, `RUN-LIVE-MODEL-CHECK.cmd`, artifact `14093858020`. SHA256 `ab3970c18be393d00f02352e0ca5f4936f107079cb6183c39b248fab8b67958f`. Linux package HTTP smoke 200/403, real model + owner Windows UX unverified. Detached container npm EAI_AGAIN (two attempts, STOP), so packed fresh install in that environment not verified. Fixed rubric **80/100 provisional** and official **UNASSESSED** unchanged, RELEASE HOLD. See STATUS/HANDOFF.\n\n# FFAX 2026-11-14 KST — CI cleanroom release-candidate verification (not a retail release)
 
 ## Provenance
 - Repository: private `hibi89/frontend-foundry-ax`, branch `feature/ffax-workbench-p85-20261112`.

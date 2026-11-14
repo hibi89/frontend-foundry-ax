@@ -1,3 +1,11 @@
+## 2026-11-14 KST — One-click Windows live model QA packaged; 80/100 provisional UNCHANGED
+
+- Functional source commit `36d2b7ea7ad7a79988c632a18a9dd809c6f1390b`; [4/4 GitHub Actions SUCCESS](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43545601889), Linux/Windows Node 113/113 each, Chromium/axe/cleanroom and unsigned owner ZIP packaging green. Prior engineering rubric **80/100 provisional** unchanged; official central final blueprint **UNASSESSED**; RELEASE HOLD, Kmong not registered.
+- Fixed owner-preview gap: ZIP now contains `package.json`, `scripts/react_real_probe.mjs` and `RUN-LIVE-MODEL-CHECK.cmd`; it can install public Node dependencies and perform **real** 12 frozen-brief local Ollama → React19 TypeScript/SSR acceptance when owner installs approved `qwen3:4b-instruct` on Windows. No model weights, Node binary, secrets, paid APIs, customer files or auto-deploy in ZIP.
+- Evidence: run artifact `ffax-owner-review-unreleased` ID `14093858020`; extracted ZIP 22 files, `SOURCE_SHA.txt` equals `36d2b7ea7ad7a79988c632a18a9dd809c6f1390b`, SHA-256 `ab3970c18be393d00f02352e0ca5f4936f107079cb6183c39b248fab8b67958f`. Separate Linux Node smoke checked six HTTP200 assets + unauthorized POST 403. Actual user PC UI and real model **NOT TESTED**.
+- Local detached dependency replay: npm registry DNS `EAI_AGAIN` after 1 timed-out install + one bounded no-retry diagnostic. No further identical retries. The already-green GitHub-hosted Windows/Linux CI installed dependencies successfully, but **standalone ZIP npm install/React probe in this detached container is unverified**; do not claim it passed on owner Windows.
+- Remaining: AC04 = 0/14 pending 12 live Qwen prompts and ≥10 genuine TSX type/build/render passes; AC09 = 0/6 pending owner visual/keyboard signoff; RG06 pending. Only 13:00 KST unified owner task message, preserving other project requests. No change to baseline `main`.
+
 ## 2026-11-14 KST — FFAX evidence-based engineering 80/100, release HOLD (current)
 
 - Official central final-blueprint acceptance: **UNASSESSED** until independent official score review; standalone fixed FFAX acceptance matrix **80/100 provisional** (AC12 +2 from clean GitHub CI). **Not 100%, not registered on Kmong, not released.**
