@@ -132,32 +132,53 @@ el('export-repo-audit').addEventListener('click',()=>{
 });
 
 // Remote-public audit never runs without distinct owner approval; no credentials accepted.
-let latestGithubAudit=null;
+let latestGithubAudit=null,latestGithubComparison=null;
 el('analyze-github').addEventListener('click',async()=>{
  const button=el('analyze-github'),display=el('github-analysis-status');
- button.disabled=true;el('export-github-audit').disabled=true;latestGithubAudit=null;
+ const previous=latestGithubAudit;
+ button.disabled=true;el('export-github-audit').disabled=true;
+ el('export-github-diff').disabled=true;latestGithubComparison=null;
  display.textContent='GitHub 공개 API 읽기 전용 검사 요청 중 (코드 실행·쓰기 없음)...';
  try{
-  const {auditPublicGitHubReactRepo}=await import('./github-readonly-intake.mjs');
+  const {auditPublicGitHubReactRepo,comparePublicGitHubAudits}=await import('./github-readonly-intake.mjs');
   const result=await auditPublicGitHubReactRepo({
    repository:el('github-repo').value,ref:el('github-ref').value,
    consent:el('github-public-consent').checked
   });
-  latestGithubAudit=result;
+  // Only compare two snapshots of the same repository; no further API calls.
+  const comparison=previous?.root.toLowerCase()===result.root.toLowerCase()
+   ?comparePublicGitHubAudits(previous,result):null;
+  latestGithubAudit=result;latestGithubComparison=comparison;
   display.textContent='PUBLIC READ-ONLY PASS · '+result.root+'\nCommit '+result.sourceGitSha+
    '\nSHA256 '+result.sha256+'\n'+result.fileCount+'/'+result.sourceFilesEligible+
    '개 허용 소스 표본 · API '+result.indicators.api+' · 라우트 '+result.indicators.route+
    ' · 인증 '+result.indicators.auth+' · 이벤트 '+result.indicators.events+
    '\n외부 GET '+result.remoteRequests+'회 · 원본 변경 0 · PR 0\n'+result.warning;
+  if(comparison){
+   display.textContent+='\n\n이전 조회 대비 해시 변경 '+comparison.changed+'건 · 보존 파일 '+comparison.unchanged+
+    '건 · 인증/API 검토 대상 '+comparison.protectedFlowChanges+'건'+
+    '\n'+(comparison.sampleIncomplete?'표본 일부만 비교: 전체 diff 아님':'허용된 표본 해시만 비교: 실행/동작 검증 아님')+
+    '\nPR/자동 적용 불가 · 검토 JSON을 다운로드해 변경 파일을 확인하세요.';
+   el('export-github-diff').disabled=false;
+  }else if(previous){
+   display.textContent+='\n서로 다른 저장소를 조회했습니다. 이전 결과와 비교하지 않습니다.';
+  }else{
+   display.textContent+='\n같은 저장소를 다른 ref로 다시 조회하면 표본 해시 변경을 비교합니다.';
+  }
   el('export-github-audit').disabled=false;
  }catch(err){
   display.textContent='PUBLIC READ-ONLY FAIL: '+(err?.message||'UNKNOWN')+
-   '\nGitHub 공개 저장소·브랜치·API 호출 한도 및 입력을 확인하세요. PR·원본 수정은 수행하지 않았습니다.';
+   '\n이전 성공 결과는 보존됩니다. 새 결과는 적용하지 않았고 원본 수정·PR도 수행하지 않았습니다.';
+  el('export-github-audit').disabled=!latestGithubAudit;
  }finally{button.disabled=false;el('github-public-consent').checked=false;}
 });
 el('export-github-audit').addEventListener('click',()=>{
  if(!latestGithubAudit)return;
  save('FFAX-github-readonly-audit.json',JSON.stringify(latestGithubAudit,null,2),'application/json');
+});
+el('export-github-diff').addEventListener('click',()=>{
+ if(!latestGithubComparison)return;
+ save('FFAX-public-github-commit-comparison.json',JSON.stringify(latestGithubComparison,null,2),'application/json');
 });
 
 el('analyze').addEventListener('click',()=>{try{brief=buildBrief(promptEl.value);history=new DocumentHistory(newDocument(brief,'A'));selected=history.present.components[0]?.id;updateAll();}catch(e){log(e.message,true);}});
