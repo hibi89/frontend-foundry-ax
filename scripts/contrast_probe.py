@@ -5,10 +5,11 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 html=(ROOT/'index.html').read_text(encoding='utf8')
 css=(ROOT/'styles.css').read_text(encoding='utf8')
 core=re.sub(r'\bexport (?=(?:const|class|function)\b)','',(ROOT/'src/core.mjs').read_text(encoding='utf8'))
-app=re.sub(r'^import [^;]+;','',(ROOT/'src/app.mjs').read_text(encoding='utf8'),count=1)
+demo=re.sub(r'\bexport (?=(?:const|class|function)\b)','',(ROOT/'src/demo-interactions.mjs').read_text(encoding='utf8'))
+app=re.sub(r'^import [^;]+;','',(ROOT/'src/app.mjs').read_text(encoding='utf8'),count=2,flags=re.M)
 html=re.sub(r'<link rel="stylesheet"[^>]+>','',html)
 html=re.sub(r'<script type="module"[^>]+></script>','',html)
-module='window.fetch=async()=>({text:async()=>'+json.dumps(css)+'});\n'+core+'\n'+app
+module='window.fetch=async()=>({text:async()=>'+json.dumps(css)+'});\n'+core+'\n'+demo+'\n'+app
 SCRIPT=r'''() => {
 function rgb(s){let m=/rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[, /]+([\d.]+))?\)/.exec(s||'');if(m)return [+m[1],+m[2],+m[3],m[4]===undefined?1:+m[4]];m=/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/.exec(s||'');return m?[+m[1]*255,+m[2]*255,+m[3]*255,m[4]===undefined?1:+m[4]]:null;}
 const mix=(fg,bg)=>[0,1,2].map(i=>fg[i]*fg[3]+bg[i]*(1-fg[3])).concat(1);
