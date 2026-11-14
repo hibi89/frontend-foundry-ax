@@ -10,6 +10,7 @@ const publicAssets = new Map([
   ['/styles.css', 'text/css; charset=utf-8'],
   ['/src/app.mjs', 'text/javascript; charset=utf-8'],
   ['/src/core.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/local-repo-intake.mjs', 'text/javascript; charset=utf-8'],
   ['/assets/ffax-favicon.svg', 'image/svg+xml']
 ]);
 const port=Number(process.env.PORT || '4173');

@@ -1,4 +1,5 @@
 import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign,exportLocalProject,importLocalProject } from './core.mjs';
+import {auditLocalReactFolder} from './local-repo-intake.mjs';
 const el=id=>document.getElementById(id);
 const promptEl=el('prompt');promptEl.value=DEFAULT_PROMPT;
 let brief=buildBrief(DEFAULT_PROMPT);let history=new DocumentHistory(newDocument(brief,'A'));
@@ -105,6 +106,30 @@ async function checkQA(){
   viewport=priorWidth;renderCanvas();
   log(`${failed?'FAIL':'PASS'} · 인앱 3폭 레이아웃 빠른 검사\n${report.join('\n')}\n※ 실제 Chromium screenshot/console/network/접근성 수락은 scripts/browser_qa.py 별도 실행`,failed);
 }
+// Real selected-folder scan occurs in the browser only, after two explicit user actions.
+let latestRepoAudit=null;
+el('analyze-repo').addEventListener('click',async()=>{
+ const button=el('analyze-repo'),display=el('repo-analysis-status');
+ button.disabled=true;el('export-repo-audit').disabled=true;latestRepoAudit=null;
+ display.textContent='로컬 폴더의 허용 파일을 읽기 전용으로 검사 중입니다.';
+ try{
+  const result=await auditLocalReactFolder(el('repo-folder').files);
+  latestRepoAudit=result;
+  const hints=result.indicators;
+  display.textContent='READ-ONLY PASS · '+result.fileCount+' files / '+result.bytes+' bytes\n'+
+   'SHA256 '+result.sha256+'\n'+
+   'API 참조 '+hints.api+' · 라우트 '+hints.route+' · 인증 '+hints.auth+' · 이벤트 '+hints.events+'\n'+
+   '안전하게 제외한 파일 '+result.skippedEntries+'개 · 변경/전송 0건\n'+result.warning;
+  el('export-repo-audit').disabled=false;
+ }catch(err){
+  display.textContent='READ-ONLY FAIL: '+(err?.message||'UNKNOWN')+'\n원본 변경·전송 0건. node_modules 등을 제외한 안전한 복사본 폴더를 선택하세요.';
+ }finally{button.disabled=false;}
+});
+el('export-repo-audit').addEventListener('click',()=>{
+ if(!latestRepoAudit)return;
+ save('FFAX-readonly-react-audit.json',JSON.stringify(latestRepoAudit,null,2),'application/json');
+});
+
 el('analyze').addEventListener('click',()=>{try{brief=buildBrief(promptEl.value);history=new DocumentHistory(newDocument(brief,'A'));selected=history.present.components[0]?.id;updateAll();}catch(e){log(e.message,true);}});
 el('component-select').addEventListener('change',e=>{selected=e.target.value;updateAll(false);});
 for(const [id,prop,transform] of [['component-text','text',v=>v],['component-type','type',v=>v],['component-color','color',v=>v],['component-spacing','spacing',Number],['component-align','align',v=>v]])el(id).addEventListener('change',e=>edit(prop,transform(e.target.value)));
