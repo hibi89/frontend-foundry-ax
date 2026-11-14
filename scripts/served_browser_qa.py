@@ -33,6 +33,7 @@ try:
         page.on('pageerror',lambda e:errors.append('pageerror:'+str(e)))
         page.on('console',lambda m:errors.append('console:'+m.text) if m.type=='error' else None)
         page.on('requestfailed',lambda r:errors.append('requestfailed:'+r.url))
+        page.on('response',lambda r:errors.append('http:'+str(r.status)+':'+r.url) if r.status>=400 else None)
         page.on('request',lambda r:errors.append('external-request:'+r.url) if not r.url.startswith(base+'/') else None)
         response=page.goto(base+'/',wait_until='networkidle',timeout=15000)
         assert response.status==200
