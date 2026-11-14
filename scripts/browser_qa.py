@@ -37,8 +37,8 @@ try:
     html=re.sub(r'<script type="module"[^>]+></script>','',html)
     core=re.sub(r'\bexport (?=(?:const|class|function)\b)','',core)
     demo=re.sub(r'\bexport (?=(?:const|class|function)\b)','',demo)
-    app=re.sub(r'^import [^;]+;','',app,count=1)
-    app=re.sub(r'^import [^;]+;','',app,count=1)
+    # The injected test concatenates core+demo+app, so strip both static imports on independent lines.
+    app=re.sub(r'^import [^;]+;','',app,count=2,flags=re.M)
     module=('const __injectedCSS = '+json.dumps(css)+';\n'
             'window.fetch=async()=>({text:async()=>__injectedCSS});\n'+core+'\n'+demo+'\n'+app)
     with sync_playwright() as p:
