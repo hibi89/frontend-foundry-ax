@@ -14,9 +14,10 @@ test('component text never becomes raw executable HTML in exported JSX',()=>{
  const input='<img src=x onerror=alert(1)> & <script>alert(2)</script>';
  const changed=applyCommand(doc,{kind:'update',id:'node-1',prop:'text',value:input});
  const tsx=exportReact(changed);
- assert.ok(tsx.includes(JSON.stringify(input)));
- assert.ok(!tsx.includes('<img src=x'));assert.ok(!tsx.includes('<script>alert(2)</script>'));
+ assert.ok(tsx.includes('{'+JSON.stringify(input)+'}'),'user text is inside a quoted JSX expression');
+ assert.ok(!tsx.includes('>'+input+'</'),'never raw HTML child');
  assert.ok(!tsx.includes('dangerouslySetInnerHTML'));
+ assert.ok(!tsx.includes('onerror={'));
 });
 test('structured model JSON preserves approved component semantics, without real model inference',()=>{
  const data={schema:'ffax-model-design.v1',title:'검증 화면',theme:'midnight',layout:'grid',components:
