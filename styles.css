@@ -24,3 +24,8 @@
 .manual-ai-area .check { align-items: start; line-height: 1.5; }
 
 .import-project-control{border:1px solid #34435d;border-radius:8px;color:#d5e0f6;display:inline-flex;flex-direction:column;gap:5px;padding:9px 12px;font-size:11px;cursor:pointer;background:#151e31;min-width:0}.import-project-control input{max-width:100%;font-size:11px}.import-project-control:focus-within{outline:2px solid #7dd3fc;outline-offset:2px}#project-import-status{white-space:normal;margin-top:12px}
+
+/* Optional P0 workflow patterns. Inert previews: never submit or mutate customer services. */
+.ff-sidebar-list{margin:10px 0 0;padding-left:20px;font-size:12px}.ff-sidebar-list li{margin:5px 0}
+.ff-form label{display:block}.ff-form span{display:block;font-size:11px;color:var(--muted)}.ff-form input{display:block;width:100%;margin:6px 0 9px;padding:9px;border-radius:6px;border:1px solid var(--muted);background:var(--surface);color:var(--ink)}.ff-form button,.ff-error button{padding:7px 10px;border-radius:6px;border:1px solid var(--muted);background:transparent;color:var(--ink)}.ff-form button:disabled,.ff-error button:disabled{opacity:.75;cursor:not-allowed}
+.ff-chart{margin:0}.ff-chart figcaption{font-size:12px;font-weight:700}.ff-chart-bars{display:flex;align-items:end;height:72px;gap:8px;margin-top:12px}.ff-chart-bars span{flex:1;min-width:0;background:var(--accent);border-radius:4px 4px 0 0}.ff-error{border-left:3px solid #f87171}.ff-error strong{font-size:12px}.ff-error p{font-size:11px}

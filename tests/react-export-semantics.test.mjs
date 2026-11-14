@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newDocument,buildBrief,exportReact,REGISTRY,applyCommand,parseModelDesign} from '../src/core.mjs';
+import {newDocument,buildBrief,exportReact,renderMarkup,makeComponent,REGISTRY,applyCommand,parseModelDesign} from '../src/core.mjs';
 const doc=newDocument(buildBrief('데이터 분석 및 검색 입력을 갖춘 운영 화면'));
 test('all 13 allowlisted UI types keep their semantic markup in exported React TSX',()=>{
- const code=exportReact(doc);assert.equal(doc.components.length,Object.keys(REGISTRY).length);
+ const code=exportReact(doc);assert.equal(doc.components.length,13);assert.equal(Object.keys(REGISTRY).length,17);
  for(const [fragment,name] of [['AI × Human Interface','Hero'],['<button type="button"','Button'],
  ['<article','Card'],['<input type="search"','Input'],['<table','Table'],['<span','Badge'],
  ['<aside role="status"','Alert'],['<nav','Navbar'],['Example metric','Stat'],
@@ -23,7 +23,7 @@ test('structured model JSON preserves approved component semantics, without real
  const data={schema:'ffax-model-design.v1',title:'검증 화면',theme:'midnight',layout:'grid',components:
  Object.keys(REGISTRY).map(type=>({type,text:'테스트 '+type,color:'accent',spacing:16,align:'start'}))};
  const out=parseModelDesign(JSON.stringify(data),{ownerBrief:'금융 데이터와 통계를 이용한 UI 생성',approval:'APPROVE_DESIGN_PREVIEW'});
- assert.equal(out.document.components.length,13);
+ assert.equal(out.document.components.length,17);
  assert.ok(out.reactSource.includes('data-layout="grid"'));
  assert.ok(out.reactSource.includes('aria-label="섹션 탭"'));
  assert.ok(out.reactSource.includes('role="region"'));
@@ -52,4 +52,24 @@ test('actual React 19 renders all 13 exported components and escapes untrusted t
  assert.match(html,/Dialog preview/);assert.match(html,/Example metric/);
  assert.match(html,/◇/);
  assert.ok(html.length>900);
+});
+
+test('four optional P0 patterns render accessible, inert preview and independent React19 output',async()=>{
+ const types=['Sidebar','Form','Chart','Error'];
+ const extended={...doc,components:[...doc.components,...types.map((t,i)=>makeComponent(t,'pattern-'+i))]};
+ const html=renderMarkup(extended),tsx=exportReact(extended);
+ assert.equal(extended.components.length,17);
+ for(const type of types)assert.match(html,new RegExp('ff-'+type.toLowerCase()));
+ for(const s of ['aria-label="사이드바 탐색"','role="form"','role="img"','role="alert"','미연결 미리보기','예시 데이터'])
+   assert.ok(html.includes(s),'preview '+s);
+ assert.ok(!html.includes('<form action='));assert.ok(!tsx.includes('onSubmit='));
+ const {createRequire}=await import('node:module'),require=createRequire(import.meta.url);
+ const ts=require('typescript'),React=require('react'),SSR=require('react-dom/server');
+ const output=ts.transpileModule(tsx,{fileName:'Screen.tsx',reportDiagnostics:true,compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,esModuleInterop:true}});
+ assert.equal((output.diagnostics||[]).filter(x=>x.category===ts.DiagnosticCategory.Error).length,0);
+ const module={exports:{}};new Function('require','module','exports',output.outputText)(require,module,module.exports);
+ const rendered=SSR.renderToStaticMarkup(React.createElement(module.exports.default));
+ for(const s of ['aria-label="사이드바 탐색"','role="form"','role="img"','role="alert"','미연결 미리보기','예시 데이터'])
+  assert.ok(rendered.includes(s),'React19 '+s);
+ assert.ok(!rendered.includes('<form action='));
 });

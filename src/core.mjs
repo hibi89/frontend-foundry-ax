@@ -18,7 +18,11 @@ export const REGISTRY = Object.freeze({
   Modal: { label: '모달', text: '계속 진행하시겠습니까?', tag: 'dialog' },
   Tabs: { label: '탭', text: '개요 · 데이터 · 결과', tag: 'div' },
   Loader: { label: '로딩', text: '검증 진행 중', tag: 'div' },
-  Empty: { label: '빈 상태', text: '아직 프로젝트가 없습니다', tag: 'section' }
+  Empty: { label: '빈 상태', text: '아직 프로젝트가 없습니다', tag: 'section' },
+  Sidebar: { label: '사이드바', text: '대시보드 탐색', tag: 'nav' },
+  Form: { label: '입력 폼', text: '이메일 주소', tag: 'section' },
+  Chart: { label: '차트 컨테이너', text: '분석 추이', tag: 'figure' },
+  Error: { label: '오류 상태', text: '데이터 연결을 확인하세요', tag: 'aside' }
 });
 export const COMPONENT_TYPES = Object.keys(REGISTRY);
 export const DEFAULT_PROMPT = '글로벌 프리랜서 마켓플레이스를 고급 다크 테마로 만들어줘. 상품 검색, 회원 프로필, AI 협상 화면을 넣어줘. 결제 및 백엔드 API는 변경하지 마.';
@@ -143,6 +147,10 @@ export function renderNode(node) {
     case 'Modal': return `<section ${attrs} role="group" aria-label="${tx}"><strong>Dialog preview</strong><p>${tx}</p><button type="button" aria-label="확인">확인</button></section>`;
     case 'Loader': return `<div ${attrs} role="status"><span class="spinner" aria-hidden="true"></span>${tx}</div>`;
     case 'Empty': return `<section ${attrs}><span aria-hidden="true">◇</span><p>${tx}</p></section>`;
+    case 'Sidebar': return `<nav ${attrs} aria-label="사이드바 탐색"><strong>${tx}</strong><ul class="ff-sidebar-list"><li>개요</li><li>프로젝트</li><li>설정</li></ul></nav>`;
+    case 'Form': return `<section ${attrs} role="form" aria-label="${tx}"><label><span>${tx}</span><input type="text" aria-label="${tx}" autocomplete="off" /></label><button type="button" disabled>미연결 미리보기</button></section>`;
+    case 'Chart': return `<figure ${attrs} role="img" aria-label="${tx} - 예시 막대 차트"><figcaption>${tx} · 예시 데이터</figcaption><div class="ff-chart-bars" aria-hidden="true"><span style="height:35%"></span><span style="height:68%"></span><span style="height:52%"></span></div></figure>`;
+    case 'Error': return `<aside ${attrs} role="alert"><strong>불러오기 오류</strong><p>${tx}</p><button type="button" disabled>다시 시도 (미연결)</button></aside>`;
     case 'Navbar': return `<nav ${attrs} aria-label="서비스 탐색">${tx}</nav>`;
     case 'Alert': return `<aside ${attrs} role="status">${tx}</aside>`;
     case 'Badge': return `<span ${attrs}>${tx}</span>`;
@@ -238,6 +246,10 @@ export function exportReact(doc){
       case 'Modal':return `<section ${s} role="group" aria-label={${JSON.stringify(n.text)}}><strong>Dialog preview</strong><p style={{fontSize:11}}>${text}</p><button type="button" aria-label="확인" style={{backgroundColor:${JSON.stringify(`color-mix(in srgb, ${accent} 60%, #0b1026)`)},color:'#ffffff',border:0,borderRadius:6,padding:'7px 13px'}}>확인</button></section>`;
       case 'Tabs':return `<div ${s} role="group" aria-label="섹션 탭">${text}</div>`;
       case 'Empty':return `<section ${s}><span aria-hidden="true">◇</span><p>${text}</p></section>`;
+       case 'Sidebar':return `<nav ${s} aria-label="사이드바 탐색"><strong>${text}</strong><ul style={{paddingLeft:18,marginBottom:0}}><li>개요</li><li>프로젝트</li><li>설정</li></ul></nav>`;
+       case 'Form':return `<section ${s} role="form" aria-label={${JSON.stringify(n.text)}}><label><span>${text}</span><input type="text" aria-label={${JSON.stringify(n.text)}} autoComplete="off" ${inputStyle} /></label><button type="button" disabled>미연결 미리보기</button></section>`;
+       case 'Chart':return `<figure ${s} role="img" aria-label={${JSON.stringify(n.text+' - 예시 막대 차트')}}><figcaption>${text} · 예시 데이터</figcaption><div aria-hidden="true" style={{display:'flex',alignItems:'end',height:72,gap:8,marginTop:12}}><span style={{height:'35%',flex:1,backgroundColor:${JSON.stringify(accent)},borderRadius:4}} /><span style={{height:'68%',flex:1,backgroundColor:${JSON.stringify(accent)},borderRadius:4}} /><span style={{height:'52%',flex:1,backgroundColor:${JSON.stringify(accent)},borderRadius:4}} /></div></figure>`;
+       case 'Error':return `<aside ${s} role="alert"><strong>불러오기 오류</strong><p>${text}</p><button type="button" disabled>다시 시도 (미연결)</button></aside>`;
       default:throw new Error('지원하지 않는 React 컴포넌트');
     }
   }).join('\n      ');
