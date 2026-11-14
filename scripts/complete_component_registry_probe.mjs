@@ -32,7 +32,8 @@ try{
  const html=ReactDOMServer.renderToStaticMarkup(React.createElement(mod.exports.default));
  if(html.length<600||!html.includes('<main')||html.includes('<script')||
     !html.includes('사이드바 탐색')||!html.includes('예시 막대 차트')||
-    !html.includes('다시 시도 (미연결)'))
+    !html.includes('로컬 다시 시도')||!html.includes('차트 예시 수치')||
+    !html.includes('미제출 · 서버 연결 없음'))
   throw Error('REGISTRY_REACT19_SSR_FAILED');
  const all=doc.components.slice(-17);
  if(all.some((node,i)=>node.type!==types[i]||node.id!=='node-'+(i+14)))
