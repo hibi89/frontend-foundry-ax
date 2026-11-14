@@ -11,13 +11,17 @@ test('local inference refuses secrets and path-like model names',()=>{
  for(const model of ['../bad','bad/model','a..b','','x'.repeat(100)])assert.throws(()=>validateLocalRequest({...opts,model}),/LOCAL_MODEL_INVALID/);
 });
 test('actual adapter contract: single loopback call, JSON output, no auto-apply',async()=>{
- let calls=0;
+ let calls=0,chatCalls=0;
  const result=await runLocalOllama({...opts,fetchImpl:async(url,req)=>{
-  calls++;assert.equal(url,'http://127.0.0.1:11434/api/chat');assert.equal(req.method,'POST');
+  calls++;
+  if(url==='http://127.0.0.1:11434/api/tags'){
+    assert.equal(req.method,'GET');return {ok:true,headers:{get:()=> 'application/json'},text:async()=>JSON.stringify({models:[{name:opts.model,size:1800000000}]})};
+  }
+  chatCalls++;assert.equal(url,'http://127.0.0.1:11434/api/chat');assert.equal(req.method,'POST');
   const data=JSON.parse(req.body);assert.equal(data.stream,false);assert.equal(data.model,opts.model);assert.equal(data.messages[1].content,prompt);
   return {ok:true,headers:{get:()=> 'application/json'},text:async()=>JSON.stringify({message:{content:makeLocalFixtureDesign(0,prompt)}})};
  }});
- assert.equal(calls,1);assert.equal(result.externalNetwork,false);assert.equal(result.autoApplied,false);assert.match(result.sha256,/^[0-9a-f]{64}$/);
+ assert.equal(calls,2);assert.equal(chatCalls,1);assert.equal(result.externalNetwork,false);assert.equal(result.autoApplied,false);assert.match(result.sha256,/^[0-9a-f]{64}$/);
  assert.match(parseModelDesign(result.output,{ownerBrief:prompt,approval:'APPROVE_DESIGN_PREVIEW'}).reactSource,/GeneratedScreen/);
 });
 test('mock errors fail closed and never retry automatically',async()=>{
@@ -32,4 +36,17 @@ test('invalid consent never calls a transport',async()=>{
  let called=false;
  await assert.rejects(runLocalOllama({...opts,consent:'',fetchImpl:async()=>{called=true;}}),/LOCAL_CONSENT_REQUIRED/);
  assert.equal(called,false);
+});
+test('cloud-only model names fail closed before any call',async()=>{
+ let count=0;
+ await assert.rejects(runLocalOllama({...opts,model:'example:cloud',fetchImpl:async()=>{count++;}}),/LOCAL_CLOUD_MODEL_FORBIDDEN/);
+ assert.equal(count,0);
+});
+test('model absent from installed inventory is rejected before sending prompt',async()=>{
+ let count=0;
+ await assert.rejects(runLocalOllama({...opts,fetchImpl:async(url)=>{
+  count++;assert.equal(url,'http://127.0.0.1:11434/api/tags');
+  return {ok:true,headers:{get:()=> 'application/json'},text:async()=>JSON.stringify({models:[]})};
+ }}),/LOCAL_MODEL_NOT_INSTALLED/);
+ assert.equal(count,1);
 });
