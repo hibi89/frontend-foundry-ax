@@ -29,3 +29,14 @@
 .ff-sidebar-list{margin:10px 0 0;padding-left:20px;font-size:12px}.ff-sidebar-list li{margin:5px 0}
 .ff-form label{display:block}.ff-form span{display:block;font-size:11px;color:var(--muted)}.ff-form input{display:block;width:100%;margin:6px 0 9px;padding:9px;border-radius:6px;border:1px solid var(--muted);background:var(--surface);color:var(--ink)}.ff-form button,.ff-error button{padding:7px 10px;border-radius:6px;border:1px solid var(--muted);background:transparent;color:var(--ink)}.ff-form button:disabled,.ff-error button:disabled{opacity:.75;cursor:not-allowed}
 .ff-chart{margin:0}.ff-chart figcaption{font-size:12px;font-weight:700}.ff-chart-bars{display:flex;align-items:end;height:72px;gap:8px;margin-top:12px}.ff-chart-bars span{flex:1;min-width:0;background:var(--accent);border-radius:4px 4px 0 0}.ff-error{border-left:3px solid #f87171}.ff-error strong{font-size:12px}.ff-error p{font-size:11px}
+
+/* Offline-only FFAX interactive component demos; never indicate real backend connectivity. */
+.ff-sidebar-list{list-style:none;padding-left:0}
+.ff-sidebar-list li{margin:4px 0}
+.ff-sidebar-list button{width:100%;text-align:left;border:1px solid transparent;border-radius:6px;padding:7px 10px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.ff-sidebar-list button[aria-current="page"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 17%,transparent);font-weight:750}
+.ff-sidebar-list button:focus-visible,.ff-form button:focus-visible,.ff-error button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ff-form input[aria-invalid="true"]{outline:2px solid #e87878;outline-offset:1px}
+.ff-form p[data-demo-status],.ff-error p[data-demo-status],.ff-sidebar p[data-demo-status]{font-size:11px;line-height:1.5;color:var(--muted)}
+.ff-chart-data{border-collapse:collapse;margin-top:8px;width:100%;font-size:10px;text-align:left}
+.ff-chart-data td,.ff-chart-data th{padding:3px 6px;border-bottom:1px solid var(--muted);text-align:left}
