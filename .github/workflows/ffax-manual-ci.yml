@@ -94,7 +94,7 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install 'playwright==1.56.0' 'Pillow==11.3.0'
-          sudo apt-get update && sudo apt-get install -y chromium
+          sudo apt-get update && sudo apt-get install -y chromium fonts-noto-cjk
       - name: Node and TypeScript tools
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Browser controls / responsive
@@ -105,6 +105,10 @@ jobs:
           python scripts/contrast_probe.py
           python scripts/served_browser_qa.py
           python scripts/axe_offline_audit.py
+      - name: Local end-to-end rehearsal
+        run: node scripts/local_acceptance_gate.mjs
+      - name: Offline fresh-copy cleanroom regression
+        run: npm run test:cleanroom
       - name: Keep QA screenshots and detailed axe report on failures
         if: always()
         uses: actions/upload-artifact@v4
@@ -113,5 +117,4 @@ jobs:
           path: artifacts/qa/
           if-no-files-found: warn
           retention-days: 7
-      - name: Local end-to-end rehearsal
-        run: node scripts/local_acceptance_gate.mjs
+
