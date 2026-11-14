@@ -12,7 +12,7 @@
 
 /* P85 contrast adjustments: keep violet identity while improving button/label legibility. */
 .ff-button,.ff-modal button{background:color-mix(in srgb,var(--accent) 60%,#0b1026);color:#ffffff}
-.ff-badge,.ff-hero .eyebrow{color:color-mix(in srgb,var(--accent) 62%,var(--ink) 38%)}
+.ff-hero .eyebrow{color:color-mix(in srgb,var(--accent) 62%,var(--ink) 38%)}
 
 .theme-daylight .ff-input span,.theme-daylight .ff-stat small,.theme-daylight .ff-card p{color:#35445b}
 
