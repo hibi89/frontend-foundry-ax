@@ -1,3 +1,16 @@
+## 2026-11-14 15:16+ KST — FFAX public GitHub commit-sample comparison (10항 인수인계)
+
+1. **목표/용도/확정요구/기술:** 사용자 요구 프론트·백엔드 최종설계100 개발 진행, 크몽 등록 제외. `REQ01/08/10`의 기존 GitHub public read-only 감사 결과를 안전하게 커밋 간 비교하는 기능. Node22/ESM/브라우저 Web Crypto/Chromium, 외부 유료 API0.
+2. **완료기능/결정:** A=실제 GitHub 쓰기 권한+PR·전체 소스 diff(고객 권한/복구·보안·승인 미해결) vs B=현재 검증된 공개 저장소 두 번의 SHA256 표본 감사 사이 변화만 로컬 비교(채택). 이전/현재 커밋·tree SHA, 파일 추가/누락(표본 범위)/수정 해시, API·인증·라우트 관련 파일 위험, 표본 불완전성을 화면 및 별도 JSON으로 노출. `approvalEligible:false`, `gitPush:false`, `prCreated:false` 고정, 비교 시 API 추가 호출0. Canvas/고객/원본 미변경.
+3. **테스트/증거:** 정확 코드 SHA `77ab4572226c3e6282bb162caccb300639b60f65`; 테스트 추가 `tests/github-readonly-intake.test.mjs` 2건(동일/서로 다른 SHA·보호 경로·불완전 표본·거짓 manifest 차단), `scripts/github_readonly_browser_probe.py`에서 Chromium mock 커밋2회 조회·해시비교 다운로드/GET-only/Canvas 불변 시나리오 추가. [설계 gate #43565531611](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43565531611) SUCCESS, [정확 SHA 전체 CI #43565531440](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43565531440) 조회 시 PENDING (PASS 건수 미확인). 과거 `2c993faf` 143/143는 이 새 코드의 검증이 아님.
+4. **완료/진행/대기/차단:** 소스 구현 및 GitHub 저장 완료, CI 결과/실 Chromium 검증 대기; 전체 최종설계 공식 UNASSESSED, 내부80/100 잠정(이번 회차 증액0), 실제 Qwen12·사용자 Windows UI7·실고객 private GitHub·안전한 PR·RG06·권리/판매 미검증, `[작업중]`, RELEASE HOLD/크몽 미등록 유지.
+5. **오류/원인/시도/대안:** 과거 공개저장소 단일 snapshot만 제공해 버전간 차이 확인 불가. 이번에는 신규 키·고객/비공개 소스 없이 순수 해시 비교를 채택. GitHub Actions CI queue를 성공으로 간주하지 않음. 실패 발견 시 해당 SHA logs로 원인별 최소 1회 수정 후 재검증, 무의미한 재시작·강제 배포 금지.
+6. **저장소/브랜치/SHA/경로:** `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`, 코드 `77ab4572226c3e6282bb162caccb300639b60f65`, 백업 기준 검증 코드 `2c993faf31a2ecf22cfff81ab2d1ce0a63c31187`. `src/github-readonly-intake.mjs`, `src/app.mjs`, `index.html`, `tests/github-readonly-intake.test.mjs`, `scripts/github_readonly_browser_probe.py`, 본 STATUS/HANDOFF.
+7. **Production/실행/환경:** localhost `127.0.0.1:4173`, `node src/server.mjs`; `npm test`, `python scripts/github_readonly_browser_probe.py`, GitHub-hosted Node22 Windows/Linux+Chromium. Production/Vercel 미적용, 자동 배포 없음.
+8. **원본/백업/보안:** 이전 Git SHA/git revert로 복구 가능, 원본 React/GitHub repo/customer data/credential/.env/권한·토큰/상품 카탈로그 미수정. 공개 Github API 사용은 별도 사용자 체크박스/버튼 동의 후만. 비교에는 소스 내용 전송/실행이 없고 샘플 해시만 필요. 기밀 소스·사설 GitHub 통합은 하지 않음.
+9. **다음 우선순위/승인사항:** (1) #43565531440 정확 SHA CI 4/4·browser probe 결과 확인, 실패 시 수정 후 재검증 (2) UI별 컴포넌트/흐름의 실제 품질·backend 추가 안전성 개선 (3) 사용자 귀가 후 실제 Qwen12(>=10개 독립 strict TSX+SSR), 실제 owner Windows UX7 수용 (4) 권한 있는 고객 GitHub repo read/write+PR 설계·승인 전 구현/배포 금지. 상용 판매와 크몽 등록은 범위 외.
+10. **KST 시각/확인범위/문서 HEAD:** 2026-11-14 15:16+ KST; GitHub 파일 blob/compare6 commits, 기능 코드 commit/게이트 성공/전체 CI queued 조회. 본 문서-only 커밋 후 원격 SHA readback 필요; 최신 4job, live Qwen, owner UX, 고객 API+auth, Production/상용은 미검증.
+
 ## 2026-11-14 14:17+ KST — FFAX Chromium CI 호환성 복구 검증 (10항 인수인계)
 
 1. **목표·최종설계·기술:** FFAX 전체 REQ 기반 프론트/백엔드 100 목표 유지, 기존 원본/안전한 Node22 React19 TypeScript/Playwright1.56 CI 유지. 사용자 PC 외출 중 개입 없이 CI 환경 호환성 오류 수정, 제품 P100/크몽 등록은 범위 외.
