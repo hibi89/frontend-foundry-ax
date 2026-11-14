@@ -53,7 +53,7 @@ function renderCanvas(){
   el('preview').style.width=`${contentWidth}px`;el('preview').innerHTML=renderMarkup(doc);
   for(const node of el('preview').querySelectorAll('[data-node-id]')){
     const nodeId=node.getAttribute('data-node-id');node.setAttribute('draggable','true');node.setAttribute('tabindex','0');if(!node.matches('button,input,select,textarea,a,label') && !node.hasAttribute('role'))node.setAttribute('role','group');
-    node.setAttribute('aria-label',`편집 컴포넌트 ${REGISTRY[doc.components.find(x=>x.id===nodeId).type].label}`);
+    if(!node.matches('button,input,select,textarea,a,label'))node.setAttribute('aria-label',`편집 컴포넌트 ${REGISTRY[doc.components.find(x=>x.id===nodeId).type].label}`);
     if(nodeId===selected)node.classList.add('selected');
     node.addEventListener('click',e=>{if(e.target.matches('input,button')&&!e.target.closest('.ff-modal')){e.preventDefault();}e.stopPropagation();selected=nodeId;updateAll(false);});
     node.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ') && e.target===node){e.preventDefault();selected=nodeId;updateAll(false);}});

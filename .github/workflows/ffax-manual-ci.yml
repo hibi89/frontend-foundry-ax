@@ -59,8 +59,8 @@ jobs:
           python scripts/manual_browser_probe.py
           python scripts/accessibility_probe.py
           python scripts/contrast_probe.py
-          python scripts/axe_offline_audit.py
           python scripts/served_browser_qa.py
+          python scripts/axe_offline_audit.py
       - name: Keep QA screenshots and detailed axe report on failures
         if: always()
         uses: actions/upload-artifact@v4
