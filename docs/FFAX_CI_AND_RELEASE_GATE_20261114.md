@@ -1,0 +1,38 @@
+# FFAX 2026-11-14 KST — CI cleanroom release-candidate verification (not a retail release)
+
+## Provenance
+- Repository: private `hibi89/frontend-foundry-ax`, branch `feature/ffax-workbench-p85-20261112`.
+- **Validated functional source SHA:** `85e0980caf29ab72da17c50cf9351f4cd048ea06`.
+- GitHub-hosted run: https://github.com/hibi89/frontend-foundry-ax/actions/runs/43543877740 — **SUCCESS**, four jobs `offline-node`, `windows-native`, `browser-qa`, `package-owner-review`.
+- Latest state of branch docs may be a subsequent documentation SHA; the tested code is the explicit SHA above. The deployment branch `main` is preserved; Vercel/Production **NOT APPLICABLE**.
+
+## Evidence and scope
+| Gate | Verified result | Boundaries |
+|---|---|---|
+| Linux Node 22 | 113 PASS / 0 FAIL / 0 SKIP | Synthetic fixtures / no actual LLM |
+| Windows hosted Node 22 | 113 PASS / 0 FAIL | CI native Windows, not owner device |
+| React 19.2.7 strict typecheck/SSR | 12 of 12 synthetic proposals PASS, 0 TS diagnostics | Model simulation, not AC04 actual AI |
+| Browser synthetic controls | 30/30 PASS, manual AI UI 10/10, a11y baseline 12/12 | Same source injected browser |
+| Served localhost Chromium | HTTP 200 HTML/CSS/JS/SVG; 375, 768, 1440 screenshots; 13 component nodes per viewport, no overflow, JS console or failed requests | 127.0.0.1 Linux runner; no internet Production |
+| axe-core 4.14.0 | 0 serious / 0 critical violations at three viewports | Automatic WCAG rules only, incomplete rules 2/view; owner UX pending |
+| 3 themes × 3 viewports contrast | 900 text candidates, 0 low-contrast | Computed text check only |
+| D1–D5 | 5/5 offline flow demonstrations PASS | Fake transport; no customer project, no live model |
+| Isolated cleanroom | 7/7 PASS, source manifest unchanged | Host-installed dependencies; no customer data |
+| Windows security smoke | HTTP200 static assets and blocked non-origin POST 403 | No real Ollama response |
+| Packaging | `ffax-owner-review-unreleased` artifact **created**; 7-day retention | **Unsigned source ZIP; review only; not EXE or customer release** |
+
+Artifacts in run: `ffax-owner-review-unreleased` and `ffax-browser-evidence`. Download/inspect source ZIP metadata before owner acceptance. The artifact's `SOURCE_SHA.txt` equals `85e0980caf29ab72da17c50cf9351f4cd048ea06`; nested review ZIP verified on a separate Linux Node 22 process with 5 static responses 200 and unauthorized POST 403. No paid external AI requests or third-party customer uploads were used for this verification.
+
+## Fixed twelve-item rubric and nonnegotiable release gates
+- **AC12 = 2/2**: fresh Windows/Linux CI + browser + D1-D5 + run evidence + owner instructions and this release-candidate log now fulfill the fixed 2-point acceptance; this awards **no user acceptance** and does not authorize sale.
+- **AC04 = 0/14**: actual locally installed Apache-2.0 `qwen3:4b-instruct` model must be exercised on 12 frozen prompts; ≥10 **actual** React 19 builds, typecheck and render PASS, failures disclosed. Fake adapter / synthetic 12/12 are not substitutes.
+- **AC09 = 0/6**: axe pass achieved, **explicit owner visual/keyboard/interaction approval still missing**, so 0 under all-or-nothing rubric.
+- **Engineering score 80/100 provisional** (formerly 78/100; only AC12 +2), **formal centralized final-blueprint score remains UNASSESSED**, product **RELEASE HOLD**.
+- RG01/RG02/RG03 have evidence in local CI; RG04 Production **not applicable** (local product); RG05 this document/STATUS/HANDOFF synchronization; RG06 owner acceptance **pending**.
+- Real customer environments, user PC performance, model response quality, preview UI signoff, software distribution support and commercial registration **not verified**; no claim of 100% or completion.
+- `qwen2.5-coder:3b` research-license tag explicitly blocked; commercial-prep default only `qwen3:4b-instruct`, separate installation, no weights distributed. See `docs/MODEL_LICENSE_DECISION_20261114.md`.
+
+## 0원 workstream and rollback
+- Short-term: no cash API spend; source-only ZIP and optional owner-installed local inference, no paid deploy. More free CI consumption is possible, avoid churn/redundant commits.
+- Main branch and all customer originals remain unchanged; work branch may be rolled back by a normal non-force `git revert <sha>` after inspecting individual commits. Do not alter `.env`/tokens, permissions, deployments or production without approval.
+- Required owner tasks are grouped at 2026-11-14 13:00 Asia/Seoul via existing FFAX automation: optional Ollama install/model download, run real 12-brief benchmark, actual Windows UX acceptance. Mobile can approve/review evidence only. Never claim these have been done yet.

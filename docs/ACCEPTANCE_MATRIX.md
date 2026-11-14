@@ -1,3 +1,5 @@
+> **2026-11-14 현재 업데이트 (아래 2026-11-12 기록은 역사적 증거):** 고정 rubric 변경 없이 AC12 0→2, 4/4 GitHub CI와 7/7 cleanroom, D1-D5 5/5, Windows113/113, Chromium, 공식 axe 0 serious/critical, 검수용 ZIP/가이드/릴리스 로그 확보로 **80/100 잠정**. AC04 실제 모델 0/14, AC09 사용자 최종 화면 승인 0/6. 중앙 최종설계 수용점수 **UNASSESSED**, 릴리스/크몽 **HOLD**. [증거](FFAX_CI_AND_RELEASE_GATE_20261114.md).
+
 > **2026-11-12 fourth pass:** Local project JSON import/export/undo with Node105 + browser9 PASS, **78/100 retained** under unchanged rubric. AC04 0, AC09 0, AC12 0; 85 target missed. [Evidence](FFAX_P85_LOCAL_PROJECT_RESTORE_20261112.md).
 
 > **2026-11-12 provider adapter preparation:** Confirmed 8/8 source blobs; Node96, mocked provider contract12, limited Chromium30, React UMD12, cleanroom7. **AC04 0, AC09 0, AC12 0; total remains 78/100 provisional (85 not reached).** Formal axe binary absent (exit2), live model/CI/owner UI review not run. [Details](FFAX_P85_PROVIDER_ADAPTER_GATE_20261112.md).
@@ -28,8 +30,8 @@
 | AC-09 | 접근성·검수 이력 | 6 | 키보드 focus, 레이블/대비, axe 자동 검사에서 critical/serious 0건, 수동 UX 승인 기록 | 0 / 미구현 |
 | AC-10 | GitHub 분기·승인·복구 | 5 | 승인 없이 원본/Production 수정 0건, 브랜치·PR 링크·SHA·rollback 실행 증거 | 5 / 5 · GitHub Draft PR + 로컬 git revert PASS |
 | AC-11 | API 비용·보안·장애 복구 | 3 | 사용량/한도/중단·중복 실행·실패 복구 테스트, 토큰/민감정보 노출 0건, 동의 전 전송 0건 | **3 / 3 · 로컬 모의 adapter와 fail-closed 정책 검증 PASS (실 공급자 미검증)** |
-| AC-12 | 실행·문서·엔드투엔드 시연 | 2 | 깨끗한 환경 설치+CI PASS, D1~D5 반복 가능한 데모, 가이드와 릴리스 로그 | 0 / 미구현 |
-| **합계** | | **100** | **모든 증거 필요** | **78 / 100 (잠정, P85 목표 미달)** |
+| AC-12 | 실행·문서·엔드투엔드 시연 | 2 | 깨끗한 환경 설치+CI PASS, D1~D5 반복 가능한 데모, 가이드와 릴리스 로그 | **2 / 2 · GitHub Actions 4/4 SUCCESS, D1~D5 5/5, guide+release log (2026-11-14)** |
+| **합계** | | **100** | **모든 증거 필요** | **80 / 100 (엔지니어링 잠정, 중앙 공식 UNASSESSED; RELEASE HOLD)** |
 
 **테스트 픽스처 고정:** 신규 UI 브리프 12개(금융·이커머스·RAG·관리자 등 서로 다른 패턴), **원본 코드가 보존된** 기존 React 샘플 2종, 명시적 사용허가가 있는 이미지 1종. 테스트 데이터와 스냅샷 버전·실행 환경을 고정해 재현 가능하도록 한다. 세부 픽스처는 최초 구현 시 별도 버전 관리하고, 그 후 점수 올리기 위한 사후 변경은 금지한다.
 

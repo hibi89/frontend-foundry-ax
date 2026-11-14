@@ -1,3 +1,5 @@
+> **2026-11-14 최신: 80/100 잠정 기술 기준 / 중앙 정식 최종완성률 UNASSESSED / RELEASE HOLD.** Linux·Windows 113/113, GitHub CI 4/4, axe 0 serious/critical, 검수용 Windows ZIP 있음. 실로컬 모델 AC04 0, 사용자 최종승인 AC09 0. [증거](docs/FFAX_CI_AND_RELEASE_GATE_20261114.md) · [Windows 검수 안내](OWNER_QUICKSTART_KO.md).
+
 > **2026-11-12 P85 attempt (engineering score 78/100 retained):** Local JSON project save/reopen with strict validation, user confirmation and Undo recovery now works. Node105 PASS, Chromium UI30 + project restore9 PASS (injected-source scope). **This is not 85%, not deployed, release HOLD.** [Evidence](docs/FFAX_P85_LOCAL_PROJECT_RESTORE_20261112.md). 
 
 ## 2026-11-12 — AI provider adapter + formal audit preparation (P78 retained)

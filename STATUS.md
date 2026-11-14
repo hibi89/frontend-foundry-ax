@@ -1,3 +1,11 @@
+## 2026-11-14 KST — FFAX evidence-based engineering 80/100, release HOLD (current)
+
+- Official central final-blueprint acceptance: **UNASSESSED** until independent official score review; standalone fixed FFAX acceptance matrix **80/100 provisional** (AC12 +2 from clean GitHub CI). **Not 100%, not registered on Kmong, not released.**
+- Verified source `85e0980caf29ab72da17c50cf9351f4cd048ea06`, GitHub Actions https://github.com/hibi89/frontend-foundry-ax/actions/runs/43543877740 **SUCCESS 4 jobs**, Linux113/113, Windows113/113, React19 strict synthetic 12/12, real localhost Chromium 3 viewports + 30/30, axe 0 serious/critical, contrast900/900, D1-D5 5/5, cleanroom7/7.
+- Source-only unsigned Windows owner review ZIP created in GitHub artifact `ffax-owner-review-unreleased` (7-day retention); ZIP content inspected/locally smoke-tested; no model weights/secrets. GitHub `main` and Production untouched.
+- Outstanding to reach 100: AC04 live local license-cleared model 12 prompts (≥10 real React TSX passes); AC09 explicit owner UX signoff; RG06 acceptance. Current model uses `qwen3:4b-instruct` Apache-2.0 tag only; old 3B restricted model blocked.
+- Owner PC/mobile instructions **scheduled 13:00 KST**. No unverified product completion or paid API calls. [Reproducible evidence](docs/FFAX_CI_AND_RELEASE_GATE_20261114.md) · [Kmong product scope](docs/KMONG_PREP_20261114.md).
+
 ## 2026-11-12 KST — P85 fourth pass: safe local project save/reopen (78/100 retained)
 - **Status:** product engineering **78/100 provisional**; target 85 **not reached**. Fixed AC02/03/05/06/08/01/07/10/11 score unchanged; AC04(14), AC09(6), AC12(2) incomplete. **RELEASE HOLD**.
 - **Verified functional code:** `a76a962037b41d474699845378c2656e439f66f1` on private `feature/ffax-workbench-p85-20261112`. New `exportLocalProject`/`importLocalProject` strict versioned JSON format, allowlisted brief/ref/components, owner-confirmed import, no network/write, Undo recovery. Six source/test files exactly match locally tested Git Blob SHA.
