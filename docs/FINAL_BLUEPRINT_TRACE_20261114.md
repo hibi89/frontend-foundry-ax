@@ -1,3 +1,5 @@
+> **2026-11-14 update:** REQ-03/04/05/B-option layout parity repaired in actual exported TSX at `0acf96c95d133c02f3666238fd638a4f3468f854` ([GitHub Actions 43548778693](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43548778693), 4/4 SUCCESS, native Linux/Windows 118/118). Previously dashboard grid became stack on export; now responsive grid, full-width key rows and data-layout marker preserve the selected layout. This improves already-counted engineering coverage and does **not** award new AC points, prove real AI or owner UX, resolve customer integration, or change official **UNASSESSED**. [Details](REACT_GRID_EXPORT_PARITY_20261114.md).
+
 # FFAX v1.0 — Full blueprint requirement-to-evidence trace (2026-11-14 KST)
 
 **Purpose:** Do not confuse a limited 12-AC engineering rubric (80/100 provisional) with the user's **entire final product blueprint 100%**. Sources are `REQUIREMENTS.md`, `docs/PRODUCT_SPEC_V1.md`, `docs/ACCEPTANCE_MATRIX.md`, and central `OWNER-FINAL-BLUEPRINT-100`. This is a **coverage audit without new weights**, not a user-approved rescore.
