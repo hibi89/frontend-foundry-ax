@@ -131,6 +131,35 @@ el('export-repo-audit').addEventListener('click',()=>{
  save('FFAX-readonly-react-audit.json',JSON.stringify(latestRepoAudit,null,2),'application/json');
 });
 
+// Remote-public audit never runs without distinct owner approval; no credentials accepted.
+let latestGithubAudit=null;
+el('analyze-github').addEventListener('click',async()=>{
+ const button=el('analyze-github'),display=el('github-analysis-status');
+ button.disabled=true;el('export-github-audit').disabled=true;latestGithubAudit=null;
+ display.textContent='GitHub 공개 API 읽기 전용 검사 요청 중 (코드 실행·쓰기 없음)...';
+ try{
+  const {auditPublicGitHubReactRepo}=await import('./github-readonly-intake.mjs');
+  const result=await auditPublicGitHubReactRepo({
+   repository:el('github-repo').value,ref:el('github-ref').value,
+   consent:el('github-public-consent').checked
+  });
+  latestGithubAudit=result;
+  display.textContent='PUBLIC READ-ONLY PASS · '+result.root+'\nCommit '+result.sourceGitSha+
+   '\nSHA256 '+result.sha256+'\n'+result.fileCount+'/'+result.sourceFilesEligible+
+   '개 허용 소스 표본 · API '+result.indicators.api+' · 라우트 '+result.indicators.route+
+   ' · 인증 '+result.indicators.auth+' · 이벤트 '+result.indicators.events+
+   '\n외부 GET '+result.remoteRequests+'회 · 원본 변경 0 · PR 0\n'+result.warning;
+  el('export-github-audit').disabled=false;
+ }catch(err){
+  display.textContent='PUBLIC READ-ONLY FAIL: '+(err?.message||'UNKNOWN')+
+   '\nGitHub 공개 저장소·브랜치·API 호출 한도 및 입력을 확인하세요. PR·원본 수정은 수행하지 않았습니다.';
+ }finally{button.disabled=false;el('github-public-consent').checked=false;}
+});
+el('export-github-audit').addEventListener('click',()=>{
+ if(!latestGithubAudit)return;
+ save('FFAX-github-readonly-audit.json',JSON.stringify(latestGithubAudit,null,2),'application/json');
+});
+
 el('analyze').addEventListener('click',()=>{try{brief=buildBrief(promptEl.value);history=new DocumentHistory(newDocument(brief,'A'));selected=history.present.components[0]?.id;updateAll();}catch(e){log(e.message,true);}});
 el('component-select').addEventListener('change',e=>{selected=e.target.value;updateAll(false);});
 for(const [id,prop,transform] of [['component-text','text',v=>v],['component-type','type',v=>v],['component-color','color',v=>v],['component-spacing','spacing',Number],['component-align','align',v=>v]])el(id).addEventListener('change',e=>edit(prop,transform(e.target.value)));

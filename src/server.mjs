@@ -12,6 +12,7 @@ const publicAssets = new Map([
   ['/src/app.mjs', 'text/javascript; charset=utf-8'],
   ['/src/core.mjs', 'text/javascript; charset=utf-8'],
   ['/src/local-repo-intake.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/github-readonly-intake.mjs', 'text/javascript; charset=utf-8'],
   ['/assets/ffax-favicon.svg', 'image/svg+xml']
 ]);
 const port=Number(process.env.PORT || '4173');
@@ -59,7 +60,7 @@ const server=http.createServer(async(req,res)=>{
     const s=await stat(abs);
     if(!s.isFile()){res.writeHead(404).end();return;}
     const body=await readFile(abs);
-    res.writeHead(200,{'Content-Type':type,'Content-Length':body.length,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'SAMEORIGIN','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; object-src 'none'; connect-src 'self'; base-uri 'self'; form-action 'none'; frame-src 'self'"});
+    res.writeHead(200,{'Content-Type':type,'Content-Length':body.length,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'SAMEORIGIN','Referrer-Policy':'no-referrer','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; object-src 'none'; connect-src 'self' https://api.github.com; base-uri 'self'; form-action 'none'; frame-src 'self'"});
     res.end(req.method==='HEAD'?undefined:body);
   }catch{res.writeHead(404).end();}
 });
