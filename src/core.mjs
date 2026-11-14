@@ -227,12 +227,12 @@ export function exportReact(doc){
     switch(n.type){
       case 'Button':return `<button type="button" ${s}>${text}</button>`;
       case 'Hero':return `<section ${s}><p>AI × Human Interface</p><h1>${text}</h1><p>다양한 아이디어를 실제 서비스 화면으로 구성합니다.</p></section>`;
-      case 'Navbar':return `<nav ${s} aria-label="서비스 탐색" >${text}</nav>`;
+      case 'Navbar':return `<nav ${s} aria-label="서비스 탐색">${text}</nav>`;
       case 'Input':return `<label ${s}><span style={{fontSize:11,color:${JSON.stringify(t.muted)}}}>${text}</span><input type="search" aria-label={${JSON.stringify(n.text)}} placeholder={${JSON.stringify(n.text)}} ${inputStyle} /></label>`;
       case 'Table':return `<div ${s} role="region" aria-label={${JSON.stringify(n.text)}}><strong>${text}</strong><table style={{width:'100%',fontSize:11,marginTop:10,borderCollapse:'collapse'}}><thead><tr><th scope="col" style={{textAlign:'left',padding:'8px 0',borderBottom:${JSON.stringify(`1px solid ${t.muted}`)}}}>이름</th><th scope="col" style={{textAlign:'left',padding:'8px 0',borderBottom:${JSON.stringify(`1px solid ${t.muted}`)}}}>상태</th></tr></thead><tbody><tr><td>Sample UI</td><td>Draft</td></tr></tbody></table></div>`;
       case 'Alert':return `<aside role="status" ${s}>${text}</aside>`;
       case 'Loader':return `<div role="status" ${s}><span aria-hidden="true">◌ </span>${text}</div>`;
-      case 'Stat':return `<article ${s}><small style={{display:'block',fontSize:10,color:${JSON.stringify(t.muted)}}>Example metric</small><strong style={{fontSize:22}}>${text}</strong></article>`;
+      case 'Stat':return `<article ${s}><small style={{display:'block',fontSize:10,color:${JSON.stringify(t.muted)}}}>Example metric</small><strong style={{fontSize:22}}>${text}</strong></article>`;
       case 'Card':return `<article ${s}><strong>${text}</strong><p style={{fontSize:11,color:${JSON.stringify(t.muted)},fontWeight:400}}>컴포넌트 스타일 미리보기</p></article>`;
       case 'Badge':return `<span ${s}>${text}</span>`;
       case 'Modal':return `<section ${s} role="group" aria-label={${JSON.stringify(n.text)}}><strong>Dialog preview</strong><p style={{fontSize:11}}>${text}</p><button type="button" aria-label="확인" style={{backgroundColor:${JSON.stringify(`color-mix(in srgb, ${accent} 60%, #0b1026)`)},color:'#ffffff',border:0,borderRadius:6,padding:'7px 13px'}}>확인</button></section>`;
