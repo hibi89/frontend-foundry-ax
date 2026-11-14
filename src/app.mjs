@@ -116,6 +116,20 @@ el('add-component').addEventListener('click',()=>{run({kind:'insert',type:'Card'
 el('remove-component').addEventListener('click',()=>{if(selected)run({kind:'remove',id:selected});});
 document.querySelectorAll('[data-width]').forEach(b=>b.addEventListener('click',()=>{viewport=Number(b.dataset.width);renderCanvas();}));
 el('run-qa').addEventListener('click',()=>checkQA().catch(e=>log(`QA 오류: ${e.message}`,true)));
+el('local-generate').addEventListener('click',async()=>{
+  const btn=el('local-generate'),status=el('local-generation-status');
+  if(!el('local-model-consent').checked){status.textContent='실행 전 이번 요청의 명시적 동의가 필요합니다.';return;}
+  btn.disabled=true;status.textContent='PC 로컬 모델 요청 중. 60초 제한으로 중단할 수 있습니다.';
+  try{
+    const response=await fetch('/api/local-model',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({model:el('local-model-name').value,prompt:promptEl.value,consent:'APPROVE_LOCAL_MODEL_PROMPT_ONLY'})});
+    const result=await response.json();
+    if(!response.ok)throw Error(result.error||'LOCAL_MODEL_UNAVAILABLE');
+    el('manual-response').value=result.output;el('manual-design-approval').checked=false;
+    status.textContent='모델 응답 수신. 아래 JSON을 검토하고 승인해야 적용됩니다. 자동 배포·코드 실행 없음.';
+  }catch(err){status.textContent='로컬 AI 실패: '+(err?.message||'UNKNOWN');}
+  finally{btn.disabled=false;el('local-model-consent').checked=false;}
+});
 el('manual-build-request').addEventListener('click',()=>{
   try {
     el('manual-request').value=makeManualAIPrompt(promptEl.value,{ownerConsent:el('manual-copy-consent').checked});
