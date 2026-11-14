@@ -113,3 +113,57 @@ export async function auditPublicGitHubReactRepo({repository,ref='main',consent=
   warning:'공개 GitHub API의 고정 커밋에서 최대 16개 허용 파일만 검사한 표본입니다. 인증·실행/API 회귀·diff/PR/원본 변경 검증 아님.'
  });
 }
+
+
+/** Compare two explicitly fetched public-repo snapshots, without any further network
+ * requests or writes. This is a bounded hash-manifest delta, NOT a source-code diff,
+ * test of behavioral equivalence, or a safe-to-merge verdict.
+ */
+export function comparePublicGitHubAudits(before,after){
+ function checked(snapshot){
+  if(!snapshot||snapshot.schema!=='ffax-readonly-github-audit.v1'||
+     snapshot.readOnly!==true||snapshot.publicOnly!==true||
+     snapshot.gitRemoteConnected!==true||!HEX40.test(snapshot.sourceGitSha||'')||
+     !HEX40.test(snapshot.sourceTreeSha||'')||
+     typeof snapshot.root!=='string'||snapshot.root!==parseGitHubPublicRepo(snapshot.root)||
+     !Array.isArray(snapshot.files)||snapshot.files.length>GITHUB_AUDIT_MAX_FILES||
+     snapshot.fileCount!==snapshot.files.length||typeof snapshot.sampled!=='boolean')
+    throw Error('GITHUB_COMPARE_SNAPSHOT_INVALID');
+  const files=new Map();
+  for(const f of snapshot.files){
+   if(!sourceCandidate({path:f?.path})||
+      !/^[a-f0-9]{64}$/.test(f?.sha256||'')||
+      !Number.isSafeInteger(f?.size)||f.size<0||f.size>INTAKE_LIMITS.maxFileBytes||
+      files.has(f.path))
+    throw Error('GITHUB_COMPARE_FILE_MANIFEST_INVALID');
+   files.set(f.path,{sha256:f.sha256,size:f.size});
+  }
+  return files;
+ }
+ const previous=checked(before),current=checked(after);
+ if(before.root.toLowerCase()!==after.root.toLowerCase())throw Error('GITHUB_COMPARE_REPOSITORY_MISMATCH');
+ const paths=[...new Set([...previous.keys(),...current.keys()])].sort();
+ const changes=[];let unchanged=0;
+ for(const path of paths){
+  const old=previous.get(path),now=current.get(path);
+  if(old&&now&&old.sha256===now.sha256&&old.size===now.size){unchanged++;continue;}
+  const kind=!old?'only-in-current-sample':!now?'only-in-previous-sample':'modified';
+  const sensitive=/(^|\/)(?:api|auth|login|logout|session|security|middleware|routes?|config|payments?|hooks?)(?:\/|[._-]|$)/i.test(path);
+  changes.push({path,kind,risk:sensitive?'PROTECTED_FLOW_REVIEW':'MANUAL_CODE_REVIEW',
+    beforeSha256:old?.sha256||null,afterSha256:now?.sha256||null});
+ }
+ const incomplete=before.sampled||after.sampled;
+ return Object.freeze({
+  schema:'ffax-public-github-sample-comparison.v1',repository:after.root,
+  previousCommit:before.sourceGitSha,currentCommit:after.sourceGitSha,
+  previousTree:before.sourceTreeSha,currentTree:after.sourceTreeSha,
+  sameCommit:before.sourceGitSha===after.sourceGitSha,
+  sampleIncomplete:incomplete,comparedFiles:paths.length,
+  unchanged,changed:changes.length,protectedFlowChanges:changes.filter(x=>x.risk==='PROTECTED_FLOW_REVIEW').length,
+  changes,remoteRequests:0,sourceWrites:0,gitPush:false,prCreated:false,
+  approvalEligible:false,manualReviewRequired:true,
+  warning:incomplete
+   ?'최대 16파일의 서로 다른 표본입니다. 목록 차이는 실제 파일 추가/삭제가 아닐 수 있고 누락된 코드 변경은 감지되지 않습니다. PR·적용 승인 불가.'
+   :'허용된 파일의 해시 변화만 비교했습니다. 코드 내용·API 계약·기능 회귀는 검증하지 않았으므로 PR·적용 승인 불가.'
+ });
+}
