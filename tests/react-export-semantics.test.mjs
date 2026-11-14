@@ -54,22 +54,31 @@ test('actual React 19 renders all 13 exported components and escapes untrusted t
  assert.ok(html.length>900);
 });
 
-test('four optional P0 patterns render accessible, inert preview and independent React19 output',async()=>{
+test('four optional P0 patterns preserve accessible local-only demo semantics in React19',async()=>{
  const types=['Sidebar','Form','Chart','Error'];
  const extended={...doc,components:[...doc.components,...types.map((t,i)=>makeComponent(t,'pattern-'+i))]};
  const html=renderMarkup(extended),tsx=exportReact(extended);
  assert.equal(extended.components.length,17);
  for(const type of types)assert.match(html,new RegExp('ff-'+type.toLowerCase()));
- for(const s of ['aria-label="사이드바 탐색"','role="form"','role="img"','role="alert"','미연결 미리보기','예시 데이터'])
-   assert.ok(html.includes(s),'preview '+s);
- assert.ok(!html.includes('<form action='));assert.ok(!tsx.includes('onSubmit='));
+ for(const fragment of ['aria-label="사이드바 탐색"','data-demo-action="navigate"',
+  'data-demo-action="validate-form"','data-demo-action="retry"',
+  'role="group"','aria-label="차트 예시 수치"','aria-live="polite"','예시 데이터']){
+  assert.ok(html.includes(fragment),'preview '+fragment);
+ }
+ assert.ok(!html.includes('<form action='));
+ assert.ok(!tsx.includes('onSubmit='));
+ for(const forbidden of ['fetch(','XMLHttpRequest','localStorage']){
+  assert.ok(!tsx.includes(forbidden),'export must not call external IO '+forbidden);
+ }
  const {createRequire}=await import('node:module'),require=createRequire(import.meta.url);
  const ts=require('typescript'),React=require('react'),SSR=require('react-dom/server');
  const output=ts.transpileModule(tsx,{fileName:'Screen.tsx',reportDiagnostics:true,compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,esModuleInterop:true}});
  assert.equal((output.diagnostics||[]).filter(x=>x.category===ts.DiagnosticCategory.Error).length,0);
  const module={exports:{}};new Function('require','module','exports',output.outputText)(require,module,module.exports);
  const rendered=SSR.renderToStaticMarkup(React.createElement(module.exports.default));
- for(const s of ['aria-label="사이드바 탐색"','role="form"','role="img"','role="alert"','미연결 미리보기','예시 데이터'])
-  assert.ok(rendered.includes(s),'React19 '+s);
+ for(const fragment of ['aria-label="사이드바 탐색"','aria-label="차트 예시 수치"',
+  'role="group"','로컬 입력 검증','로컬 다시 시도','예시 데이터','미제출 · 서버 연결 없음']){
+  assert.ok(rendered.includes(fragment),'React19 '+fragment);
+ }
  assert.ok(!rendered.includes('<form action='));
 });
