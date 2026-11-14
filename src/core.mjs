@@ -117,7 +117,7 @@ export function applyCommand(doc, command) {
     // Never derive IDs from wall-clock time or randomness: repeatable edits yield repeatable TSX.
     const used=new Set(next.components.map(node=>node.id));
     const greatest=next.components.reduce((max,node)=>{
-      const match=/^node-(\\d+)$/.exec(node.id);
+      const match=/^node-(\d+)$/.exec(node.id);
       const value=match?Number(match[1]):0;
       return Number.isSafeInteger(value)?Math.max(max,value):max;
     },0);
