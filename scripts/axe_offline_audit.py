@@ -16,10 +16,11 @@ if not AXE.is_file():
 html=(ROOT/'index.html').read_text(encoding='utf8')
 css=(ROOT/'styles.css').read_text(encoding='utf8')
 core=re.sub(r'\bexport (?=(?:const|class|function)\b)','',(ROOT/'src/core.mjs').read_text(encoding='utf8'))
-app=re.sub(r'^import [^;]+;','',(ROOT/'src/app.mjs').read_text(encoding='utf8'),count=1)
+demo=re.sub(r'\bexport (?=(?:const|class|function)\b)','',(ROOT/'src/demo-interactions.mjs').read_text(encoding='utf8'))
+app=re.sub(r'^import [^;]+;','',(ROOT/'src/app.mjs').read_text(encoding='utf8'),count=2,flags=re.M)
 html=re.sub(r'<link rel="stylesheet"[^>]+>','',html)
 html=re.sub(r'<script type="module"[^>]+></script>','',html)
-script='window.fetch=async()=>({text:async()=>'+json.dumps(css)+'});\n'+core+'\n'+app
+script='window.fetch=async()=>({text:async()=>'+json.dumps(css)+'});\n'+core+'\n'+demo+'\n'+app
 record={'schema':'ffax-axe-audit.v1','dependency':'axe-core 4.14.0','injectedSource':True,'directBrowserUrl':False,'userUxApproval':False,'viewports':[]}
 with sync_playwright() as p:
   browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-gpu'])
