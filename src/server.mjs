@@ -15,6 +15,7 @@ const publicAssets = new Map([
   ['/src/github-readonly-intake.mjs', 'text/javascript; charset=utf-8'],
   ['/src/github-compare-review.mjs', 'text/javascript; charset=utf-8'],
   ['/src/device-checkpoint.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/demo-interactions.mjs', 'text/javascript; charset=utf-8'],
   ['/assets/ffax-favicon.svg', 'image/svg+xml']
 ]);
 const port=Number(process.env.PORT || '4173');
