@@ -1,6 +1,17 @@
 name: FFAX manual verification (opt-in)
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/ffax-workbench-p85-20261112
+    paths:
+      - '.github/workflows/ffax-manual-ci.yml'
+      - 'package.json'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'index.html'
+      - 'styles.css'
 permissions:
   contents: read
 concurrency:
