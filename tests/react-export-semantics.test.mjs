@@ -29,3 +29,27 @@ test('structured model JSON preserves approved component semantics, without real
  assert.ok(out.reactSource.includes('role="region"'));
  assert.equal(out.metadata.externalNetwork,false);
 });
+
+test('actual React 19 renders all 13 exported components and escapes untrusted text',async()=>{
+ const {createRequire}=await import('node:module');
+ const require=createRequire(import.meta.url);
+ const ts=require('typescript'),React=require('react'),ReactDOMServer=require('react-dom/server');
+ const malicious='<img src=x onerror=alert(1)> & <script>alert(2)</script>';
+ const safe=applyCommand(doc,{kind:'update',id:'node-1',prop:'text',value:malicious});
+ const jsx=exportReact(safe);
+ const compiled=ts.transpileModule(jsx,{fileName:'GeneratedScreen.tsx',reportDiagnostics:true,
+  compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,esModuleInterop:true}});
+ assert.equal((compiled.diagnostics||[]).filter(x=>x.category===ts.DiagnosticCategory.Error).length,0);
+ // Only FFAX allowlisted serializer output is executed; no raw third-party model source.
+ const module={exports:{}};
+ new Function('require','module','exports',compiled.outputText)(require,module,module.exports);
+ const html=ReactDOMServer.renderToStaticMarkup(React.createElement(module.exports.default));
+ assert.match(html,/data-layout="stack"/);
+ assert.match(html,/&lt;img src=x onerror=alert\(1\)&gt;/);
+ assert.doesNotMatch(html,/<img src=x|<script>alert\(2\)<\/script>/);
+ assert.match(html,/<nav/);assert.match(html,/<table/);assert.match(html,/<input[^>]*type="search"/);
+ assert.match(html,/role="region"/);assert.match(html,/role="group"/);
+ assert.match(html,/Dialog preview/);assert.match(html,/Example metric/);
+ assert.match(html,/◇/);
+ assert.ok(html.length>900);
+});
