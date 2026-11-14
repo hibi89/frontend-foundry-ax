@@ -30,6 +30,8 @@ jobs:
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Unit and synthetic fixture regression
         run: npm test
+      - name: React 19 real runtime + TypeScript strict probes
+        run: npm run test:react-real
       - name: Structured TSX contract checks
         run: |
           npm run test:model-contract
