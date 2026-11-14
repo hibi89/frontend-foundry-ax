@@ -7,10 +7,11 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 html=(ROOT/'index.html').read_text(encoding='utf-8')
 css=(ROOT/'styles.css').read_text(encoding='utf-8')
 core=re.sub(r'\bexport (?=(?:const|class|function)\b)','',(ROOT/'src/core.mjs').read_text(encoding='utf-8'))
-app=re.sub(r'^import [^;]+;','',(ROOT/'src/app.mjs').read_text(encoding='utf-8'),count=1)
+demo=re.sub(r'\bexport (?=(?:const|class|function)\b)','',(ROOT/'src/demo-interactions.mjs').read_text(encoding='utf-8'))
+app=re.sub(r'^import [^;]+;','',(ROOT/'src/app.mjs').read_text(encoding='utf-8'),count=2,flags=re.M)
 html=re.sub(r'<link rel="stylesheet"[^>]+>','',html)
 html=re.sub(r'<script type="module"[^>]+></script>','',html)
-module='window.fetch=async()=>({text:async()=>'+json.dumps(css)+'});\n'+core+'\n'+app
+module='window.fetch=async()=>({text:async()=>'+json.dumps(css)+'});\n'+core+'\n'+demo+'\n'+app
 brief='프리랜서 상품 검색과 고객 프로필 대시보드 UI를 만들고 기존 결제 API는 변경하지 마'
 valid=json.dumps({'schema':'ffax-model-design.v1','title':'AI 안전 검토 화면','theme':'ocean','layout':'grid','components':[{'type':'Navbar','text':'프로젝트 탐색'},{'type':'Hero','text':'AI 협업 마켓'},{'type':'Button','text':'프로젝트 시작'}]},ensure_ascii=False)
 checks=[];errors=[]
