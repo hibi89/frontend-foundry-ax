@@ -21,7 +21,10 @@ async function collect(dir) {
   const rootStat = await lstat(source);
   if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) throw new Error('SOURCE_NOT_DIRECTORY');
   const rootReal = await realpath(source);
-  if (rootReal !== source) throw new Error('SOURCE_SYMLINK_NOT_ALLOWED');
+  // Windows preserves filesystem names case-insensitively; realpath may canonicalize case.
+  // Any change beyond case remains a denied symlink/junction ancestor.
+  const samePath = process.platform === 'win32' ? rootReal.toLowerCase() === source.toLowerCase() : rootReal === source;
+  if (!samePath) throw new Error('SOURCE_SYMLINK_NOT_ALLOWED');
   const files = []; let bytesCount = 0;
   async function walk(abs, relPrefix = '') {
     const entries = (await readdir(abs, { withFileTypes: true })).sort((a,b) => a.name.localeCompare(b.name));

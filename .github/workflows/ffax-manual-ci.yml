@@ -47,9 +47,12 @@ jobs:
       - name: Install development dependencies without postinstall scripts
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Windows Node regression and real React 19 synthetic rendering
+        shell: pwsh
         run: |
           npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm run test:react-real
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Windows native localhost HTTP / static assets / consent gate
         shell: pwsh
         run: |

@@ -8,7 +8,7 @@ test('AC10 real Git branch, explicit UI-only commit, and non-force revert recove
  const root=await mkdtemp(join(tmpdir(),'ffax-git-revert-'));
  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8'}).trim();
  try{
-  git('init','-b','main');git('config','--local','user.name','FFAX Fixture QA');git('config','--local','user.email','ffax-qa@example.invalid');
+  git('init','-b','main');git('config','--local','user.name','FFAX Fixture QA');git('config','--local','user.email','ffax-qa@example.invalid');git('config','--local','core.autocrlf','false');
   await mkdir(join(root,'src','ui'),{recursive:true});await writeFile(join(root,'src','ui','theme.css'),':root {--primary: blue;}\n');
   const before=await readFile(join(root,'src','ui','theme.css'));
   git('add','.');git('commit','-m','fixture: original UI');const baseline=git('rev-parse','HEAD');
