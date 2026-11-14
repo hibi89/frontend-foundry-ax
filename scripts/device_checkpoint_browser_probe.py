@@ -89,6 +89,7 @@ with tempfile.TemporaryDirectory(prefix='ffax-device-checkpoint-') as td:
             must(page.evaluate('(key)=>localStorage.getItem(key)!==null',KEY),'DELETE_CANCEL_LOST_RECORD')
             page.once('dialog',lambda dialog:dialog.accept())
             page.locator('#device-checkpoint-delete').click()
+            page.wait_for_function("() => document.querySelector('#device-checkpoint-status').textContent.includes('복구점만 삭제')",timeout=10000)
             must(page.evaluate('(key)=>localStorage.getItem(key)===null',KEY),'EXPLICIT_DELETE_FAILED')
             must(page.locator('#preview').inner_text()==before_invalid,'DELETE_MUTATED_CANVAS')
             must(not external,'EXTERNAL_NETWORK_REQUESTS '+repr(external))
