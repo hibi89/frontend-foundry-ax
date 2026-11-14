@@ -1,18 +1,32 @@
 import http from 'node:http';
 import {runLocalOllama} from './local-ollama.mjs';
 import { readFile, stat } from 'node:fs/promises';
-import { resolve, dirname, extname, sep } from 'node:path';
+import { resolve, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml'};
+// Exact public assets only: never serve project exports, benchmark receipts, manifests, model internals, or other source files.
+const publicAssets = new Map([
+  ['/index.html', 'text/html; charset=utf-8'],
+  ['/styles.css', 'text/css; charset=utf-8'],
+  ['/src/app.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/core.mjs', 'text/javascript; charset=utf-8'],
+  ['/assets/ffax-favicon.svg', 'image/svg+xml']
+]);
 const port=Number(process.env.PORT || '4173');
 const host='127.0.0.1';
 if (!Number.isSafeInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid PORT');
 const server=http.createServer(async(req,res)=>{
-  const url=new URL(req.url || '/',`http://${host}:${port}`);
+  // A loopback listener alone is not protection against Host-header/DNS rebinding.
+  if(req.headers.host !== `${host}:${port}`) {
+    res.writeHead(403, {'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store'}).end('LOCAL_HOST_FORBIDDEN');
+    return;
+  }
+  let url;
+  try { url=new URL(req.url || '/',`http://${host}:${port}`); }
+  catch { res.writeHead(400).end(); return; }
   if(url.pathname==='/api/local-model'){
     if(req.method!=='POST'){res.writeHead(405,{'Allow':'POST'}).end();return;}
-    if(req.headers.host!==host+':'+port || req.headers.origin!=='http://'+host+':'+port || req.headers['content-type']!=='application/json'){
+    if(req.headers.origin!=='http://'+host+':'+port || req.headers['content-type']!=='application/json'){
       res.writeHead(403,{'Content-Type':'application/json','Cache-Control':'no-store'}).end('{"error":"LOCAL_REQUEST_FORBIDDEN"}');return;
     }
     try{
@@ -32,10 +46,10 @@ const server=http.createServer(async(req,res)=>{
   let pathname;
   try {pathname=decodeURIComponent(url.pathname);} catch {res.writeHead(400).end();return;}
   if(pathname==='/' )pathname='/index.html';
+  const type=publicAssets.get(pathname);
+  if(!type){res.writeHead(404,{'Cache-Control':'no-store'}).end();return;}
   const abs=resolve(root,'.'+pathname);
   if(!abs.startsWith(root+sep)){res.writeHead(403).end();return;}
-  const type=mime[extname(abs)];
-  if(!type){res.writeHead(404).end();return;}
   try{
     const s=await stat(abs);
     if(!s.isFile()){res.writeHead(404).end();return;}

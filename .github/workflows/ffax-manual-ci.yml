@@ -147,6 +147,20 @@ jobs:
           if(-not (Test-Path -LiteralPath $zip)){throw "PACKAGE_NOT_CREATED"}
           $hash=(Get-FileHash -Algorithm SHA256 $zip).Hash
           Write-Output "REVIEW_ZIP_OK hash=$hash source=${{ github.sha }} distribution=UNRELEASED"
+          $inspect = Join-Path $PWD "VERIFY-OWNER-REVIEW"
+          Expand-Archive -LiteralPath $zip -DestinationPath $inspect -Force
+          $unpacked = Join-Path $inspect "FFAX-OWNER-REVIEW"
+          $embeddedSha = (Get-Content -LiteralPath (Join-Path $unpacked "SOURCE_SHA.txt") -Raw).Trim()
+          if($embeddedSha -ne "${{ github.sha }}"){throw "REVIEW_PACKAGE_SHA_MISMATCH"}
+          foreach($rel in @("src/server.mjs","src/app.mjs","src/core.mjs","scripts/react_real_probe.mjs","RUN-LIVE-MODEL-CHECK.cmd","package.json")){
+            $candidate = Join-Path $unpacked $rel
+            if(-not(Test-Path -LiteralPath $candidate)){throw "REVIEW_PACKAGE_MISSING $rel"}
+          }
+          & node --check (Join-Path $unpacked "src/server.mjs")
+          if($LASTEXITCODE -ne 0){throw "REVIEW_PACKAGE_SERVER_SYNTAX_INVALID"}
+          & node --check (Join-Path $unpacked "scripts/react_real_probe.mjs")
+          if($LASTEXITCODE -ne 0){throw "REVIEW_PACKAGE_PROBE_SYNTAX_INVALID"}
+          Write-Output "REVIEW_PACKAGE_EXTRACT_SHA_AND_SYNTAX_PASS"
       - name: Upload unsigned review ZIP for seven days
         uses: actions/upload-artifact@v4
         with:
