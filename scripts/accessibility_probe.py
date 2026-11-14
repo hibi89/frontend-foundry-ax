@@ -11,8 +11,9 @@ app=(ROOT/'src/app.mjs').read_text(encoding='utf8')
 html=re.sub(r'<link rel="stylesheet"[^>]+>','',html)
 html=re.sub(r'<script type="module"[^>]+></script>','',html)
 core=re.sub(r'\bexport (?=(?:const|class|function)\b)','',core)
-app=re.sub(r'^import [^;]+;','',app,count=1)
-module='const __injectedCSS = '+json.dumps(css)+';\nwindow.fetch=async()=>({text:async()=>__injectedCSS});\n'+core+'\n'+app
+demo=re.sub(r'\bexport (?=(?:const|class|function)\b)','',(ROOT/'src/demo-interactions.mjs').read_text(encoding='utf8'))
+app=re.sub(r'^import [^;]+;','',app,count=2,flags=re.M)
+module='const __injectedCSS = '+json.dumps(css)+';\nwindow.fetch=async()=>({text:async()=>__injectedCSS});\n'+core+'\n'+demo+'\n'+app
 checklist=[]
 def check(name,passed,detail=''):
  checklist.append({'name':name,'passed':bool(passed),'detail':detail})
