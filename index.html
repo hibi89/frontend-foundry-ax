@@ -110,7 +110,9 @@
       <label for="theme-select">프로젝트 테마</label><select id="theme-select"></select>
       <div class="inspector-actions"><button id="move-up" type="button">↑ 위로</button><button id="move-down" type="button">↓ 아래로</button></div>
       <div class="inspector-actions"><button id="undo" type="button">↶ 되돌리기</button><button id="redo" type="button">↷ 다시하기</button></div>
-      <div class="inspector-actions"><button id="add-component" type="button">+ 추가</button><button id="remove-component" type="button" class="danger">− 삭제</button></div>
+      <label for="insert-component-type">추가할 컴포넌트 (17종)</label><select id="insert-component-type" aria-describedby="insert-component-status"></select>
+      <div class="inspector-actions"><button id="add-component" type="button">+ 선택한 컴포넌트 추가</button><button id="remove-component" type="button" class="danger">− 삭제</button></div>
+      <p id="insert-component-status" class="helper" role="status" aria-live="polite">등록된 17종 중 하나를 추가합니다. 최대 80개, Undo/Redo 지원.</p>
       <label for="source-preview">생성되는 React 코드 일부</label><pre id="source-preview" class="code-preview" tabindex="0" aria-label="생성 소스코드 미리보기"></pre>
     </aside>
   </main>
