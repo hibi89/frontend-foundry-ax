@@ -1,5 +1,6 @@
 import http from 'node:http';
 import {runLocalOllama} from './local-ollama.mjs';
+import {createLocalInferenceGate} from './inference-gate.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +17,7 @@ const publicAssets = new Map([
 const port=Number(process.env.PORT || '4173');
 const host='127.0.0.1';
 if (!Number.isSafeInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid PORT');
+const localInferenceGate=createLocalInferenceGate();
 const server=http.createServer(async(req,res)=>{
   // A loopback listener alone is not protection against Host-header/DNS rebinding.
   if(req.headers.host !== `${host}:${port}`) {
@@ -35,11 +37,13 @@ const server=http.createServer(async(req,res)=>{
       for await(const chunk of req){size+=chunk.length;if(size>6000)throw Error('LOCAL_REQUEST_TOO_LARGE');data+=chunk.toString('utf8');}
       let body;try{body=JSON.parse(data);}catch{throw Error('LOCAL_REQUEST_INVALID_JSON');}
       if(!body||Object.keys(body).sort().join(',')!=='consent,model,prompt')throw Error('LOCAL_REQUEST_INVALID_FIELDS');
-      const result=await runLocalOllama(body),reply=JSON.stringify(result);
+      // Limit expensive local CPU/GPU inference to a single running request.
+      // Invalid/duplicate user requests never queue a second Ollama generation.
+      const result=await localInferenceGate.run(()=>runLocalOllama(body)),reply=JSON.stringify(result);
       res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}).end(reply);
     }catch(err){
       const code=/^LOCAL_[A-Z_]+$/.test(err?.message||'')?err.message:'LOCAL_MODEL_UNAVAILABLE';
-      res.writeHead(400,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}).end(JSON.stringify({error:code}));
+      res.writeHead(code==='LOCAL_MODEL_BUSY'?429:400,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...(code==='LOCAL_MODEL_BUSY'?{'Retry-After':'5'}:{})}).end(JSON.stringify({error:code}));
     }
     return;
   }
