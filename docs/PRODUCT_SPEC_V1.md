@@ -1,3 +1,5 @@
+> **Status update (2026-11-14, historical spec below):** This document's 2026-11-12 line saying "아직 제품 코드 없음" is obsolete. FFAX local v1 engineering workbench code now exists on private `feature/ffax-workbench-p85-20261112`; exact validated feature SHA `df4187b92522a7071c2eef892c0f77c1ff6856ad`, CI [4/4 SUCCESS](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43551139439). **Not** a commercially released full-v1 product: internal AC rubric 80/100 provisional, central full blueprint UNASSESSED; real installed Qwen, owner physical UX, real customer GitHub app integration and legal/commercial GO unverified. All original requirements below remain binding.
+
 # PRODUCT_SPEC_V1.md — FFAX 최종 사용자 경험·모듈 명세
 
 **제품명:** FRONTEND FOUNDRY AX (FFAX)  
