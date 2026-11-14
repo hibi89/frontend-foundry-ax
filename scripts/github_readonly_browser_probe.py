@@ -16,6 +16,8 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 COMMIT = 'a' * 40
 TREE = 'b' * 40
+COMMIT2 = 'c' * 40
+TREE2 = 'd' * 40
 PREFIX = 'https://api.github.com/repos/testowner/ok-react'
 
 def file(path, content):
@@ -30,14 +32,20 @@ fixtures = [
     file('.env', 'PRIVATE_KEY_NEVER_REQUESTED'),
 ]
 
+fixtures2 = [x if x['path'] != 'src/api.ts' else file('src/api.ts', "export const get=()=>fetch('/api/v2/users')") for x in fixtures]
+
 def json_response(url):
     if url == PREFIX + '/':
         return {'full_name': 'testowner/ok-react', 'private': False}
     if url == PREFIX + '/commits/main':
         return {'sha': COMMIT, 'commit': {'tree': {'sha': TREE}}}
+    if url == PREFIX + '/commits/compare-ref':
+        return {'sha': COMMIT2, 'commit': {'tree': {'sha': TREE2}}}
     if url == PREFIX + '/git/trees/' + TREE + '?recursive=1':
         return {'truncated': False, 'tree': [{k: v for k, v in item.items() if k != 'content'} for item in fixtures]}
-    for item in fixtures:
+    if url == PREFIX + '/git/trees/' + TREE2 + '?recursive=1':
+        return {'truncated': False, 'tree': [{k: v for k, v in item.items() if k != 'content'} for item in fixtures2]}
+    for item in fixtures + fixtures2:
         if url == PREFIX + '/git/blobs/' + item['sha'] and item['path'] != '.env':
             return {'encoding': 'base64', 'sha': item['sha'], 'size': item['size'], 'content': item['content']}
     raise AssertionError('GITHUB_UNEXPECTED_API_REQUEST: ' + url)
@@ -100,10 +108,31 @@ with tempfile.TemporaryDirectory(prefix='ffax-remote-public-browser-') as td:
             assert all(req['method'] == 'GET' for req in external)
             assert all(req['url'].startswith(PREFIX + '/') and '.env' not in req['url'] for req in external)
             assert 'PRIVATE_KEY' not in dest.read_text(encoding='utf8')
+            assert page.locator('#export-github-diff').is_disabled()
+            page.locator('#github-ref').fill('compare-ref')
+            page.locator('#github-public-consent').check()
+            page.locator('#analyze-github').click()
+            page.wait_for_function("() => document.querySelector('#github-analysis-status').textContent.includes('이전 조회 대비 해시 변경')", timeout=15000)
+            assert COMMIT2 in page.locator('#github-analysis-status').inner_text()
+            assert page.locator('#export-github-diff').is_enabled()
+            assert not page.locator('#github-public-consent').is_checked()
+            with page.expect_download() as download_diff:
+                page.locator('#export-github-diff').click()
+            diffpath = Path(td) / 'FFAX-public-github-commit-comparison.json'
+            download_diff.value.save_as(str(diffpath))
+            comparison = json.loads(diffpath.read_text(encoding='utf8'))
+            assert comparison['previousCommit'] == COMMIT and comparison['currentCommit'] == COMMIT2
+            assert comparison['changed'] == 1 and comparison['protectedFlowChanges'] == 1
+            assert comparison['changes'][0]['path'] == 'src/api.ts'
+            assert comparison['approvalEligible'] is False and comparison['prCreated'] is False
+            assert comparison['remoteRequests'] == 0 and comparison['sourceWrites'] == 0
+            assert canvas_before == page.locator('#preview').inner_text(), 'COMPARISON_MUTATED_CANVAS'
+            assert all(req['method'] == 'GET' for req in external)
+            assert len(external) == 12 and 'PRIVATE_KEY' not in diffpath.read_text(encoding='utf8')
             assert not errors, errors
             browser.close()
             print(json.dumps({'test': 'FFAX_GITHUB_PUBLIC_CHROMIUM', 'status': 'PASS',
-                              'remoteMockGETs': len(external), 'sourceFiles': audit['fileCount'],
+                              'remoteMockGETs': len(external), 'sourceFiles': audit['fileCount'], 'comparisonChanges': comparison['changed'],
                               'postOrWrite': 0, 'realRemoteGitHub': False, 'ownerApproved': False}, ensure_ascii=False))
     finally:
         server.terminate()
