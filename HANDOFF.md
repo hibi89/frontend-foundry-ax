@@ -1,3 +1,16 @@
+## 2026-11-14 KST — FFAX 17-component insertion and deterministic source ID proof (필수 10항)
+
+1. **목표/용도/확정 요구/기술:** FFAX 전체 최종설계 FE/BE 100 목표 중 P0 REQ03/05/06에 걸친 UI 컴포넌트 삽입 개선. Node22 ESM, React19 TSX, 브라우저 Chromium. 사용자 모바일 외출 중 개입0, 크몽 상품 등록 제외.
+2. **완료 기능·설계 대안:** A=Card만 추가한 뒤 타입 변경, Date.now/난수 ID(재현성/사용성 나쁨); B=17종 selector 직접 삽입, 현재 doc 숫자 ID 최대값+1/충돌 검사, 최대 80개, Undo/Redo 및 JSON 스키마 보존(비용0·유지보수 낮아 채택). Sidebar/Form/Chart/Error 등 패턴을 선택 후 preview/React TSX로 내보낼 수 있으나 실제 API 바인딩·폼 전송은 아직 샘플·비활성 상태.
+3. **테스트 명령/수치:** 정확 기능 SHA `ee1e58427aea086354cbf69440254a5354f361e8`, [GitHub Actions #43571600882](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43571600882) 4/4 SUCCESS. Linux npm test 162/162, Windows npm test 162/162, strict TypeScript/React19 SSR 17 registry patterns 양쪽 오류0, Chromium served 17타입 삽입·undo/redo·JSON/TSX export·375/768/1440 no overflow·전송0·원본0 PASS; 기존 local device checkpoint, mock GitHub read-only compare, keyboard12/browser30 회귀 PASS. 검토 ZIP artifact `14103434786`, SHA256 `C938B929628E4157018A31B051C8FB1F5E43EF3F6F0D006625E28C7F4551A88A`, 압축해제 내장 SOURCE_SHA 일치·문법 PASS.
+4. **완료/진행/대기/차단:** 17종 추가 UI와 재현 가능한 소스 구현 및 CI 완료, 전체 공식 최종설계 UNASSESSED·과거 내부80/100 잠정 점수 변경 없음. 실제 모델 Qwen12 ≥10 strict TSX/SSR, 사용자 Windows UX7/RG06, 고객 GitHub clone/실 diff/PR·백엔드 API/auth 보존, commercial rights 미완; `[작업중]`, RELEASE HOLD, 크몽 등록0.
+5. **실패 근거/원인/시도/대안:** 기존 Date.now/Math.random으로 동일 편집 단계의 element ID가 달라짐, Card 강제 삽입으로 17종 사용성 부족. 소스 중간 변경 시 regex escape 불일치 즉시 blob readback으로 발견하여 최소 1회 수정, 최종 CI PASS. 과거 다른 스택/브라우저 오류 반복 수정 없음. 중간 commits queued/cancelled는 합격 증거 아님.
+6. **저장소·브랜치·SHA·경로:** `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`, 검증 기능 SHA `ee1e58427aea086354cbf69440254a5354f361e8`, 되돌리기 복구점 `94a603576aa110e6ae7d799c6fbb9029878b7759`. 변경 `src/core.mjs`, `src/app.mjs`, `index.html`, `tests/component-insertion.test.mjs`, `scripts/component_insertion_browser_probe.py`, `scripts/complete_component_registry_probe.mjs`, `.github/workflows/ffax-manual-ci.yml`, `OWNER_QUICKSTART_KO.md`, docs.
+7. **Production URL/Vercel/환경·명령:** FFAX local-first, `http://127.0.0.1:4173` via `node src/server.mjs`; `npm test`, `node scripts/complete_component_registry_probe.mjs`, `python scripts/component_insertion_browser_probe.py`(GitHub-hosted Linux Chromium). GitHub Windows native Node22. Vercel/Production 미적용; review ZIP은 unreleased source kit.
+8. **원본/백업/인증관리·금지:** Git 히스토리로 소스 복구; 기존 고객 파일·비밀정보·사용자 DB·GitHub 인증·Vercel 설정·중앙 상품원장/크몽 이력 변경0. 프로젝트 JSON schema v1 유지. 새로운 외부/유료 API·업로드·쓰기 0, 수동 승인 없이 실제 고객 서비스에 적용하지 않음.
+9. **다음 우선순위·승인:** 등록 컴포넌트의 실제 상호작용(Form validation, Sidebar selection, Chart data binding, Error retry)은 샘플 수준이므로 로컬 안전 시연용 한계·테스트를 보강할 것. 실 고객 API/auth 보존과 private repo/PR은 별도 승인/원본 백업/권한 검증 전 작업금지. 사용자 PC 귀가 후 실제 로컬 Qwen12·Windows UX7 수락 필요, 상품 등록은 Codex가 별도.
+10. **KST 갱신 시각/증거/문서 HEAD:** 2026-11-14 KST. 정확 코드 SHA GitHub Actions jobs/logs/검토 ZIP SHA 확인; 실 Chrome이지만 합성 브라우저 데이터이며 user physical Windows·실 API·Production 아님. 이 STATUS/HANDOFF docs commit 이후 readback과 author/committer/HEAD 확인, 중앙 hub Source App auto snapshot은 별도 상태.
+
 ## 2026-11-14 16:02+ KST — FFAX 공개 GitHub 커밋 변경 검토 구현/검증 인수인계 (10항)
 
 1. **목표·용도·요구·기술:** FFAX 프론트·백엔드 최종설계100 목표 중 P0 REQ08/10 보강. 공개 저장소 GitHub Compare API(GET), React/Node22 local-first workbench, Playwright Chromium. 크몽 등록 제외.
