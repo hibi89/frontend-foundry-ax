@@ -44,6 +44,11 @@ with sync_playwright() as p:
   browser.close()
 OUT.parent.mkdir(parents=True,exist_ok=True)
 OUT.write_text(json.dumps(record,ensure_ascii=False,indent=2),encoding='utf8')
+# Diagnostic identifiers and target selectors only; never print owner prompts or private data.
+for viewport in record['viewports']:
+  for violation in viewport['violations']:
+    if violation['impact'] in ('critical','serious'):
+      print(json.dumps({'width':viewport['width'],'id':violation['id'],'impact':violation['impact'],'nodes':violation['nodes'],'targets':violation['targets']},ensure_ascii=False))
 num=sum(x['seriousOrCritical'] for x in record['viewports'])
 print(json.dumps({'axeVersion':'4.14.0','viewports':len(record['viewports']),'seriousOrCriticalViolations':num,'jsErrors':len(record['jsErrors']),'report':str(OUT),'userApproval':'PENDING'},ensure_ascii=False))
 sys.exit(1 if num or record['jsErrors'] else 0)
