@@ -36,3 +36,12 @@ test('an approved model-shaped design exports grid, not a stacked substitute (no
  assert.match(parsed.reactSource,/gridColumn:'1\/-1'/);
  assert.equal(parsed.metadata.externalNetwork,false);
 });
+
+test('workbench CSS and standalone TSX export share the responsive grid formula',async()=>{
+ const {readFileSync}=await import('node:fs');
+ const stylesheet=readFileSync(new URL('../styles.css',import.meta.url),'utf8');
+ const cssFormula='grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))';
+ const jsxFormula="gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,300px),1fr))'";
+ assert.ok(stylesheet.includes(cssFormula));
+ assert.ok(exportReact(newDocument(brief,'B')).includes(jsxFormula));
+});

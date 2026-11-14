@@ -107,6 +107,7 @@ jobs:
           python scripts/accessibility_probe.py
           python scripts/contrast_probe.py
           python scripts/served_browser_qa.py
+          python scripts/export_layout_browser_probe.py
           python scripts/axe_offline_audit.py
       - name: Local end-to-end rehearsal
         run: node scripts/local_acceptance_gate.mjs
