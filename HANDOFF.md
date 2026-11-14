@@ -1,3 +1,16 @@
+## 2026-11-14 16:02+ KST — FFAX 공개 GitHub 커밋 변경 검토 구현/검증 인수인계 (10항)
+
+1. **목표·용도·요구·기술:** FFAX 프론트·백엔드 최종설계100 목표 중 P0 REQ08/10 보강. 공개 저장소 GitHub Compare API(GET), React/Node22 local-first workbench, Playwright Chromium. 크몽 등록 제외.
+2. **완료·설계 비교:** A=실제 고객 repo 전체 source diff/PR(권한·보안·백업·사전 승인 위험) 대신 B=앞서 읽은 두 공개 commit SHA를 별도 동의로 GET 1회 비교(채택). 변경 경로/status/라인 수, API·auth·config 민감 경로 경고, GitHub 300파일/250커밋 한도 경고, raw patch 제거, JSON export. 원본 수정·PR·merge·배포 금지.
+3. **테스트 명령·수치·검증:** 정확 code SHA `94a603576aa110e6ae7d799c6fbb9029878b7759`. [Actions #43568782380](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43568782380) **4/4 SUCCESS**, Linux157/157, native Windows157/157, 실제 Chromium served browser에서 모의 GitHub GET13회(2번 감사+1번 compare), patch 누출0, post/write0, canvas 불변 PASS; 앞선 checkpoint·30 control·12 keyboard/a11y PASS. GitHub metadata 실 API 조회는 수행하지 않은 mock 증거. Review ZIP artifact `14104200171`, SHA256 `43707820B2D0602867E9D6B3F25E0EB7A73DC139911F158AF199D5F989F77FB7`, SHA 추적/압축해제/구문 PASS.
+4. **완료·진행·대기·차단:** 본 추가 기능 구현/CI 완료, 전체 공식 최종설계 점수 UNASSESSED, 과거 내부80/100 잠정 증액0. 실제 Qwen12·사용자 PC UX7/승인·고객 API·auth·real diff/PR/권리 미검증, `[작업중]`, RELEASE HOLD, 크몽 등록0.
+5. **실패/원인/시도·대안:** 이번 기능 최종 정확 SHA CI 실패0. 중간 커밋 GitHub Actions queued/cancelled는 합격 합산 금지. 테스트 도구 JS 문자열 합성 작성 오류는 텍스트 수정으로 해결했고 불완전 버전 GitHub 미반영. 과거 Playwright 플랫폼/기기 삭제 타이밍 오류는 이전 인수인계에 근거 및 해결 기록.
+6. **저장소·브랜치·SHA·경로:** `hibi89/frontend-foundry-ax@feature/ffax-workbench-p85-20261112`, code SHA `94a603576aa110e6ae7d799c6fbb9029878b7759`, 이전 정상 기능 SHA `3dec6ba0b6df15d5fe517d0f572df16898e535cf` 복구점. 경로 `src/github-compare-review.mjs`, `src/app.mjs`, `src/server.mjs`, `index.html`, `tests/github-compare-review.test.mjs`, `scripts/github_readonly_browser_probe.py`, `OWNER_QUICKSTART_KO.md`.
+7. **Production·URL·환경·명령:** 로컬 `node src/server.mjs` / `http://127.0.0.1:4173`; Node22 `npm test`, Python Playwright `python scripts/github_readonly_browser_probe.py`. Vercel/Production **미적용**, unsigned Windows source-review ZIP만 존재.
+8. **원본·백업·인증·금지:** 모든 기능 commit은 feature 브랜치, 기존 SHA/git revert로 복구. 실제 고객 원본/GitHub App 토큰/권한/비공개 저장소·secrets/중앙 상품 점수·등록 이력 변경0. 외부 공개 GitHub GET은 별도 동의 후, API 응답 raw patch 버리고 메타데이터만 JSON 저장.
+9. **다음 우선순위·승인사항:** (A) 남은 P0 등록 컴포넌트의 실제 form/chart/sidebar/error 동작 및 FE QA 보강 (B) 실제 고객 통합/비공개 repo/PR 구현은 사용자 승인·원본 백업·권한 검토 후에만 (C) 귀가 후 실 Qwen 12브리프 중 ≥10 strict TSX+React19 SSR, 사용자 Windows UX7·최종 수락 RG06. 모바일 사용 중 PC 작업 요청하지 않음.
+10. **KST 시점·검증 범위·문서 기준:** 2026-11-14 16:02+ KST, 원격 코드 SHA/Actions 4-job logs/ZIP SHA 확인. 실제 GitHub public API 통신·고객 앱·실 Qwen·owner 물리 PC·Production 미검증. 이번 STATUS/HANDOFF 문서 커밋 후 GitHub HEAD readback, 중앙 Hub 자동 snapshot 대기.
+
 ## 2026-11-14 15:35+ KST — FFAX owner-consent device checkpoint and CI proof (필수 10항)
 
 1. **목표·용도/확정 요구/기술:** FFAX 최종설계 P0 프론트·백엔드 100%를 향한 `REQ01/10/12` 로컬 프로젝트 중단·재개 보강. 사용자 외출 중 PC 개입0, 크몽 등록 제외. Node22 ESM/browser localStorage+SHA256/React19 기존 TSX 파이프라인 보존.
