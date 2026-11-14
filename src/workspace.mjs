@@ -1,7 +1,7 @@
 /** FFAX local-only read -> snapshot -> review -> explicit approved UI patch pipeline.
  * No project code is executed by this module, no GitHub token or network is used.
  */
-import { lstat, readFile, readdir, mkdir, writeFile, rm, stat, open, rename, realpath } from 'node:fs/promises';
+import { lstat, readFile, readdir, mkdir, writeFile, rm, stat, open, rename } from 'node:fs/promises';
 import { resolve, relative, join, dirname, sep, posix, basename } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 
@@ -20,11 +20,18 @@ async function collect(dir) {
   const source = resolve(dir);
   const rootStat = await lstat(source);
   if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) throw new Error('SOURCE_NOT_DIRECTORY');
-  const rootReal = await realpath(source);
-  // Windows preserves filesystem names case-insensitively; realpath may canonicalize case.
-  // Any change beyond case remains a denied symlink/junction ancestor.
-  const samePath = process.platform === 'win32' ? rootReal.toLowerCase() === source.toLowerCase() : rootReal === source;
-  if (!samePath) throw new Error('SOURCE_SYMLINK_NOT_ALLOWED');
+  // Compare reparse/symlink identity at each path component, not its textual realpath.
+  // On Windows realpath may canonicalize volume names/aliases even for ordinary directories;
+  // a string comparison caused false rejections of every native fixture.
+  // This explicitly refuses any symlink/junction ancestor while preserving no-link paths.
+  let cursor = source;
+  while (true) {
+    const info = await lstat(cursor);
+    if (info.isSymbolicLink()) throw new Error('SOURCE_SYMLINK_NOT_ALLOWED');
+    const parent = dirname(cursor);
+    if (parent === cursor) break;
+    cursor = parent;
+  }
   const files = []; let bytesCount = 0;
   async function walk(abs, relPrefix = '') {
     const entries = (await readdir(abs, { withFileTypes: true })).sort((a,b) => a.name.localeCompare(b.name));
