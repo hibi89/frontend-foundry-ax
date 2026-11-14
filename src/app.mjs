@@ -45,7 +45,7 @@ function renderInspector(){
   el('undo').disabled=!history.past.length;el('redo').disabled=!history.future.length;
   el('add-component').disabled=doc.components.length>=80;
   el('theme-select').value=doc.theme;
-  el('source-preview').textContent=exportReact(doc).slice(0,1600)+'\n// […]';
+  el('source-preview').textContent=exportReact(doc).slice(0,3200)+'\n// […]';
 }
 function renderCanvas(){
   const doc=history.present;
