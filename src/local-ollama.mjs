@@ -8,6 +8,7 @@ export function validateLocalRequest({prompt,model,consent}={}){
  if(consent!=='APPROVE_LOCAL_MODEL_PROMPT_ONLY')throw Error('LOCAL_CONSENT_REQUIRED');
  if(typeof model!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9._:-]{1,79}$/.test(model)||model.includes('..'))throw Error('LOCAL_MODEL_INVALID');
  if(/cloud/i.test(model))throw Error('LOCAL_CLOUD_MODEL_FORBIDDEN');
+ if(model!=='qwen3:4b-instruct')throw Error('LOCAL_MODEL_LICENSE_NOT_CLEARED');
  if(typeof prompt!=='string'||prompt.trim().length<8||prompt.length>2000||SENSITIVE.test(prompt))throw Error('LOCAL_PROMPT_UNSAFE');
  return {prompt:prompt.trim(),model};
 }

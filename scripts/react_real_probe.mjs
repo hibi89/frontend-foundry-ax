@@ -29,7 +29,7 @@ const BRIEFS=[
 const live=process.argv.includes('--local'),consent=process.argv.includes('--approve-local');
 const opt=process.argv.find(s=>s.startsWith('--model='));
 if(live&&!consent)throw Error('LOCAL_MODEL_OWNER_APPROVAL_REQUIRED');
-const model=opt?.slice(8)||'qwen2.5-coder:3b';
+const model=opt?.slice(8)||'qwen3:4b-instruct';
 const tmp=await mkdtemp(join(process.cwd(),'.ffax-tsx-real-'));
 const files=[],outcomes=[];
 try {

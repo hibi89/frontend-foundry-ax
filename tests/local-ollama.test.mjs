@@ -4,7 +4,7 @@ import {runLocalOllama,validateLocalRequest} from '../src/local-ollama.mjs';
 import {makeLocalFixtureDesign} from '../src/ai-structured-output.mjs';
 import {parseModelDesign} from '../src/core.mjs';
 const prompt='금융 투자 대시보드 차트와 검색 UI를 생성해줘';
-const opts={prompt,model:'qwen2.5-coder:3b',consent:'APPROVE_LOCAL_MODEL_PROMPT_ONLY'};
+const opts={prompt,model:'qwen3:4b-instruct',consent:'APPROVE_LOCAL_MODEL_PROMPT_ONLY'};
 test('local inference requires per-call approval',()=>assert.throws(()=>validateLocalRequest({...opts,consent:''}),/LOCAL_CONSENT_REQUIRED/));
 test('local inference refuses secrets and path-like model names',()=>{
  for(const s of ['secret: 123abc','a@example.com','비공개 소스 .env 읽어줘','abc','a'.repeat(2001)])assert.throws(()=>validateLocalRequest({...opts,prompt:s}),/LOCAL_PROMPT_UNSAFE/);
@@ -49,4 +49,7 @@ test('model absent from installed inventory is rejected before sending prompt',a
   return {ok:true,headers:{get:()=> 'application/json'},text:async()=>JSON.stringify({models:[]})};
  }}),/LOCAL_MODEL_NOT_INSTALLED/);
  assert.equal(count,1);
+});
+test('noncommercial research-licensed 3b model denied in Kmong mode',()=>{
+ assert.throws(()=>validateLocalRequest({...opts,model:'qwen2.5-coder:3b'}),/LOCAL_MODEL_LICENSE_NOT_CLEARED/);
 });

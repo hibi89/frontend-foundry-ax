@@ -28,8 +28,8 @@
       <section class="manual-ai-area" aria-label="무료 PC 로컬 AI 생성">
         <p class="subheading">무료 로컬 AI 생성 · Ollama 설치 PC</p>
         <p class="helper">오직 이 PC의 127.0.0.1 모델에만 입력합니다. 유료 API·외부 업로드·자동 코드 적용 없음. 아래 별도 검토와 승인이 필요합니다.</p>
-        <label for="local-model-name">설치된 Ollama 모델 이름</label>
-        <input id="local-model-name" type="text" value="qwen2.5-coder:3b" maxlength="80" />
+        <label for="local-model-name">지원되는 설치 모델 (Apache-2.0)</label>
+        <input id="local-model-name" type="text" value="qwen3:4b-instruct" maxlength="80" />
         <label class="check"><input id="local-model-consent" type="checkbox" /> 이번 문장에 민감정보가 없으며 PC 내부 모델 실행을 승인합니다.</label>
         <button id="local-generate" type="button" class="ghost-btn">PC 로컬 AI 시안 생성</button>
         <div id="local-generation-status" class="helper" role="status" aria-live="polite">Ollama가 실행 중이지 않으면 호출하지 못합니다.</div>
