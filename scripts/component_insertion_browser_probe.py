@@ -69,7 +69,7 @@ with tempfile.TemporaryDirectory(prefix='ffax-insert-chromium-') as td:
             assert 'GeneratedScreen' in generated
             assert '사이드바 탐색' in generated
             assert '예시 막대 차트' in generated
-            assert '다시 시도 (미연결)' in generated
+            assert '로컬 다시 시도' in generated
             with page.expect_download() as download_json:
                 page.locator('#export-json').click()
             jsonfile=Path(td)/'FFAX-project.json'
