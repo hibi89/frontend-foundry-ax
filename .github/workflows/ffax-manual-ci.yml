@@ -134,10 +134,13 @@ jobs:
           $ErrorActionPreference = "Stop"
           $out = Join-Path $PWD "FFAX-OWNER-REVIEW"
           New-Item -ItemType Directory -Path $out -Force | Out-Null
-          foreach($name in @("src","assets","index.html","styles.css","START-FFAX.cmd","OWNER_QUICKSTART_KO.md","THIRD_PARTY_NOTICES.md","REQUIREMENTS.md")){
+          foreach($name in @("src","assets","index.html","styles.css","package.json","START-FFAX.cmd","RUN-LIVE-MODEL-CHECK.cmd","OWNER_QUICKSTART_KO.md","THIRD_PARTY_NOTICES.md","REQUIREMENTS.md")){
             if(-not (Test-Path -LiteralPath $name)){throw "MISSING_REVIEW_FILE $name"}
             Copy-Item -LiteralPath $name -Destination $out -Recurse -Force
           }
+          New-Item -ItemType Directory -Path (Join-Path $out "scripts") -Force | Out-Null
+          Copy-Item -LiteralPath "scripts/react_real_probe.mjs" -Destination (Join-Path $out "scripts/react_real_probe.mjs") -Force
+          foreach($p in @("package.json","scripts/react_real_probe.mjs","RUN-LIVE-MODEL-CHECK.cmd")) { if(-not (Test-Path -LiteralPath (Join-Path $out $p))) { throw "OWNER_LIVE_PROBE_PACKAGING_INCOMPLETE $p" } }
           Set-Content -LiteralPath (Join-Path $out "SOURCE_SHA.txt") -Value "${{ github.sha }}" -Encoding ascii
           $zip = Join-Path $PWD "FFAX-OWNER-REVIEW.zip"
           Compress-Archive -Path $out -DestinationPath $zip -CompressionLevel Optimal
