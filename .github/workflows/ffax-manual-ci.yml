@@ -121,3 +121,33 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+  package-owner-review:
+    needs: [offline-node, windows-native, browser-qa]
+    if: ${{ success() }}
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build unsigned owner-review source ZIP (no model weights or secrets)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $out = Join-Path $PWD "FFAX-OWNER-REVIEW"
+          New-Item -ItemType Directory -Path $out -Force | Out-Null
+          foreach($name in @("src","assets","index.html","styles.css","START-FFAX.cmd","OWNER_QUICKSTART_KO.md","THIRD_PARTY_NOTICES.md","REQUIREMENTS.md")){
+            if(-not (Test-Path -LiteralPath $name)){throw "MISSING_REVIEW_FILE $name"}
+            Copy-Item -LiteralPath $name -Destination $out -Recurse -Force
+          }
+          Set-Content -LiteralPath (Join-Path $out "SOURCE_SHA.txt") -Value "${{ github.sha }}" -Encoding ascii
+          $zip = Join-Path $PWD "FFAX-OWNER-REVIEW.zip"
+          Compress-Archive -Path $out -DestinationPath $zip -CompressionLevel Optimal
+          if(-not (Test-Path -LiteralPath $zip)){throw "PACKAGE_NOT_CREATED"}
+          $hash=(Get-FileHash -Algorithm SHA256 $zip).Hash
+          Write-Output "REVIEW_ZIP_OK hash=$hash source=${{ github.sha }} distribution=UNRELEASED"
+      - name: Upload unsigned review ZIP for seven days
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffax-owner-review-unreleased
+          path: FFAX-OWNER-REVIEW.zip
+          if-no-files-found: error
+          retention-days: 7
