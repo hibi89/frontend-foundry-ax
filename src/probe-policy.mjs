@@ -5,7 +5,7 @@
 export const PROBE_TOTAL=12;
 export function assessProbe(outcomes,{live=false,haltReason=null,acceptedTypeErrors=0}={}){
  if(!Array.isArray(outcomes)||outcomes.length>PROBE_TOTAL||
-    !outcomes.every(x=>x&&typeof x.pass==='boolean')||
+    !outcomes.every(x=>x&&typeof x.pass==='boolean'&&(!x.pass||(x.strictTypeChecked===true&&x.react19Rendered===true)))||
     !Number.isSafeInteger(acceptedTypeErrors)||acceptedTypeErrors<0)throw Error('PROBE_EVIDENCE_INVALID');
  const attempted=outcomes.length,passed=outcomes.filter(x=>x.pass).length;
  const threshold=live?10:PROBE_TOTAL;

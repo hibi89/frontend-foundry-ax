@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 import {assessProbe,strictDiagnostics,PROBE_TOTAL} from '../src/probe-policy.mjs';
 const require=createRequire(import.meta.url),ts=require('typescript');
@@ -32,7 +33,8 @@ test('actual model success forbidden for incomplete, aborted, or type-unsafe acc
  assert.equal(unreachable.reason,'LOCAL_PASS_THRESHOLD_UNREACHABLE');
 });
 test('actual strict TypeScript compiler detects invalid TSX per case without penalizing a valid separate file',async()=>{
- const dir=await mkdtemp(join(tmpdir(),'ffax-probe-strict-'));
+ // Keep fixtures under the repository so TypeScript resolves installed React types.
+ const dir=await mkdtemp(join(fileURLToPath(new URL('../',import.meta.url)),'.ffax-probe-strict-'));
  try{
   const good=join(dir,'Good.tsx'),bad=join(dir,'Bad.tsx');
   await writeFile(good,"import * as React from 'react';export default function Good(){return <section>ok</section>;}");
