@@ -6,6 +6,9 @@ import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const tscCli=require.resolve('typescript/lib/tsc.js');
 const briefs=[
 '금융 투자 대시보드 차트와 고객 검색 화면 만들기',
 'AI 마켓플레이스 상품 검색 프로필 화면 디자인',
@@ -29,7 +32,7 @@ try {
   if(output.document.components.length!==7 || output.metadata.externalNetwork!==false) throw new Error('CONTRACT_FAILURE');
   await writeFile(join(dir,'Screen'+i+'.tsx'),output.reactSource);checked++;
  }
- const result=execFileSync('tsc',['--strict','--noEmit','--skipLibCheck','--jsx','react','--target','es2020','--moduleResolution','node','--esModuleInterop','react-shim.d.ts',...briefs.map((_,i)=>'Screen'+i+'.tsx')],{cwd:dir,encoding:'utf8'});
+ const result=execFileSync(process.execPath,[tscCli,'--strict','--noEmit','--skipLibCheck','--jsx','react','--target','es2020','--moduleResolution','node','--esModuleInterop','react-shim.d.ts',...briefs.map((_,i)=>'Screen'+i+'.tsx')],{cwd:dir,encoding:'utf8'});
  if(result.trim())errors.push(result);
  console.log(JSON.stringify({fixtureScreens:checked,typechecked:checked,failures:errors.length,actualAIProviderCalls:0,networkCalls:0,scope:'synthetic structured proposals; not real LLM'},null,2));
 }finally{await rm(dir,{recursive:true,force:true});}

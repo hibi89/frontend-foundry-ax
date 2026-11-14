@@ -3,12 +3,13 @@
  */
 import { mkdtemp, cp, rm, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { resolve, join } from 'node:path';
+import { resolve, join, delimiter } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 const root=resolve(import.meta.dirname,'..');
 const files=['package.json','index.html','styles.css','src','tests','scripts','fixtures'];
 const digest=x=>createHash('sha256').update(x).digest('hex');
+const depsEnv={...process.env,PATH:join(root,'node_modules','.bin')+delimiter+(process.env.PATH||''),NODE_PATH:join(root,'node_modules')};
 const clean=await mkdtemp(join(tmpdir(),'ffax-cleanroom-'));
 const steps=[
  ['Node automated regressions','node',['--test','tests/core.test.mjs','tests/ai-gate.test.mjs','tests/ai-structured-output.test.mjs','tests/manual-ai-ui.test.mjs','tests/workspace.test.mjs','tests/react-tsx-interactions.test.mjs','tests/github-review.test.mjs','tests/git-revert.test.mjs']],
@@ -27,7 +28,7 @@ try {
  await mkdir(join(clean,'artifacts','qa'),{recursive:true});
  for(const [name,bin,args] of steps){
   let output='';let status='PASS';
-  try{output=execFileSync(bin,args,{cwd:clean,encoding:'utf8',timeout:120000,maxBuffer:2_000_000});}
+  try{output=execFileSync(bin,args,{cwd:clean,env:depsEnv,encoding:'utf8',timeout:120000,maxBuffer:2_000_000});}
   catch(e){status='FAIL';output=(e.stdout||'')+'\n'+(e.stderr||'')+'\n'+e.message;process.exitCode=1;}
   result.push({name,status,command:[bin,...args].join(' '),outputTail:output.slice(-750)});
   console.log(`${status} ${name}: ${output.trim().split('\n').at(-1)}`);
@@ -36,7 +37,7 @@ try {
  const cleanPackage=await readFile(join(clean,'package.json'));
  const sourcePackage=await readFile(join(root,'package.json'));
  const manifest={schema:'ffax-cleanroom-gate.v1',isolated:true,sourcePreserved:digest(cleanPackage)===digest(sourcePackage),
-   externalNetwork:false,actualProvider:false,realWindows:false,axe:false,githubCI:false,
+   externalNetwork:false,dependencySource:'preinstalled parent node_modules (shared read-only for offline code checks)',actualProvider:false,realWindows:false,axe:false,githubCI:false,
    steps:result,passed:result.filter(x=>x.status==='PASS').length,total:steps.length};
  await mkdir(join(root,'artifacts','qa'),{recursive:true});
  await writeFile(join(root,'artifacts','qa','cleanroom-report.json'),JSON.stringify(manifest,null,2));

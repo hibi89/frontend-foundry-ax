@@ -44,7 +44,7 @@ for (const [index,prompt] of BRIEFS.entries()){
   output.push({index,objective:brief.objective,prompt,source,compiled:js.outputText});
 }
 const args=['--noEmit','--strict','--skipLibCheck','--jsx','react','--target','es2020','--moduleResolution','node','--esModuleInterop','react-shim.d.ts',...output.map(x=>`GeneratedScreen${x.index}.tsx`)];
-const diagnostics=execFileSync('tsc',args,{cwd:work,encoding:'utf8'});
+const diagnostics=execFileSync(process.execPath,[require.resolve('typescript/lib/tsc.js'),...args],{cwd:work,encoding:'utf8'});
 const report={schema:'ffax-react-batch.v1',tool:'local deterministic exporter; not AI',node:process.version,
   typechecked:output.length,transpiled:output.length,compiled:output.map(x=>({index:x.index,objective:x.objective,js:x.compiled})),
   typecheckDiagnostic:diagnostics.trim()};
