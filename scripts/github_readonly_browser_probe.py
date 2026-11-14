@@ -35,6 +35,11 @@ fixtures = [
 fixtures2 = [x if x['path'] != 'src/api.ts' else file('src/api.ts', "export const get=()=>fetch('/api/v2/users')") for x in fixtures]
 
 def json_response(url):
+    if url == PREFIX + '/compare/' + COMMIT + '...' + COMMIT2:
+        return {'status':'ahead','ahead_by':1,'behind_by':0,'total_commits':1,
+                'base_commit':{'sha':COMMIT},'commits':[{'sha':COMMIT2}],
+                'files':[{'filename':'src/api.ts','status':'modified','additions':1,
+                          'deletions':1,'changes':2,'patch':'NEVER_EXPORT_SOURCE_PATCH'}]}
     if url == PREFIX + '/':
         return {'full_name': 'testowner/ok-react', 'private': False}
     if url == PREFIX + '/commits/main':
@@ -129,10 +134,37 @@ with tempfile.TemporaryDirectory(prefix='ffax-remote-public-browser-') as td:
             assert canvas_before == page.locator('#preview').inner_text(), 'COMPARISON_MUTATED_CANVAS'
             assert all(req['method'] == 'GET' for req in external)
             assert len(external) == 12 and 'PRIVATE_KEY' not in diffpath.read_text(encoding='utf8')
+            assert page.locator('#github-compare-run').is_enabled()
+            assert page.locator('#export-github-compare').is_disabled()
+            page.locator('#github-compare-run').click()
+            page.wait_for_function("() => document.querySelector('#github-compare-status').textContent.includes('CONSENT_REQUIRED')",timeout=10000)
+            assert len(external) == 12, 'COMPARE_CALLED_BEFORE_CONSENT'
+            page.locator('#github-compare-consent').check()
+            page.locator('#github-compare-run').click()
+            page.wait_for_function("() => document.querySelector('#github-compare-status').textContent.includes('READ-ONLY COMMIT REVIEW PASS')",timeout=15000)
+            assert not page.locator('#github-compare-consent').is_checked()
+            assert page.locator('#export-github-compare').is_enabled()
+            assert len(external) == 13, 'EXPECTED_EXACTLY_ONE_COMPARE_GET'
+            with page.expect_download() as download_full:
+                page.locator('#export-github-compare').click()
+            fullpath = Path(td) / 'FFAX-public-commit-file-review.json'
+            download_full.value.save_as(str(fullpath))
+            review = json.loads(fullpath.read_text(encoding='utf8'))
+            assert review['baseCommit'] == COMMIT and review['headCommit'] == COMMIT2
+            assert review['changedFilesListed'] == 1 and review['protectedCount'] == 1
+            assert review['files'][0]['path'] == 'src/api.ts'
+            assert review['sourceContentIncluded'] is False
+            assert review['approvalEligible'] is False and review['prCreated'] is False
+            assert review['sourceWrites'] == 0 and review['externalRequests'] == 1
+            assert 'NEVER_EXPORT_SOURCE_PATCH' not in fullpath.read_text(encoding='utf8')
+            assert canvas_before == page.locator('#preview').inner_text(), 'REMOTE_COMPARE_MUTATED_CANVAS'
+            assert all(req['method'] == 'GET' for req in external)
+            assert all(req['url'].startswith(PREFIX + '/') and '.env' not in req['url'] for req in external)
             assert not errors, errors
             browser.close()
             print(json.dumps({'test': 'FFAX_GITHUB_PUBLIC_CHROMIUM', 'status': 'PASS',
-                              'remoteMockGETs': len(external), 'sourceFiles': audit['fileCount'], 'comparisonChanges': comparison['changed'],
+                              'remoteMockGETs': len(external), 'sourceFiles': audit['fileCount'],
+                              'comparisonChanges': comparison['changed'], 'realMetadataChanges': review['changedFilesListed'],
                               'postOrWrite': 0, 'realRemoteGitHub': False, 'ownerApproved': False}, ensure_ascii=False))
     finally:
         server.terminate()
