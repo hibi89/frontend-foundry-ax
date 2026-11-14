@@ -27,7 +27,7 @@ test('FFAX localhost static assets require exact Host and path allowlist',async(
   let ready=false;
   for(let i=0;i<60;i++){if(proc.exitCode!==null)throw Error('SERVER_EXITED');try{if((await req(p)).status===200){ready=true;break;}}catch{}await new Promise(ok=>setTimeout(ok,70));}
   assert.ok(ready,'SERVER_NOT_READY');
-  for(const path of ['/','/index.html','/styles.css','/src/app.mjs','/src/core.mjs','/src/local-repo-intake.mjs','/src/github-readonly-intake.mjs','/src/github-compare-review.mjs','/src/device-checkpoint.mjs','/assets/ffax-favicon.svg']){
+  for(const path of ['/','/index.html','/styles.css','/src/app.mjs','/src/core.mjs','/src/local-repo-intake.mjs','/src/github-readonly-intake.mjs','/src/github-compare-review.mjs','/src/device-checkpoint.mjs','/src/demo-interactions.mjs','/assets/ffax-favicon.svg']){
    const r=await req(p,path);assert.equal(r.status,200,'public '+path);assert.equal(r.headers['x-content-type-options'],'nosniff');
   }
   for(const path of ['/package.json','/SOURCE_SHA.txt','/FFAX-LIVE-MODEL-RESULT.json','/src/local-ollama.mjs','/src/server.mjs','/src/workspace.mjs','/scripts/react_real_probe.mjs','/REQUIREMENTS.md','/THIRD_PARTY_NOTICES.md','/assets/concepts/ffax-v1-vision.webp']){
@@ -41,7 +41,7 @@ test('FFAX localhost static assets require exact Host and path allowlist',async(
   assert.equal((await req(p,'/api/local-model')).status,405);
   const head=await req(p,'/src/app.mjs',{method:'HEAD'});assert.equal(head.status,200);assert.equal(head.body,'');
   assert.match((await req(p,'/')).headers['content-security-policy'],/connect-src 'self' https:\/\/api\.github\.com/);
-  console.log('FFAX_REAL_HTTP_SECURITY_PASS public=10 private=10 badhost=6');
+  console.log('FFAX_REAL_HTTP_SECURITY_PASS public=11 private=10 badhost=6');
  }finally{
   if(proc.exitCode===null){proc.kill();await Promise.race([new Promise(ok=>proc.once('exit',ok)),new Promise(ok=>setTimeout(ok,600))]);}
  }
