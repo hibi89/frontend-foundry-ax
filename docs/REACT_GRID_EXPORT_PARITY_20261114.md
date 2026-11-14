@@ -1,3 +1,11 @@
+## 2026-11-14 final A/B real Chromium parity follow-up (newest)
+
+- Validated code SHA `69d26097d23a41a7fad49712c9e38589d3b7f9c8` on `feature/ffax-workbench-p85-20261112`; prior `0acf96c9` exporter fix alone did not make responsive browser preview identical: `styles.css` still hardcoded 2 columns at every width. New `styles.css` now uses the **same** `repeat(auto-fit,minmax(min(100%,300px),1fr))` grid formula as React exporter.
+- `tests/react-export-layout.test.mjs` gained CSS↔TSX rule parity assertion, `scripts/export_layout_browser_probe.py` added to actual CI browser job. [GitHub Actions 43549618123](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43549618123) **4 jobs SUCCESS**; Linux/Windows **119/119**, hosted real Chromium 6/6 checks: A stack + B grid each at375/768/1440, B columns **1/2/4**, 13 components/width, horizontal overflow0, console exception0. Formal axe serious/critical0 and D1–D5 cleanroom remain PASS. React19 strict TSX build/SSR12/12 is **synthetic**.
+- Downloaded owner preview artifact ID `14095494091`, SHA256 `63632430069bf919523deeb529b982f039df68f52ac299011892afd3b91601a9`, **22 files**; embedded `SOURCE_SHA.txt` matches `69d26097d23a41a7fad49712c9e38589d3b7f9c8`, compared both CSS and exporter code. Unpacked ZIP local server smoke: six public routes HTTP200, three private paths404, hostile Host403.
+- **No real Qwen inference or owner Windows visual approval**. Internal engineering **80/100 provisional** unchanged; central official final-design **UNASSESSED**. AC04 real AI0/14, AC09 owner UX0/6, release HOLD/[작업중]/Kmong not registered. Owner-only tasks consolidated at 13:00 KST.
+- Previous `0acf96c9` update and its proof below retained for history.
+
 # FFAX React TSX preview/export grid layout parity — 2026-11-14 KST
 
 ## Verified bug and correction
