@@ -36,6 +36,50 @@ jobs:
         run: |
           npm run test:model-contract
           npm run test:provider-contract
+  windows-native:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install development dependencies without postinstall scripts
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Windows Node regression and real React 19 synthetic rendering
+        run: |
+          npm test
+          npm run test:react-real
+      - name: Windows native localhost HTTP / static assets / consent gate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $proc = Start-Process -FilePath "node" -ArgumentList "src/server.mjs" -PassThru -NoNewWindow
+          try {
+            $ready = $false
+            for($i=0; $i -lt 35; $i++){
+              try {
+                $page = Invoke-WebRequest "http://127.0.0.1:4173/" -TimeoutSec 3
+                if($page.StatusCode -eq 200){ $ready = $true; break }
+              } catch { Start-Sleep -Milliseconds 300 }
+            }
+            if(-not $ready){ throw "WINDOWS_LOCAL_SERVER_START_FAILED" }
+            foreach($p in @("/styles.css","/src/app.mjs","/src/core.mjs","/assets/ffax-favicon.svg")){
+              $r = Invoke-WebRequest ("http://127.0.0.1:4173"+$p) -TimeoutSec 5
+              if($r.StatusCode -ne 200){ throw "WINDOWS_ASSET_NOT_200 $p" }
+            }
+            if($page.Content -notmatch "local-model-name"){ throw "WINDOWS_LOCAL_MODEL_UI_MISSING" }
+            $blocked = $false
+            try {
+              Invoke-WebRequest "http://127.0.0.1:4173/api/local-model" -Method POST -ContentType "application/json" -Body "{}" -TimeoutSec 3 | Out-Null
+            } catch {
+              if([int]$_.Exception.Response.StatusCode -eq 403){ $blocked = $true }
+            }
+            if(-not $blocked){throw "WINDOWS_LOCAL_CONSENT_GATE_UNSAFE"}
+            Write-Output "WINDOWS_NATIVE_SMOKE_PASS status=200 assets=4 blocked_origin=403"
+          } finally {
+            if($proc -and -not $proc.HasExited){ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
+          }
   browser-qa:
     runs-on: ubuntu-latest
     timeout-minutes: 20
