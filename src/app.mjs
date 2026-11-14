@@ -42,6 +42,7 @@ function renderInspector(){
   }
   for(const id of ['component-text','component-type','component-color','component-spacing','component-align','move-up','move-down','remove-component'])el(id).disabled=!current;
   el('undo').disabled=!history.past.length;el('redo').disabled=!history.future.length;
+  el('add-component').disabled=doc.components.length>=80;
   el('theme-select').value=doc.theme;
   el('source-preview').textContent=exportReact(doc).slice(0,1600)+'\n// […]';
 }
@@ -231,7 +232,17 @@ el('theme-select').addEventListener('change',e=>run({kind:'theme',value:e.target
 el('move-up').addEventListener('click',()=>{const i=history.present.components.findIndex(c=>c.id===selected);if(i>0)run({kind:'move',id:selected,index:i-1});});
 el('move-down').addEventListener('click',()=>{const i=history.present.components.findIndex(c=>c.id===selected);if(i>=0&&i<history.present.components.length-1)run({kind:'move',id:selected,index:i+1});});
 el('undo').addEventListener('click',()=>{history.undo();updateAll();});el('redo').addEventListener('click',()=>{history.redo();updateAll();});
-el('add-component').addEventListener('click',()=>{run({kind:'insert',type:'Card'});selected=history.present.components.at(-1)?.id;updateAll();});
+el('add-component').addEventListener('click',()=>{
+  const type=el('insert-component-type').value,before=history.present.components.length;
+  run({kind:'insert',type});
+  if(history.present.components.length===before+1){
+    selected=history.present.components.at(-1)?.id||null;
+    updateAll();
+    el('insert-component-status').textContent=REGISTRY[type].label+' 추가됨 · '+history.present.components.length+'/80 · Undo로 복구 가능';
+  }else{
+    el('insert-component-status').textContent='추가되지 않았습니다. 최대 80개 또는 타입 검증 오류를 확인하세요.';
+  }
+});
 el('remove-component').addEventListener('click',()=>{if(selected)run({kind:'remove',id:selected});});
 document.querySelectorAll('[data-width]').forEach(b=>b.addEventListener('click',()=>{viewport=Number(b.dataset.width);renderCanvas();}));
 el('run-qa').addEventListener('click',()=>checkQA().catch(e=>log(`QA 오류: ${e.message}`,true)));
@@ -336,5 +347,7 @@ el('device-checkpoint-delete').addEventListener('click',async()=>{
 });
 
 for(const type of COMPONENT_TYPES){const o=document.createElement('option');o.value=type;o.textContent=REGISTRY[type].label;el('component-type').append(o);}
+for(const type of COMPONENT_TYPES){const o=document.createElement('option');o.value=type;o.textContent=REGISTRY[type].label;el('insert-component-type').append(o);}
+el('insert-component-type').value='Card';
 for(const [key,t] of Object.entries(THEME_OPTIONS)){const o=document.createElement('option');o.value=key;o.textContent=t.label;el('theme-select').append(o);}
 updateAll();
