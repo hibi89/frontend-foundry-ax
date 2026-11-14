@@ -1,3 +1,10 @@
+## 2026-11-14 follow-up: genuine React 19 SSR of all 13 types and escaped HTML (latest)
+
+- Feature SHA `d47b70eab287a972772ed7e807f94586a3eae9d7`, [Actions 43551976060](https://github.com/hibi89/frontend-foundry-ax/actions/runs/43551976060) **4/4 SUCCESS**, native Windows & Linux Node22 **123/123 PASS each**. Added 1 regression case to `tests/react-export-semantics.test.mjs` that actually TypeScript-transpiles FFAX-controlled serializer TSX, executes it with `react@19.2.7` and `react-dom/server`, validates semantic Navbar/Table/Input/Modal/Tabs/Empty content, and confirms `<img onerror>` / `<script>` strings appear as escaped display text rather than markup. No raw LLM output or remote code is executed; this is **not a live model test**.
+- Existing 3 new component semantics/XSS/model-contract cases, actual served Chromium A/B 6/6, axe zero serious/critical, React synthetic12, cleanroom all retained. New artifact ID `14096831784`, unsigned Windows owner ZIP **22 files**, `SOURCE_SHA.txt=d47b70eab287a972772ed7e807f94586a3eae9d7`, ZIP SHA256 `35d13a72d98f02b2a49443e805c2d3c6a1e2929e947deaa4c7d28f0ff5adf080`. Downloaded and verified compressed data plus actual extracted HTTP: 6 public200, 4 private404, invalid Host403.
+- No actual Ollama Qwen3 4B 12-case model inference, no physical owner Windows visual/keyboard signoff, and no customer integration/Kmong sale. Frozen technical **80/100 provisional** unchanged, official whole-final-design **UNASSESSED**, AC04 0/14, AC09 0/6, RG06 pending and RELEASE HOLD. Owner tasks consolidated for 13:00 KST.
+- Earlier semantic export change/proof and initial false-positive regression failure are documented below, preserved historically.
+
 # FFAX standalone React 13-component semantic parity — 2026-11-14 KST
 
 ## Finding and repair
