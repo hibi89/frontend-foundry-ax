@@ -1,3 +1,5 @@
+> **[HANDOFF-STARTUP-V2 | ACTIVE | 2026-11-16]** **먼저** `frontend-foundry-ax@feature/ffax-workbench-p85-20261112` 역할/최신 HEAD와 `AGENTS.md` 상단 [OWNER-DEV-EXECUTION-V2](https://github.com/hibi89/hackathon-command-center-2026/blob/kmong-productization/docs/strategy/OWNER_DEV_EXECUTION_CANONICAL_20261116.md)의 적용 범위를 확정한 후 HANDOFF 최신 진행·차단/STATUS/REQUIREMENTS/확정 최종설계/실제 소스를 교차 검증하라. 오래된 HANDOFF 모델 담당·4슬롯 잠금·P85/95 지시는 역사일 뿐 현재 실행순서가 아니다. **웹 Sol High 최초 설계 → 웹 Sol Instant 주력 구현 → 구현 후보 후 전체 CI·수정(위험검사 유지) → Codex Sol Max/Astra Max 독립검수 → High 최종인수 → 사용자 GO 뒤 Luna Extra High 상품등록**.  원본/기능·데이터/보안·권리·검증 공식률/RELEASE HOLD 불변. 본 공시는 코드 검증 성공을 의미하지 않는다.
+
 ## 2026-11-14 17:16 KST — FFAX 안전한 로컬 컴포넌트 상호작용/리그레션 PASS (10항)
 
 1. **목표/용도·확정 요구·기술:** FFAX FE/BE 최종설계 100% 목표의 P0 REQ07/09 UI 기능/검증 보강. Node22 ESM, React19 TSX, Chromium, 로컬 우선. 사용자 모바일 외출 중 PC 작업 요청0, 크몽 등록 제외.
