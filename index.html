@@ -45,7 +45,7 @@
         <button id="forge-local-adopt" type="button" class="ghost-btn" disabled>선택 시안에 검토한 모델 제안 반영</button>
 
         <div id="forge-variants" class="forge-variants" aria-label="디자인 시안 선택"></div>
-        <label for="forge-instruction">시안 부분 개선 (지원: 다크, 밝게, 청록, 여백, 제목:문구)</label>
+        <label for="forge-instruction">자연어 부분 개선 (예: 브랜드명:OO, 카드 맨 위로 이동, 그리드 배치, 강조색:#2563eb, 폰트 Georgia, 장식 제거)</label>
         <input id="forge-instruction" type="text" maxlength="300" placeholder="예: 여백을 더 넓게" />
         <button id="forge-refine" type="button" class="ghost-btn" disabled>선택한 시안 개선</button>
         <p class="subheading">컴포넌트 직접 편집 (선택 시안의 복사본만 변경)</p>
@@ -73,6 +73,7 @@
         </select>
         <button id="forge-token-apply" type="button" class="ghost-btn" disabled>디자인 토큰 변경</button>
         <button id="forge-undo" type="button" class="ghost-btn" disabled>선택 시안의 직전 버전 복구 (Undo)</button>
+        <button id="forge-redo" type="button" class="ghost-btn" disabled>되돌린 시안 다시 적용 (Redo)</button>
         <label for="forge-mix-from">다른 시안과 색채·배치 혼합</label>
         <select id="forge-mix-from"><option value="A">A 시안</option><option value="B">B 시안</option><option value="C">C 시안</option></select>
         <label class="check"><input id="forge-mix-layout" type="checkbox" /> 색채 외에 배치도 혼합</label>

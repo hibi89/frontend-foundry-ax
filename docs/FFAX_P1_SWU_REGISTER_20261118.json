@@ -12,9 +12,9 @@
   "requestedOwnerApprovalForFinalNumericalRubric": false,
   "snapshotSummary": {
     "total": 25,
-    "candidate": 23,
-    "partial": 2,
-    "sourceCandidatePercent": 92,
+    "candidate": 24,
+    "partial": 1,
+    "sourceCandidatePercent": 96,
     "p2Verification": "NOT_RUN"
   },
   "units": [
@@ -473,32 +473,33 @@
         "REQ-10"
       ],
       "goal": "Free-form revisioned design editing and mix",
-      "status": "PARTIAL_SOURCE",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
       "dependency_swu_ids": [
         "FFAX-SWU-DF-03"
       ],
       "allowed_paths": [
         "src/design-forge.mjs",
         "src/design-forge-ui.mjs",
-        "index.html"
+        "index.html",
+        "tests/design-forge.test.mjs"
       ],
-      "acceptance": "free text selective layout/branding/asset changes → reversible source revisions with stable component contracts",
+      "acceptance": "typed free-text or GUI request → safe component text/brand label, order/layout, font/density/decorative token and WCAG contrast-checked accent; Undo/Redo with immutable source revisions; unknown original logo assets require separate owner import",
       "complexity": {
-        "S": 1,
+        "S": 2,
         "C": 1,
         "I": 0,
         "D": 1,
         "U": 0,
-        "total": 3,
-        "assumption": "Code-only scope; P2 and independent owner gate separate"
+        "total": 4,
+        "assumption": "GUI/API typed language parser + revision history; externally supplied raster logos or fonts stay separately owner-gated"
       },
-      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
-      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
+      "p1_check": "GITHUB_WORKFLOW_PENDING",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
     },
     {
       "swu_id": "FFAX-SWU-DF-05",
@@ -900,5 +901,5 @@
       "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
     }
   ],
-  "lastUpdatedStatus": "DF-05, RF-01 PASS; RF-02/RF-03 SOURCE_CANDIDATE_CI_PENDING"
+  "lastUpdatedStatus": "DF-04 SOURCE_CANDIDATE_CI_PENDING; RF-08 PARTIAL"
 }

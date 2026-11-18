@@ -61,6 +61,87 @@ export function generateForgeVariants(brief){
    return {schema:FORGE_VARIANT_SCHEMA,id:['A','B','C'][index],styleId:style.id,revision:1,parentVariantId:null,brief:{prompt:brief.prompt,audience:brief.audience,mood:brief.mood,mustHave:brief.mustHave,avoid:brief.avoid},document:doc,recommendation:rec,previewStatus:'SOURCE_READY_RENDER_NOT_VERIFIED'};
  });
 }
+
+/** Human instruction -> one deterministic typed source edit; never executes code.
+ * Ambiguous or source-image asset requests fail closed instead of pretending
+ * to extract a logo or use an external generative provider. */
+export function parseForgeDesignInstruction(variant,raw){
+ checkVariant(variant);
+ if(typeof raw!=='string'||raw.trim().length<2||raw.length>300||sensitive.test(raw)||
+    /[\u0000-\u001f\u007f]/.test(raw))throw Error('FORGE_INSTRUCTION_INVALID');
+ const t=raw.trim(),doc=variant.document;
+ const first=type=>{
+  const n=doc.components.find(x=>x.type===type);
+  if(!n)throw Error('FORGE_INSTRUCTION_COMPONENT_MISSING');
+  return n;
+ };
+ const labels=[['Navbar',/내비|네비|헤더|상단메뉴|브랜드명|브랜드 이름/i],
+  ['Hero',/히어로|제목|메인 타이틀|대문/i],['Card',/카드/i],
+  ['Button',/버튼/i],['Stat',/통계/i],['Table',/표|테이블/i],
+  ['Form',/폼|입력 양식/i],['Input',/입력창/i]];
+ const typeFrom=(value)=>{
+  for(const [name,re] of labels)if(re.test(value))return name;
+  throw Error('FORGE_INSTRUCTION_COMPONENT_UNKNOWN');
+ };
+ const textEdit=/^(제목|브랜드명|버튼 문구|카드 문구|상단 메뉴)\s*[:：]\s*(.+)$/i.exec(t);
+ if(textEdit){
+  const type=textEdit[1]==='제목'?'Hero':/브랜드명|상단 메뉴/.test(textEdit[1])?'Navbar':/버튼/.test(textEdit[1])?'Button':'Card';
+  const value=textEdit[2].trim();
+  if(value.length<1||value.length>180)throw Error('FORGE_INSTRUCTION_TEXT_INVALID');
+  return {kind:'update',id:first(type).id,prop:'text',value};
+ }
+ if(/원본\s*(?:로고|이미지|폰트)|로고\s*파일|사진\s*교체|이미지\s*업로드/i.test(t))
+  throw Error('FORGE_INSTRUCTION_ORIGINAL_ASSET_IMPORT_REQUIRED');
+ const insert=/^(히어로|카드|버튼|폼|입력창|테이블|통계|헤더)\s*(?:컴포넌트)?\s*추가$/i.exec(t);
+ if(insert)return {kind:'insert',value:typeFrom(insert[1])};
+ const remove=/^(히어로|카드|버튼|폼|입력창|테이블|통계|헤더)\s*(?:컴포넌트)?\s*(?:삭제|제거)$/i.exec(t);
+ if(remove)return {kind:'remove',id:first(typeFrom(remove[1])).id};
+ const move=/^(히어로|카드|버튼|폼|입력창|테이블|통계|헤더)\s*(?:컴포넌트를?)?\s*(맨\s*위|맨\s*아래|최상단|최하단)(?:로)?\s*(?:이동|배치|올려|내려)?$/i.exec(t);
+ if(move)return {kind:'move',id:first(typeFrom(move[1])).id,
+  value:/위|상단/.test(move[2])?0:doc.components.length-1};
+ if(/(?:그리드|격자|두\s*열|2\s*열)\s*(?:구조|배치|레이아웃)?(?:로)?$/i.test(t))
+  return {kind:'layout',value:'grid'};
+ if(/(?:세로|한\s*열|1\s*열|스택)\s*(?:구조|배치|레이아웃)?(?:로)?$/i.test(t))
+  return {kind:'layout',value:'stack'};
+ const color=/^(?:강조색|브랜드 색|포인트 색)\s*[:：]\s*(#[a-fA-F0-9]{6})$/i.exec(t);
+ if(color)return {kind:'token',prop:'accent',value:color[1].toLowerCase()};
+ if(/(?:폰트|글꼴)/.test(t)){
+  let font;
+  if(/맑은\s*고딕|말군/i.test(t))font="'Malgun Gothic', system-ui, sans-serif";
+  else if(/조지아|Georgia|세리프/i.test(t))font='Georgia, serif';
+  else if(/Arial|아리알/i.test(t))font='Arial, sans-serif';
+  else if(/시스템|기본/i.test(t))font='system-ui, sans-serif';
+  if(!font)throw Error('FORGE_INSTRUCTION_FONT_UNSUPPORTED');
+  return {kind:'token',prop:'fontStack',value:font};
+ }
+ if(/(?:여백|간격|밀도)/.test(t)){
+  const density=/좁|촘촘|컴팩트|줄여/i.test(t)?'compact':
+   /넓|여유|넉넉|늘려/i.test(t)?'airy':'balanced';
+  return {kind:'token',prop:'density',value:density};
+ }
+ if(/(?:장식|배경)/.test(t)){
+  const art=/없|제거|단순|미니멀/.test(t)?'none':
+    /격자|그리드/.test(t)?'grid':
+    /빛|별|은은|광채/.test(t)?'celestial':
+    /파도|웨이브|물결/.test(t)?'waves':null;
+  if(!art)throw Error('FORGE_INSTRUCTION_ART_UNSUPPORTED');
+  return {kind:'token',prop:'heroArt',value:art};
+ }
+ if(/다크|검정|어둡|dark/i.test(t))return {kind:'theme',value:'midnight'};
+ if(/밝|화이트|라이트|light/i.test(t))return {kind:'theme',value:'daylight'};
+ if(/청록|오션|블루|cyan/i.test(t))return {kind:'theme',value:'ocean'};
+ throw Error('FORGE_INSTRUCTION_UNSUPPORTED_USE_TYPED_EDIT_OR_OWNER_LOCAL_MODEL');
+}
+function contrastRatio(fg,bg){
+ const luminance=value=>{
+  const c=[1,3,5].map(i=>parseInt(value.slice(i,i+2),16)/255)
+   .map(v=>v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4);
+  return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];
+ };
+ const a=luminance(fg),b=luminance(bg);
+ return (Math.max(a,b)+0.05)/(Math.min(a,b)+0.05);
+}
+
 export function refineForgeVariant(variant,{kind,id,prop,value}={}){
  checkVariant(variant);
  let command;
@@ -75,9 +156,14 @@ export function refineForgeVariant(variant,{kind,id,prop,value}={}){
    fontStack:['system-ui, sans-serif','Georgia, serif','Arial, sans-serif',"'Malgun Gothic', system-ui, sans-serif"],
    heroArt:['none','celestial','grid','waves']
   };
-  if(!Object.hasOwn(valid,prop)||!valid[prop].includes(value))throw Error('FORGE_TOKEN_VALUE_UNSUPPORTED');
+  if(prop==='accent'){
+   if(typeof value!=='string'||!/^#[a-fA-F0-9]{6}$/.test(value)||
+      !variant.document.designSystem||contrastRatio(value,variant.document.designSystem.surface)<4.5)
+    throw Error('FORGE_ACCENT_CONTRAST_TOO_LOW_OR_INVALID');
+  }else if(!Object.hasOwn(valid,prop)||!valid[prop].includes(value))throw Error('FORGE_TOKEN_VALUE_UNSUPPORTED');
   command={kind:'token',prop,value};
- }else throw Error('FORGE_REFINEMENT_UNSUPPORTED');
+ }else if(kind==='layout'&&['grid','stack'].includes(value))command={kind:'layout',value};
+ else throw Error('FORGE_REFINEMENT_UNSUPPORTED');
  const result=clone(variant);
  if(command.kind==='theme' && variant.document.designSystem){
    const previous=variant.document.designSystem;
@@ -92,6 +178,9 @@ export function refineForgeVariant(variant,{kind,id,prop,value}={}){
    result.document=clone(variant.document);
    result.document.designSystem[command.prop]=command.value;
    result.document.version++;
+ }else if(command.kind==='layout'){
+   result.document=clone(variant.document);
+   result.document.layout=command.value;result.document.version++;
  }else result.document=applyCommand(variant.document,command);
  result.parentVariantId=variant.id+':'+variant.revision;result.revision++;
  result.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(result);return result;

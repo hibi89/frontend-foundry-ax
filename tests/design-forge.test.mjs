@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,finalizeForgeBundleWithCapture,verifyForgeBundle} from '../src/design-forge.mjs';
+import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,finalizeForgeBundleWithCapture,verifyForgeBundle,parseForgeDesignInstruction} from '../src/design-forge.mjs';
 import {exportReact,renderMarkup,validateProjectImport} from '../src/core.mjs';
 
 test('DF-01/02/03: real three distinct local React source variants',()=>{
@@ -116,4 +116,31 @@ test('DF-02: pinned upstream CSV subset informs accessibility/night recommendati
  assert.equal(options[0].source.offlineRules.research.stylesBlobSha,'7ed18d6ef06557b9a6f2285b87b458fd71e4722f');
  const night=makeForgeBrief({prompt:'야간 코딩 인터페이스와 개발자 화면을 만들어줘'});
  assert.ok(recommendForgeStyles(night).some(x=>x.matchingRules.some(rule=>rule.category==='pinned-style-row-7')));
+});
+
+test('DF-04: natural-language typed layout/text/brand and decorative edits remain deterministic',()=>{
+ const first=generateForgeVariants(makeForgeBrief({prompt:'브랜드 홈페이지와 세부 카드 및 액션을 제작해줘'}))[0];
+ const original=JSON.stringify(first);
+ let candidate=refineForgeVariant(first,parseForgeDesignInstruction(first,'브랜드명:새로운 브랜드'));
+ assert.equal(candidate.document.components.find(x=>x.type==='Navbar').text,'새로운 브랜드');
+ candidate=refineForgeVariant(candidate,parseForgeDesignInstruction(candidate,'그리드 배치'));
+ assert.equal(candidate.document.layout,'grid');
+ const change=parseForgeDesignInstruction(candidate,'카드 맨 위로 이동');
+ const moved=refineForgeVariant(candidate,change);
+ assert.equal(moved.document.components[0].type,'Card');
+ const accented=refineForgeVariant(moved,parseForgeDesignInstruction(moved,'강조색:#facc15'));
+ assert.equal(accented.document.designSystem.accent,'#facc15');
+ const font=refineForgeVariant(accented,parseForgeDesignInstruction(accented,'폰트 Arial'));
+ assert.equal(font.document.designSystem.fontStack,'Arial, sans-serif');
+ const decorative=refineForgeVariant(font,parseForgeDesignInstruction(font,'배경 장식 제거'));
+ assert.equal(decorative.document.designSystem.heroArt,'none');
+ assert.equal(JSON.stringify(first),original);
+ assert.equal(validateProjectImport(decorative.document),true);
+});
+test('DF-04: unapproved raster replacement, secret, ambiguous code and low contrast are denied',()=>{
+ const v=generateForgeVariants(makeForgeBrief({prompt:'브랜드 홈페이지와 사용자 메뉴를 제작해줘'}))[0];
+ assert.throws(()=>parseForgeDesignInstruction(v,'로고 파일 교체'),/ORIGINAL_ASSET_IMPORT_REQUIRED/);
+ assert.throws(()=>parseForgeDesignInstruction(v,'curl https://bad.invalid'),/UNSUPPORTED/);
+ assert.throws(()=>parseForgeDesignInstruction(v,'secret=abcdef'),/INSTRUCTION_INVALID/);
+ assert.throws(()=>refineForgeVariant(v,{kind:'token',prop:'accent',value:v.document.designSystem.surface}),/CONTRAST_TOO_LOW/);
 });

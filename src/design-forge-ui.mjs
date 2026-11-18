@@ -1,6 +1,6 @@
 /* FFAX Design Forge interface: local HTML/React-source variants; no remote requests. */
 import {renderMarkup,validateProjectImport,parseModelDesign} from './core.mjs';
-import {verifyForgeBundle,adoptLocalModelDesign} from './design-forge.mjs';
+import {verifyForgeBundle,adoptLocalModelDesign,parseForgeDesignInstruction} from './design-forge.mjs';
 const $=id=>document.getElementById(id);
 const status=$('forge-status');
 const report=(message,failed=false)=>{status.textContent=message;status.dataset.failed=String(failed);};
@@ -8,7 +8,7 @@ const download=(name,content,type='application/json')=>{
  const url=URL.createObjectURL(new Blob([content],{type}));
  const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 };
-let variants=[],selectedId=null,frozen=null,ownerBrief=null,variantHistory=new Map();
+let variants=[],selectedId=null,frozen=null,ownerBrief=null,variantHistory=new Map(),redoHistory=new Map();
 let capturedPng=null,captureUrl=null,captureId=null,captureBundleSha=null;
 
 let forgeCsrf=null;
@@ -69,6 +69,7 @@ $('forge-local-adopt').addEventListener('click',()=>{
 function rememberRevision(variant){
  const prior=variantHistory.get(variant.id)||[];
  prior.push(structuredClone(variant));if(prior.length>30)prior.shift();variantHistory.set(variant.id,prior);
+ redoHistory.delete(variant.id);
 }
 function active(){const found=variants.find(v=>v.id===selectedId);if(!found)throw Error('FORGE_SELECT_VARIANT_FIRST');return found;}
 function renderCards(){
@@ -96,6 +97,7 @@ function renderCards(){
  }
  if(chosen?.document.components.some(x=>x.id===previousTarget))targetSelect.value=previousTarget;
  $('forge-undo').disabled=!selectedId || !(variantHistory.get(selectedId)||[]).length;
+ $('forge-redo').disabled=!selectedId || !(redoHistory.get(selectedId)||[]).length;
  $('forge-mix').disabled=!selectedId;
  $('forge-apply').disabled=!frozen;
  $('forge-export').disabled=!frozen;
@@ -107,7 +109,7 @@ $('forge-generate').addEventListener('click',async()=>{
  try{
   const result=await forgePost('variants',{brief:{prompt:$('forge-brief').value,audience:$('forge-audience').value,mood:$('forge-mood').value,mustHave:$('forge-musthave').value,avoid:$('forge-avoid').value}});
   if(result.schema!=='ffax.design-variants-result.v1'||!Array.isArray(result.variants)||result.variants.length!==3)throw Error('FORGE_VARIANTS_INVALID');
-  ownerBrief=result.brief;variants=result.variants;variantHistory=new Map();selectedId=null;frozen=null;renderCards();
+  ownerBrief=result.brief;variants=result.variants;variantHistory=new Map();redoHistory=new Map();selectedId=null;frozen=null;renderCards();
   report('A/B/C 시안 3개를 실제 FFAX 구조화 코드에서 생성했습니다. 이미지나 모델 호출 없이 로컬 처리합니다. 선택·개선 후 확정하세요.');
  }catch(err){report(err.message,true);}
 });
@@ -117,31 +119,35 @@ $('forge-undo').addEventListener('click',()=>{
   const queue=variantHistory.get(current.id)||[];
   if(!queue.length)throw Error('FORGE_REVISION_HISTORY_EMPTY');
   const previous=queue.pop();
+  const redo=redoHistory.get(current.id)||[];redo.push(structuredClone(current));
+  if(redo.length>30)redo.shift();redoHistory.set(current.id,redo);
   variants=variants.map(v=>v.id===current.id?previous:v);
   frozen=null;stagedLocalModel=null;$('forge-local-response').value='';$('forge-local-adopt').disabled=true;
   renderCards();report(current.id+' 시안의 직전 소스 버전 v'+previous.revision+'을 복구했습니다. 확정하려면 다시 승인하세요.');
  }catch(err){report('버전 복구 거절: '+err.message,true);}
 });
+$('forge-redo').addEventListener('click',()=>{
+ try{
+  const current=active(),queue=redoHistory.get(current.id)||[];
+  if(!queue.length)throw Error('FORGE_REDO_HISTORY_EMPTY');
+  const next=queue.pop(),prior=variantHistory.get(current.id)||[];
+  prior.push(structuredClone(current));if(prior.length>30)prior.shift();
+  variantHistory.set(current.id,prior);
+  variants=variants.map(v=>v.id===current.id?next:v);
+  frozen=null;stagedLocalModel=null;$('forge-local-response').value='';$('forge-local-adopt').disabled=true;
+  renderCards();report(current.id+' 이전에 Undo한 소스 버전 v'+next.revision+'을 Redo했습니다. 확정 전 재승인 필요.');
+ }catch(err){report('Redo 거부: '+err.message,true);}
+});
 $('forge-refine').addEventListener('click',async()=>{
  try{
   const variant=active(),instruction=$('forge-instruction').value.trim();
-  if(instruction.length<2||instruction.length>300)throw Error('FORGE_INSTRUCTION_INVALID');
-  let change;
-  if(/밝|화이트|라이트|light/i.test(instruction))change={kind:'theme',value:'daylight'};
-  else if(/다크|검정|어둡|dark/i.test(instruction))change={kind:'theme',value:'midnight'};
-  else if(/청록|오션|블루|cyan/i.test(instruction))change={kind:'theme',value:'ocean'};
-  else if(/여백|간격|spacing/i.test(instruction)){
-   const node=variant.document.components.find(n=>n.type==='Hero'||n.type==='Card')||variant.document.components[0];
-   change={kind:'update',id:node.id,prop:'spacing',value:32};
-  } else if(/제목[:：]/.test(instruction)){
-   const text=instruction.split(/제목[:：]/)[1]?.trim();if(!text||text.length>180)throw Error('FORGE_TITLE_INVALID');
-   const node=variant.document.components.find(n=>n.type==='Hero');if(!node)throw Error('FORGE_HERO_MISSING');change={kind:'update',id:node.id,prop:'text',value:text};
-  } else throw Error('FORGE_INSTRUCTION_UNSUPPORTED: 다크/밝게/청록/여백/제목:문구를 지원합니다.');
-  const result=await forgePost('refine',{variant,command:change});const updated=result.variant;
+  const change=parseForgeDesignInstruction(variant,instruction);
+  const result=await forgePost('refine',{variant,command:change}),updated=result.variant;
   if(result.schema!=='ffax.design-refine-result.v1'||updated?.id!==variant.id)throw Error('FORGE_REFINEMENT_INVALID');
-  rememberRevision(variant);variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;renderCards();
-  report(updated.id+' 시안 v'+updated.revision+'에 요청한 부분만 반영. 기존 시안을 덮어쓴 것은 아니며 새 버전입니다.');
- }catch(err){report(err.message,true);}
+  rememberRevision(variant);variants=variants.map(v=>v.id===updated.id?updated:v);
+  frozen=null;renderCards();
+  report(updated.id+' v'+updated.revision+'에 요청을 타입 제한 수정으로 반영. 다른 컴포넌트는 보존; Undo/Redo 가능.');
+ }catch(err){report('수정 거부: '+(err?.message||'UNKNOWN'),true);}
 });
 $('forge-edit-apply').addEventListener('click',async()=>{
  try{
@@ -274,7 +280,7 @@ $('forge-import').addEventListener('change',async()=>{
   const raw=await file.text();const parsed=JSON.parse(raw);const doc=await verifyForgeBundle(parsed);
   const recommendation={name:'복구된 확정 시안',rationale:'SHA 검증된 로컬 소스 번들'};
   frozen=parsed;variants=[{schema:'ffax.design-variant.v1',id:parsed.manifest.variantId,styleId:parsed.manifest.styleId,revision:parsed.manifest.revision,parentVariantId:null,brief:{},document:doc,recommendation,previewStatus:'BUNDLE_REOPENED'}];
-  selectedId=parsed.manifest.variantId;variantHistory=new Map();renderCards();report('레퍼런스 번들 SHA256 검증 PASS · 로컬에서 복구했습니다.');
+  selectedId=parsed.manifest.variantId;variantHistory=new Map();redoHistory=new Map();renderCards();report('레퍼런스 번들 SHA256 검증 PASS · 로컬에서 복구했습니다.');
  }catch(err){report('복구 거절: '+err.message,true);}finally{$('forge-import').value='';}
 });
 
