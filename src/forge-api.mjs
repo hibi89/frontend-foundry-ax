@@ -1,10 +1,11 @@
 /* FFAX loopback Design Forge API: strict origin/CSRF, typed only, optional owner-approved local storage. */
 import {randomBytes} from 'node:crypto';
-import {homedir} from 'node:os';
+import {homedir,tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
 import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,verifyForgeBundle} from './design-forge.mjs';
 import {proposeTypedVisualFixes,applyBoundedVisualPatches} from './forge-correction.mjs';
+import {capture} from '../scripts/forge_capture.mjs';
 const MAX_BYTES=150000,MAX_RESPONSE=350000;
 const storeRoot=join(homedir(),'.ffax','forge-bundles');
 function reply(res,status,value){
@@ -29,6 +30,7 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
  const origin='http://'+host+':'+port;
  const csrf=randomBytes(32).toString('hex');
  let busy=false;
+ const captures=new Map();
  const handle=async(req,res,path)=>{
   if(!path.startsWith('/api/design/'))return false;
   const requestOrigin=req.headers.origin;
@@ -40,6 +42,12 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
    reply(res,200,{schema:'ffax.forge-session.v1',csrf,origin,storage:'OWNER_OPT_IN_ONLY'});return true;
   }
   if(req.headers['x-ffax-csrf']!==csrf){reply(res,403,{error:'FORGE_CSRF_FORBIDDEN'});return true;}
+  if(req.method==='GET'&&/^\/api\/design\/captures\/[a-f0-9]{32}\.png$/.test(path)){
+   const id=path.split('/').at(-1).slice(0,-4),saved=captures.get(id);
+   if(!saved){reply(res,404,{error:'FORGE_CAPTURE_NOT_FOUND'});return true;}
+   res.writeHead(200,{'Content-Type':'image/png','Content-Length':saved.bytes.length,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}).end(saved.bytes);
+   return true;
+  }
   if(req.method==='GET'&&/^\/api\/design\/jobs\/[a-f0-9]{64}$/.test(path)){
    try{
     const id=path.slice('/api/design/jobs/'.length);
@@ -71,6 +79,25 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
      assertKeys(body,['variant','command']);value={schema:'ffax.design-refine-result.v1',variant:refineForgeVariant(body.variant,body.command)};break;
     case '/api/design/mix':
      assertKeys(body,['primary','secondary','options']);value={schema:'ffax.design-mix-result.v1',variant:mixForgeVariants(body.primary,body.secondary,body.options)};break;
+    case '/api/design/capture':{
+     assertKeys(body,['bundle','width','height','dpr','approval']);
+     if(body.approval!=='APPROVE_LOCAL_CAPTURE')throw Error('FORGE_CAPTURE_APPROVAL_REQUIRED');
+     if(!Number.isInteger(body.width)||body.width<320||body.width>2560||
+        !Number.isInteger(body.height)||body.height<320||body.height>2200||
+        ![1,2].includes(body.dpr))throw Error('FORGE_VIEWPORT_UNSUPPORTED');
+     await verifyForgeBundle(body.bundle);
+     const dir=await mkdtemp(join(tmpdir(),'ffax-owner-capture-'));
+     try{
+      const source=join(dir,'bundle.json');await writeFile(source,JSON.stringify(body.bundle),{flag:'wx',mode:0o600});
+      const receipt=await capture({bundle:source,out:join(dir,'render'),width:body.width,height:body.height,dpr:body.dpr});
+      const bytes=await readFile(join(dir,'render','render.png'));
+      if(bytes.length>6*1024*1024)throw Error('FORGE_CAPTURE_SIZE_LIMIT');
+      const id=randomBytes(16).toString('hex');
+      captures.set(id,{bytes,receipt});
+      while(captures.size>2)captures.delete(captures.keys().next().value);
+      value={schema:'ffax.design-capture-result.v1',id,receipt,download:'/api/design/captures/'+id+'.png',status:'CAPTURED_NOT_VISUALLY_APPROVED'};
+     }finally{await rm(dir,{recursive:true,force:true});}
+     break;}
     case '/api/design/visual-propose':
      assertKeys(body,['issues','variant']);value={schema:'ffax.design-visual-proposal-result.v1',plan:proposeTypedVisualFixes(body.issues,body.variant)};break;
     case '/api/design/visual-apply':
