@@ -9,6 +9,7 @@ const download=(name,content,type='application/json')=>{
  const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 };
 let variants=[],selectedId=null,frozen=null,ownerBrief=null;
+let capturedPng=null,captureUrl=null;
 
 let forgeCsrf=null;
 async function forgePost(endpoint,payload){
@@ -82,6 +83,8 @@ function renderCards(){
  $('forge-mix').disabled=!selectedId;
  $('forge-apply').disabled=!frozen;
  $('forge-export').disabled=!frozen;
+ $('forge-capture-run').disabled=!frozen;
+ if(!frozen){capturedPng=null;if(captureUrl)URL.revokeObjectURL(captureUrl);captureUrl=null;$('forge-capture-preview').removeAttribute('src');$('forge-capture-download').disabled=true;}
 }
 $('forge-generate').addEventListener('click',async()=>{
  try{
@@ -138,6 +141,39 @@ $('forge-export').addEventListener('click',()=>{
  if(!frozen){report('FORGE_REFERENCE_NOT_APPROVED',true);return;}
  download('FFAX-Design-Forge-'+frozen.manifest.variantId+'.json',JSON.stringify(frozen,null,2));
 });
+
+$('forge-capture-run').addEventListener('click',async()=>{
+ const button=$('forge-capture-run');
+ try{
+  if(!frozen)throw Error('FORGE_CAPTURE_REQUIRES_APPROVED_BUNDLE');
+  if(!$('forge-capture-consent').checked)throw Error('FORGE_CAPTURE_OWNER_CONSENT_REQUIRED');
+  const width=Number($('forge-capture-width').value),height=Number($('forge-capture-height').value);
+  if(!Number.isInteger(width)||!Number.isInteger(height)||height<320||height>2200)throw Error('FORGE_CAPTURE_VIEWPORT_INVALID');
+  button.disabled=true;report('로컬 Chromium 캡처 실행 중. 외부 네트워크·임의 코드 실행은 차단됩니다.');
+  const response=await forgePost('capture',{bundle:frozen,width,height,dpr:1,approval:'APPROVE_LOCAL_CAPTURE'});
+  if(response.schema!=='ffax.design-capture-result.v1'||!/^\/api\/design\/captures\/[a-f0-9]{32}\.png$/.test(response.download))throw Error('FORGE_CAPTURE_RESPONSE_INVALID');
+  const pngResponse=await fetch(response.download,{headers:{'x-ffax-csrf':forgeCsrf},method:'GET',credentials:'omit',cache:'no-store',redirect:'error'});
+  if(!pngResponse.ok||!/^image\/png\b/.test(pngResponse.headers.get('content-type')||''))throw Error('FORGE_CAPTURE_PNG_UNAVAILABLE');
+  const png=await pngResponse.blob();
+  if(png.size<33||png.size>6*1024*1024)throw Error('FORGE_CAPTURE_PNG_SIZE_INVALID');
+  const digest=await crypto.subtle.digest('SHA-256',await png.arrayBuffer());
+  const check=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
+  if(check!==response.receipt.sha256)throw Error('FORGE_CAPTURE_PNG_SHA_MISMATCH');
+  if(captureUrl)URL.revokeObjectURL(captureUrl);
+  capturedPng=png;captureUrl=URL.createObjectURL(png);$('forge-capture-preview').src=captureUrl;$('forge-capture-download').disabled=false;
+  try{
+   const transfer=new DataTransfer();transfer.items.add(new File([png],'FFAX-real-browser.png',{type:'image/png'}));
+   $('forge-compare-render').files=transfer.files;
+   report('실제 Playwright PNG SHA 확인 · 비교 패널의 구현 화면 파일에 자동 지정했습니다. 원본 레퍼런스를 선택하고 비교를 실행하세요.');
+  }catch{report('실제 Playwright PNG 확인 완료. 자동 파일 지정 미지원: PNG를 저장하여 비교 패널에 직접 선택하세요.');}
+ }catch(err){report('캡처 실패: '+err.message,true);}
+ finally{button.disabled=!frozen;$('forge-capture-consent').checked=false;}
+});
+$('forge-capture-download').addEventListener('click',()=>{
+ if(!capturedPng)return;
+ const url=URL.createObjectURL(capturedPng),a=document.createElement('a');a.href=url;a.download='FFAX-real-browser.png';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
+
 $('forge-apply').addEventListener('click',async()=>{
  try{
   if(!frozen)throw Error('FORGE_REFERENCE_NOT_APPROVED');
