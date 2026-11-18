@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,verifyForgeBundle} from '../src/design-forge.mjs';
-import {exportReact,validateProjectImport} from '../src/core.mjs';
+import {exportReact,renderMarkup,validateProjectImport} from '../src/core.mjs';
 
 test('DF-01/02/03: real three distinct local React source variants',()=>{
  const brief=makeForgeBrief({prompt:'역학달력을 고급스럽게 만들고 날짜 선택과 생년월일시 입력 폼을 넣어줘',mood:'한국적 현대 미니멀',mustHave:'날짜 검색, 사주팔자'});
@@ -37,4 +37,19 @@ test('Security: invalid/sensitive prompts and unsupported targeted edits fail cl
  assert.throws(()=>makeForgeBrief({prompt:'123'}),/FORGE_BRIEF_INVALID_OR_SENSITIVE/);
  const [a]=generateForgeVariants(makeForgeBrief({prompt:'일반 포트폴리오 사이트 프론트엔드를 만들어줘'}));
  assert.throws(()=>refineForgeVariant(a,{kind:'shell',value:'curl evil'}),/FORGE_REFINEMENT_UNSUPPORTED/);
+});
+
+
+test('Forge design tokens produce distinct preview CSS and exported React source without modifying legacy docs',()=>{
+ const variants=generateForgeVariants(makeForgeBrief({prompt:'역학달력 홈페이지 날짜검색을 디자인해줘'}));
+ for(const item of variants){
+  const token=item.document.designSystem;
+  assert.equal(validateProjectImport(item.document),true);
+  assert.ok(renderMarkup(item.document).includes('--ff-hero-art:'));
+  assert.ok(renderMarkup(item.document).includes(token.accent));
+  assert.ok(exportReact(item.document).includes(token.fontStack));
+  assert.ok(exportReact(item.document).includes('backgroundImage'));
+ }
+ const invalid=structuredClone(variants[0].document);invalid.designSystem.fontStack='url(https://evil.example/font)';
+ assert.throws(()=>validateProjectImport(invalid),/DESIGN_SYSTEM_INVALID/);
 });
