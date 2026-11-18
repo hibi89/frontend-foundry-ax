@@ -1,3 +1,9 @@
+> **[2026-11-18 19:00 KST | FFAX P1 실제 구현 및 국소 CI 증거]**
+기능 커밋 c16fa0c (RF-08 안전한 격리 클론 추가·diff/rollback), e43de656 (RF-01/02 외부 이미지 asset manifest→잠금 번들/브라우저 다운로드), 3511a73e (DF-04 컴포넌트 직접 편집·디자인 토큰·선택적 시안 혼합·Undo). 결함 수정 d8d0ed04 (한국어 '표시' 오분류), 62959e5e (합성 이미지 fixture 계약).
+실행 증거: GitHub P1 source smoke https://github.com/hibi89/frontend-foundry-ax/actions/runs/44280844367 = 25/25 PASS, Node syntax PASS; blueprint evidence gate https://github.com/hibi89/frontend-foundry-ax/actions/runs/44280844846 = SUCCESS. P2 전체 브라우저/Windows/고객 React auth/API/route 검증/독립 감사 NOT_RUN.
+관리용 8/15 SOURCE_CANDIDATE + 7/15 PARTIAL 유지(공식 SWU/REQ 분모 아님). 공식 P1 구현완료율 UNASSESSED, P2 검증완료율 UNASSESSED. 기존 main/Production/실고객 원본/유료/외부 전송 변경 없음; RELEASE HOLD.
+남은 READY: RF-01 원본 이미지 바이트 로컬 불변 보존·재조회, RF-02 실제 이미지 자산 크롭·manifest/권리 바인딩, DF-02 오프라인 추천 스타일 데이터 확대, DF-04 자연어 구조 재배치, RF-08 기존 인증·API·라우트·데이터·이벤트 계약 검토형 통합 연결. 고객 원본 수정과 PR/배포는 별도 승인 필요.
+
 # FFAX V2.1 — P1 기능 진행 원장 (2026-11-18 KST)
 
 Repo: hibi89/frontend-foundry-ax
@@ -15,18 +21,18 @@ Canonical: docs/FINAL_BLUEPRINT_FFAX_V2_REFERENCE_FIDELITY_20261118.md §0A, REQ
 | DF-01 | SOURCE_CANDIDATE | design-forge.mjs / forge-api.mjs: 안전 brief/API |
 | DF-02 | PARTIAL | 3개 자체 스타일 추천; upstream 전체 오프라인 추천 데이터 미편입 |
 | DF-03 | SOURCE_CANDIDATE | A/B/C 구조화 실제 React 후보와 디자인 토큰 |
-| DF-04 | PARTIAL | 제한된 부분수정/혼합/Undo; 자유로운 자연어 변형 및 자산 혼합 미완 |
+| DF-04 | PARTIAL | GUI/API에서 타입 제한 컴포넌트 추가·삭제·이동·속성 수정, 폰트·밀도·모서리·장식 토큰 변경, 시안 시각 속성 혼합·Undo 구현. 자유로운 자연어 재설계/미적 검수 미완 |
 | DF-05 | PARTIAL | 실제 Playwright 캡처 소스; 폰트/자산/품질 규칙 완전 연결 미완 |
 | DF-06 | SOURCE_CANDIDATE | 승인형 source+PNG SHA 번들/부모/복원 |
 | DF-07 | SOURCE_CANDIDATE | GUI→루프백 API→확정→기존 FFAX 편집기 동일 소스 handoff |
 | RF-01 | PARTIAL | 외부 이미지 권리/SHA/해상도/색상 분석; 불변 원본 보존·권리 manifest 미완 |
-| RF-02 | PARTIAL | 외부 PNG 색상/영역 힌트 및 선택형 one-shot 구조 추출; 실제 자산 자동 복원 미완 |
+| RF-02 | PARTIAL | PNG 색상·영역 힌트 및 사용자 라벨 bounds·타입, 원본 SHA·권리 주장·불확실한 자산을 구분하여 승인 잠금 번들의 manifest에 저장. 실 이미지 자산 추출/폰트 복원 미완 |
 | RF-03 | PARTIAL | external-reference-to-forge.mjs 사용자 직접 영역 라벨링→React; 완전 자동 역설계 미완 |
 | RF-04 | SOURCE_CANDIDATE | forge_capture.py/.mjs Chromium 실제 PNG/viewport/DPR/영수증 |
 | RF-05 | SOURCE_CANDIDATE | ffax_reference_fidelity.mjs 선택형 one-shot-ui 비교/히트맵. 실엔진 미설치·검사 |
 | RF-06 | SOURCE_CANDIDATE | forge-convergence.mjs, forge_converge.mjs, forge_pixel_metric.py: 최대5회 후보 보정·실캡처·점수 재측정·개선시 선택/rollback |
 | RF-07 | SOURCE_CANDIDATE | forge-runner.mjs + forge-convergence-ui.mjs + forge-compare-ui.mjs: 메모리 전용 PNG, 시각 비교, owner approval |
-| RF-08 | PARTIAL | forge_export.mjs 고립 TSX/토큰 export; 기존 앱 API/auth 보존 diff/PR 및 owner GO 미구현 |
+| RF-08 | PARTIAL | forge_export.mjs 및 forge-safe-integration.mjs/forge_integration_review.mjs: 승인 번들→로컬 React 원본 read-only 스냅샷→격리 복제본에 TSX 신규 추가→실제 unified diff·SHA receipt→충돌 차단/rollback. 기존 앱 API/auth/route 동작 검사·PR은 HOLD |
 
 이번 회차 실제 구현:
 - 로컬 Chromium 기반 픽셀 진단과 reference SHA 고정, 최대 5회 타입 제한 보정/재촬영/점수 비교 및 이전 최선본 보존.
