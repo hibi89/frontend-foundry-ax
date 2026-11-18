@@ -37,3 +37,20 @@ test('RF-06/07: local PNG runner requires exact Origin and CSRF and rejects forg
  res=response();await api.handle(request('GET',undefined,{'x-ffax-csrf':csrf}),res,'/api/design/runner/results/'+'0'.repeat(32));
  assert.equal(res.status,404);
 });
+
+test('RF-01 JPEG/WebP direct archive rejects wrong origin, missing consent and forged MIME',async()=>{
+ const api=createForgeApi({host:'127.0.0.1',port:4173});
+ const base=response();await api.handle(request('GET',undefined,{}),base,'/api/design/session');
+ const token=base.body.csrf;
+ const headers={origin:'http://127.0.0.1:4173','x-ffax-csrf':token,
+  'content-type':'image/jpeg','x-ffax-owner-consent':'APPROVE_LOCAL_REFERENCE_VAULT',
+  'x-ffax-rights-confirmed':'OWNER_ASSERTED_RIGHTS','x-ffax-source-sha256':'a'.repeat(64)};
+ let reply=response();
+ await api.handle(request('POST',pixel,{...headers,origin:'https://evil.invalid'}),reply,'/api/design/runner/vault-intake');
+ assert.equal(reply.status,403);
+ reply=response();await api.handle(request('POST',pixel,{...headers,origin:headers.origin,'x-ffax-owner-consent':'NO'}),reply,'/api/design/runner/vault-intake');
+ assert.equal(reply.status,400);
+ reply=response();await api.handle(request('POST',pixel,headers),reply,'/api/design/runner/vault-intake');
+ assert.equal(reply.status,400);
+ assert.match(reply.body.error,/FORGE_RUNNER_VAULT_MIME_OR_SHA_MISMATCH/);
+});

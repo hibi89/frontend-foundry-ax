@@ -8,7 +8,7 @@ import {join,resolve} from 'node:path';
 import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
 import {verifyForgeBundle} from './design-forge.mjs';
 import {converge} from '../scripts/forge_converge.mjs';
-import {saveLocalReference,loadLocalReference} from './reference-vault.mjs';
+import {saveLocalReference,loadLocalReference,inspectLocalReference} from './reference-vault.mjs';
 const MAX_PNG=6*1024*1024;
 const pngSig=Buffer.from([137,80,78,71,13,10,26,10]);
 const json=(res,status,value)=>res.writeHead(status,{'Content-Type':'application/json; charset=utf-8',
@@ -35,11 +35,13 @@ export function createForgeRunner(){
   if(req.method==='GET'){
    const receiptMatch=/^\/api\/design\/runner\/archive\/([a-f0-9]{64})$/.exec(path);
    const pngMatch=/^\/api\/design\/runner\/archive\/png\/([a-f0-9]{64})$/.exec(path);
-   if(receiptMatch||pngMatch){
+   const fileMatch=/^\/api\/design\/runner\/archive\/file\/([a-f0-9]{64})$/.exec(path);
+   if(receiptMatch||pngMatch||fileMatch){
     try{
-     const saved=await loadLocalReference({sha256:(receiptMatch||pngMatch)[1]});
+     const saved=await loadLocalReference({sha256:(receiptMatch||pngMatch||fileMatch)[1]});
      if(receiptMatch)json(res,200,{schema:'ffax.runner-archive-receipt.v1',receipt:saved.receipt});
-     else res.writeHead(200,{'Content-Type':'image/png','Content-Length':saved.bytes.length,
+     else if(pngMatch&&saved.receipt.mime!=='image/png')refuse(res,404,'REFERENCE_VAULT_NOT_PNG');
+     else res.writeHead(200,{'Content-Type':saved.receipt.mime,'Content-Length':saved.bytes.length,
        'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}).end(saved.bytes);
     }catch(e){refuse(res,404,/^REFERENCE_VAULT_/.test(e?.message||'')?e.message:'REFERENCE_VAULT_UNAVAILABLE');}
     return true;
@@ -71,6 +73,18 @@ export function createForgeRunner(){
     references.set(id,{bytes,meta});
     while(references.size>2)references.delete(references.keys().next().value);
     json(res,200,{schema:'ffax.runner-reference.v1',id,...meta,scope:'LOCAL_MEMORY_ONLY'});
+   }else if(path==='/api/design/runner/vault-intake'){
+    if(!['image/png','image/jpeg','image/webp'].includes(req.headers['content-type'])||
+       req.headers['x-ffax-owner-consent']!=='APPROVE_LOCAL_REFERENCE_VAULT'||
+       req.headers['x-ffax-rights-confirmed']!=='OWNER_ASSERTED_RIGHTS')
+     throw Error('FORGE_RUNNER_VAULT_CONSENT_REQUIRED');
+    const bytes=await readBounded(req,MAX_PNG),meta=inspectLocalReference(bytes);
+    if(req.headers['content-type']!==meta.mime||
+       req.headers['x-ffax-source-sha256']!==meta.sha256)
+     throw Error('FORGE_RUNNER_VAULT_MIME_OR_SHA_MISMATCH');
+    const receipt=await saveLocalReference({bytes,sha256:meta.sha256,rightsConfirmed:true,
+      approval:'APPROVE_LOCAL_REFERENCE_VAULT'});
+    json(res,200,{schema:'ffax.runner-archive-receipt.v1',receipt});
    }else if(path==='/api/design/runner/archive'||path==='/api/design/runner/restore'){
     if(req.headers['content-type']!=='application/json')throw Error('FORGE_RUNNER_JSON_REQUIRED');
     const raw=await readBounded(req,5000);
@@ -90,10 +104,15 @@ export function createForgeRunner(){
      if(Object.keys(body).sort().join(',')!=='approval,sha256'||
        body.approval!=='APPROVE_LOCAL_REFERENCE_RESTORE')throw Error('FORGE_RUNNER_RESTORE_APPROVAL_REQUIRED');
      const saved=await loadLocalReference({sha256:body.sha256});
-     const id=randomBytes(16).toString('hex');
-     references.set(id,{bytes:saved.bytes,meta:inspectPNG(saved.bytes)});
-     while(references.size>2)references.delete(references.keys().next().value);
-     json(res,200,{schema:'ffax.runner-reference.v1',id,...inspectPNG(saved.bytes),scope:'LOCAL_VERIFIED_RELOAD'});
+     if(saved.receipt.mime==='image/png'){
+      const meta=inspectPNG(saved.bytes);
+      const id=randomBytes(16).toString('hex');
+      references.set(id,{bytes:saved.bytes,meta});
+      while(references.size>2)references.delete(references.keys().next().value);
+      json(res,200,{schema:'ffax.runner-reference.v1',id,...meta,
+        mime:saved.receipt.mime,scope:'LOCAL_VERIFIED_RELOAD'});
+     }else json(res,200,{schema:'ffax.runner-restored-file.v1',receipt:saved.receipt,
+       scope:'LOCAL_VERIFIED_RELOAD_NO_PNG_CONVERGENCE'});
     }
    }else if(path==='/api/design/runner/start'){
     if(req.headers['content-type']!=='application/json')throw Error('FORGE_RUNNER_JSON_REQUIRED');

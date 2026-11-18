@@ -38,3 +38,25 @@ test('RF-01 refuses symlink reference vault and invalid binary data',async()=>{
   await assert.rejects(loadLocalReference({root,sha256:'../bad'}),/SHA_INVALID/);
  }finally{await rm(home,{recursive:true,force:true});}
 });
+
+test('RF-01 stores and verifies SHA-addressed JPEG and WebP reference headers without executing them',async()=>{
+ const home=await mkdtemp(join(tmpdir(),'ffax-vault-')),root=join(home,'safe');
+ const jpeg=Buffer.from([0xff,0xd8,0xff,0xe0,0x00,0x10,
+  ...Buffer.alloc(14),0xff,0xc0,0x00,0x11,0x08,0x00,0x02,0x00,0x03,0x03,
+  0x01,0x11,0x00,0x02,0x11,0x00,0x03,0x11,0x00,0xff,0xda,0x00,0x02,0xff,0xd9]);
+ const webp=Buffer.alloc(34);
+ webp.write('RIFF',0,'ascii');webp.writeUInt32LE(26,4);webp.write('WEBP',8,'ascii');
+ webp.write('VP8X',12,'ascii');webp.writeUInt32LE(10,16);
+ webp.writeUIntLE(2,24,3);webp.writeUIntLE(1,27,3);
+ try{
+  for(const [bytes,mime] of [[jpeg,'image/jpeg'],[webp,'image/webp']]){
+   const hashValue=createHash('sha256').update(bytes).digest('hex');
+   const rec=await saveLocalReference({root,bytes,sha256:hashValue,
+    rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'});
+   assert.equal(rec.mime,mime);assert.equal(rec.rightsScope,'REFERENCE_ONLY');
+   assert.equal(rec.verification,'HEADER_AND_SHA_ONLY_BROWSER_DECODE_REQUIRED');
+   const restored=await loadLocalReference({root,sha256:hashValue});
+   assert.ok(restored.bytes.equals(bytes));
+  }
+ }finally{await rm(home,{recursive:true,force:true});}
+});

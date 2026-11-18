@@ -12,9 +12,9 @@
   "requestedOwnerApprovalForFinalNumericalRubric": false,
   "snapshotSummary": {
     "total": 25,
-    "candidate": 20,
-    "partial": 5,
-    "sourceCandidatePercent": 80,
+    "candidate": 21,
+    "partial": 4,
+    "sourceCandidatePercent": 84,
     "p2Verification": "NOT_RUN"
   },
   "units": [
@@ -618,31 +618,33 @@
         "REQ-10"
       ],
       "goal": "External reference import/hash and immutable storage",
-      "status": "PARTIAL_SOURCE",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
       "dependency_swu_ids": [],
       "allowed_paths": [
         "src/reference-analysis.mjs",
         "src/reference-vault.mjs",
         "src/forge-runner.mjs",
-        "src/forge-convergence-ui.mjs"
+        "src/forge-convergence-ui.mjs",
+        "tests/reference-vault.test.mjs",
+        "tests/forge-runner.test.mjs"
       ],
-      "acceptance": "owner PNG/JPEG/WebP rights/scope → immutable bytes+manifest+retrieve; changed SHA rejected",
+      "acceptance": "user selected local PNG/JPEG/WebP → browser decode and SHA check → CSRF+rights-bound localhost upload → immutable owner-only content-addressed file, exact hash receipt and readback, no overwrite; SHA/rights/mime/path tamper refused",
       "complexity": {
-        "S": 1,
-        "C": 0,
-        "I": 0,
+        "S": 2,
+        "C": 1,
+        "I": 1,
         "D": 2,
         "U": 0,
-        "total": 3,
-        "assumption": "Code-only scope; P2 and independent owner gate separate"
+        "total": 6,
+        "assumption": "Original data safety D=2 / multi-MIME parser reviewed only as P1 code candidate; local browser decode and permission gate mandatory, OS real test P2"
       },
-      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
-      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
+      "p1_check": "GITHUB_WORKFLOW_PENDING",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
     },
     {
       "swu_id": "FFAX-SWU-RF-02",
@@ -890,5 +892,5 @@
       "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
     }
   ],
-  "lastUpdatedStatus": "DF-05 SOURCE_CANDIDATE_CI_PENDING"
+  "lastUpdatedStatus": "DF-05 PASS; RF-01 SOURCE_CANDIDATE_CI_PENDING"
 }
