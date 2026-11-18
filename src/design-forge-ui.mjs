@@ -47,7 +47,7 @@ $('forge-local-request').addEventListener('click',async()=>{
   if(!result.ok)throw Error(data.error||'FORGE_LOCAL_MODEL_UNAVAILABLE');
   const parsed=parseModelDesign(data.output,{ownerBrief:brief,approval:'APPROVE_DESIGN_PREVIEW'});
   validateProjectImport(parsed.document);
-  stagedLocalModel={id:chosen.id,model:data.model,sha256:data.sha256,document:parsed.document,output:data.output};
+  stagedLocalModel={id:chosen.id,revision:chosen.revision,model:data.model,sha256:data.sha256,document:parsed.document,output:data.output};
   $('forge-local-response').value=data.output;$('forge-local-adopt').disabled=false;
   report('로컬 Qwen 구조 JSON을 수신했습니다. 내용을 검토하고 별도 승인한 경우에만 '+chosen.id+' 시안에 반영합니다.');
  }catch(e){report('로컬 Qwen: '+e.message,true);}
@@ -56,7 +56,7 @@ $('forge-local-request').addEventListener('click',async()=>{
 $('forge-local-adopt').addEventListener('click',()=>{
  try{
   if(!$('forge-local-review').checked)throw Error('FORGE_MODEL_REVIEW_APPROVAL_REQUIRED');
-  if(!stagedLocalModel||stagedLocalModel.id!==selectedId)throw Error('FORGE_MODEL_PROPOSAL_STALE');
+  if(!stagedLocalModel||stagedLocalModel.id!==selectedId||stagedLocalModel.revision!==active().revision)throw Error('FORGE_MODEL_PROPOSAL_STALE');
   const updated=adoptLocalModelDesign(active(),stagedLocalModel.document,{model:stagedLocalModel.model,sha256:stagedLocalModel.sha256,approval:'APPROVE_LOCAL_DESIGN_VARIANT'});
   variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;stagedLocalModel=null;
   $('forge-local-response').value='';$('forge-local-adopt').disabled=true;renderCards();
