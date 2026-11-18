@@ -61,7 +61,10 @@ export function refineForgeVariant(variant,{kind,id,prop,value}={}){
 export function mixForgeVariants(primary,secondary,{takeTheme=true,takeLayout=false}={}){
  checkVariant(primary);checkVariant(secondary);
  const next=clone(primary);next.parentVariantId=primary.id+':'+primary.revision;next.revision++;
- if(takeTheme)next.document.theme=secondary.document.theme;
+ if(takeTheme){
+  next.document.theme=secondary.document.theme;
+  if(next.document.designSystem&&secondary.document.designSystem){for(const color of ['surface','accent','ink','muted'])next.document.designSystem[color]=secondary.document.designSystem[color];}
+ }
  if(takeLayout)next.document.layout=secondary.document.layout;
  next.document.version++;next.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(next);return next;
 }
