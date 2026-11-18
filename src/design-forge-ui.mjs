@@ -229,4 +229,20 @@ $('forge-import').addEventListener('change',async()=>{
   selectedId=parsed.manifest.variantId;variantHistory=new Map();renderCards();report('레퍼런스 번들 SHA256 검증 PASS · 로컬에서 복구했습니다.');
  }catch(err){report('복구 거절: '+err.message,true);}finally{$('forge-import').value='';}
 });
+
+// Convergence review shares immutable receipts, not internal mutable UI state.
+export function getApprovedForgeBundleForComparison(){
+ if(!frozen)throw Error('FORGE_REFERENCE_NOT_APPROVED');
+ return structuredClone(frozen);
+}
+export async function postForgeReview(endpoint,payload){return await forgePost(endpoint,payload);}
+export async function getForgeSessionToken(){
+ if(forgeCsrf)return forgeCsrf;
+ const session=await fetch('/api/design/session',{method:'GET',cache:'no-store',credentials:'omit',redirect:'error'});
+ if(!session.ok)throw Error('FORGE_SESSION_UNAVAILABLE');
+ const result=await session.json();
+ if(result.schema!=='ffax.forge-session.v1'||!/^[a-f0-9]{64}$/.test(result.csrf))throw Error('FORGE_SESSION_INVALID');
+ forgeCsrf=result.csrf;return forgeCsrf;
+}
+
 report('Design Forge 준비 · 무료 오프라인 규칙·기존 FFAX 컴포넌트로 시안을 생성합니다.');
