@@ -25,6 +25,34 @@
       <button id="analyze" class="primary-btn" type="button">✦ 요구 분석 · 디자인 2안</button>
       <section class="brief-area" aria-label="분석 결과"><p class="subheading">구조화된 요구사항</p><div id="brief-summary" class="brief-text" role="status">요구사항을 입력하고 분석하세요.</div><div id="design-options" class="design-options"></div></section>
       <div class="section-rule"></div>
+      <section class="manual-ai-area forge-panel" aria-label="Design Forge 디자인 추천·확정">
+        <p class="subheading">Design Forge · 디자인 생성 → 개선 → 레퍼런스 확정</p>
+        <p class="helper">무료 오프라인 FFAX 17종 컴포넌트로 A/B/C 소스 시안을 생성합니다. 디자인이 확정되면 React 코드·디자인 토큰·구조를 SHA256으로 잠가 기존 편집기로 전달합니다. 외부 이미지 생성이나 유료 API는 호출하지 않습니다.</p>
+        <label for="forge-brief">새 디자인 요구사항</label>
+        <textarea id="forge-brief" rows="3" maxlength="2000" placeholder="예: 역학달력을 현대적이고 고급스러운 스타일로 만들고, 날짜 검색과 사주 입력창을 보여줘."></textarea>
+        <label for="forge-audience">대상 사용자 (선택)</label><input id="forge-audience" type="text" maxlength="120" placeholder="예: 모바일 이용자, 20~40대" />
+        <label for="forge-mood">디자인 취향 (선택)</label><input id="forge-mood" type="text" maxlength="150" placeholder="예: 전통 감성 + 현대적 미니멀" />
+        <label for="forge-musthave">반드시 포함할 구성 (선택)</label><textarea id="forge-musthave" rows="2" maxlength="500" placeholder="예: 달력, 검색, 생년월일시 폼"></textarea>
+        <label for="forge-avoid">피할 스타일 (선택)</label><textarea id="forge-avoid" rows="2" maxlength="500" placeholder="예: 과도한 금색, 촌스러운 그라데이션"></textarea>
+        <button id="forge-generate" type="button" class="primary-btn">A/B/C 실제 UI 시안 만들기</button>
+        <div id="forge-variants" class="forge-variants" aria-label="디자인 시안 선택"></div>
+        <label for="forge-instruction">시안 부분 개선 (지원: 다크, 밝게, 청록, 여백, 제목:문구)</label>
+        <input id="forge-instruction" type="text" maxlength="300" placeholder="예: 여백을 더 넓게" />
+        <button id="forge-refine" type="button" class="ghost-btn" disabled>선택한 시안 개선</button>
+        <label for="forge-mix-from">다른 시안과 색채·배치 혼합</label>
+        <select id="forge-mix-from"><option value="A">A 시안</option><option value="B">B 시안</option><option value="C">C 시안</option></select>
+        <label class="check"><input id="forge-mix-layout" type="checkbox" /> 색채 외에 배치도 혼합</label>
+        <button id="forge-mix" type="button" class="ghost-btn" disabled>선택 시안에 혼합</button>
+        <label class="check"><input id="forge-approval" type="checkbox" /> 선택 시안을 레퍼런스로 확정합니다. 새로운 버전의 재확정 없이는 바꾸지 않습니다.</label>
+        <button id="forge-freeze" type="button" class="primary-btn" disabled>선택 레퍼런스 확정 · SHA 잠금</button>
+        <button id="forge-export" type="button" class="ghost-btn" disabled>확정 소스 번들 JSON 저장</button>
+        <label for="forge-import">기존 확정 번들 다시 불러오기 (SHA 검증)</label>
+        <input id="forge-import" type="file" accept="application/json,.json" />
+        <button id="forge-apply" type="button" class="ghost-btn" disabled>확정 시안의 동일 코드를 FFAX 편집기로 전달</button>
+        <pre id="forge-status" class="brief-text" role="status" aria-live="polite">Design Forge 준비 중.</pre>
+        <p class="micro-note">이 단계는 실제 HTML 미리보기이며 Playwright PNG 촬영/정밀 시각 비교·실기능 수락은 별도입니다. 외부 이미지 레퍼런스는 기존 이미지 분석 경로에서 다룹니다.</p>
+      </section>
+      <div class="section-rule"></div>
       <section class="manual-ai-area" aria-label="기존 React 프로젝트 읽기 전용 분석">
         <p class="subheading">기존 React 프로젝트 · 로컬 폴더 읽기 전용</p>
         <p class="helper">명시적으로 선택한 React+TypeScript 폴더의 안전한 파일만 브라우저에서 해시·구조 분석합니다. 원본 수정·외부 전송·GitHub 인증·자동 적용 없음. node_modules 없이 정리된 폴더를 권장합니다.</p>
@@ -118,5 +146,6 @@
   </main>
   <footer class="site-foot">FFAX concept implementation · Offline-first · 미리보기의 샘플 데이터는 실제 서비스 데이터가 아닙니다. · 기존 GitHub 프로젝트에는 자동 적용되지 않습니다.</footer>
   <script type="module" src="/src/app.mjs"></script>
+  <script type="module" src="/src/design-forge-ui.mjs"></script>
 </body>
 </html>
