@@ -3,20 +3,29 @@
 import {readFile,stat,realpath} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {prepareForgeIntegration,rollbackForgeIntegration} from '../src/forge-safe-integration.mjs';
+import {prepareForgeIntegration,rollbackForgeIntegration,auditForgeIntegration,planForgeDraftPR} from '../src/forge-safe-integration.mjs';
 async function main(argv){
  const mode=argv.shift();
- if(!['prepare','rollback'].includes(mode)||argv.length%2!==0)throw Error('FORGE_INTEGRATION_USAGE');
+ if(!['prepare','rollback','audit','plan'].includes(mode)||argv.length%2!==0)throw Error('FORGE_INTEGRATION_USAGE');
  const args={};
  for(let i=0;i<argv.length;i+=2){
   const key=argv[i],val=argv[i+1];
-  if(!['--bundle','--source','--dest','--job','--workdir','--approval'].includes(key)||
+  if(!['--bundle','--source','--dest','--job','--workdir','--approval','--repo','--branch','--base','--commit'].includes(key)||
      Object.hasOwn(args,key)||!val)throw Error('FORGE_INTEGRATION_ARGUMENT_INVALID');
   args[key]=val;
  }
  if(mode==='rollback'){
   if(Object.keys(args).sort().join(',')!=='--approval,--workdir')throw Error('FORGE_INTEGRATION_USAGE');
   return rollbackForgeIntegration({workDir:args['--workdir'],approval:args['--approval']});
+ }
+ if(mode==='audit'){
+  if(Object.keys(args).sort().join(',')!=='--approval,--workdir')throw Error('FORGE_INTEGRATION_USAGE');
+  return auditForgeIntegration({workDir:args['--workdir'],approval:args['--approval']});
+ }
+ if(mode==='plan'){
+  if(Object.keys(args).sort().join(',')!=='--approval,--base,--branch,--commit,--repo,--workdir')throw Error('FORGE_INTEGRATION_USAGE');
+  return planForgeDraftPR({workDir:args['--workdir'],approval:args['--approval'],
+    repo:args['--repo'],branch:args['--branch'],base:args['--base'],commit:args['--commit']});
  }
  if(Object.keys(args).sort().join(',')!=='--approval,--bundle,--dest,--job,--source')throw Error('FORGE_INTEGRATION_USAGE');
  const path=await realpath(resolve(args['--bundle']));

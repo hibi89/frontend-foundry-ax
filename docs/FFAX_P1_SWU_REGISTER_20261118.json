@@ -12,9 +12,9 @@
   "requestedOwnerApprovalForFinalNumericalRubric": false,
   "snapshotSummary": {
     "total": 25,
-    "candidate": 24,
-    "partial": 1,
-    "sourceCandidatePercent": 96,
+    "candidate": 25,
+    "partial": 0,
+    "sourceCandidatePercent": 100,
     "p2Verification": "NOT_RUN"
   },
   "units": [
@@ -873,33 +873,34 @@
         "REQ-12"
       ],
       "goal": "Customer React integration with preserved contracts",
-      "status": "PARTIAL_SOURCE",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
       "dependency_swu_ids": [
         "FFAX-SWU-RF-07",
         "FFAX-SWU-L10"
       ],
       "allowed_paths": [
         "src/forge-safe-integration.mjs",
-        "scripts/forge_integration_review.mjs"
+        "scripts/forge_integration_review.mjs",
+        "tests/forge-safe-integration.test.mjs"
       ],
-      "acceptance": "reviewed diff → route/auth/API/event/data parity and separately approved scoped PR, safe rollback",
+      "acceptance": "owner-reviewed frozen Forge source → isolated customer React clone/actual additive TSX diff → hash audit all unchanged originals including auth/API/route/data files, reject dynamic file discovery, create owner-scoped draft PR plan → only explicit later owner approval+verified adapter may create draft (never merge/deploy); rollback exact hash",
       "complexity": {
-        "S": 1,
-        "C": 0,
-        "I": 0,
+        "S": 2,
+        "C": 1,
+        "I": 1,
         "D": 2,
         "U": 0,
-        "total": 3,
-        "assumption": "Code-only scope; P2 and independent owner gate separate"
+        "total": 6,
+        "assumption": "High-reviewed risk D=2; source-byte parity and optional draft-PR adapter are P1 implementation only, runtime auth/API/event compatibility remains P2; production/main/user GO unchanged"
       },
-      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
-      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
+      "p1_check": "GITHUB_WORKFLOW_PENDING",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
     }
   ],
-  "lastUpdatedStatus": "DF-04 SOURCE_CANDIDATE_CI_PENDING; RF-08 PARTIAL"
+  "lastUpdatedStatus": "ALL 25 SWU SOURCE_CANDIDATE_CI_PENDING P2_UNASSESSED"
 }
