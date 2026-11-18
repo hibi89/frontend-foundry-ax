@@ -6,6 +6,7 @@ import { readFile, realpath, stat, mkdir, readdir, writeFile } from 'node:fs/pro
 import { resolve, join, dirname } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import {reserveLocalReportDirectory} from './ffax_local_report_guard.mjs';
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const MAX_PNG_BYTES = 24 * 1024 * 1024;
@@ -64,10 +65,14 @@ export async function compareReference({reference,render,out,engineEntry=join(PR
   const [ref, impl] = await Promise.all([inspectPng(reference),inspectPng(render)]);
   if(ref.width!==impl.width || ref.height!==impl.height) throw new FidelityError('VIEWPORT_MISMATCH', 'Reference ' + ref.width + 'x' + ref.height + ', render ' + impl.width + 'x' + impl.height + ': capture at identical viewport/DPR; never resize screenshots to conceal differences');
   const target=resolve(out);
-  if(target===ref.path || target===impl.path) throw new FidelityError('OUTPUT_CONFLICT','Output path conflicts with a PNG input');
-  await mkdir(target,{recursive:true});
-  const existing=await readdir(target);
-  if(existing.length) throw new FidelityError('OUTPUT_NOT_EMPTY','Use an empty, dedicated report directory so previous evidence is not overwritten');
+  if(target===ref.path || target===impl.path)throw new FidelityError('OUTPUT_CONFLICT','Output path conflicts with a PNG input');
+  try{await reserveLocalReportDirectory(target,{allowEmptyExisting:true});}
+  catch(error){
+   const code=error?.message;
+   throw new FidelityError(code==='REPORT_OUTPUT_NOT_EMPTY'?'OUTPUT_NOT_EMPTY':
+     code==='REPORT_OUTPUT_INSIDE_SOURCE'?'OUTPUT_SOURCE_FORBIDDEN':'OUTPUT_UNSAFE',
+     'The report destination must be an empty real directory outside FFAX source, without symlinks');
+  }
   const comparison = await invokeEngine(engineEntry,'compare',[ref.path,impl.path,'--json','--no-ocr','--heatmap','heatmap.png'],target);
   const suggestions = suggest ? await invokeEngine(engineEntry,'suggest-fixes',[ref.path,impl.path,'--json','--no-ocr'],target) : null;
   // A successful external process is not proof of an actual comparison.

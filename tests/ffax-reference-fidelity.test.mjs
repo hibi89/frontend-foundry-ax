@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join,resolve,dirname,basename } from 'node:path';
+import { symlink,stat } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { compareReference } from '../scripts/ffax_reference_fidelity.mjs';
 
 const tiny = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==','base64');
@@ -33,4 +35,38 @@ test('existing report output is never overwritten',async t=>{
   const f=await fixture(t);await mkdir(f.out);await writeFile(join(f.out,'report.json'),'existing');
   await assert.rejects(compareReference(f),{code:'OUTPUT_NOT_EMPTY'});
   assert.equal(await readFile(join(f.out,'report.json'),'utf8'),'existing');
+});
+
+test('P2: real reference compare refuses creating reports in FFAX source tree',async t=>{
+ const f=await fixture(t);
+ const repo=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+ const output=join(repo,'src','_ffax-report-should-not-exist-'+basename(dirname(f.out)));
+ await assert.rejects(compareReference({...f,out:output}),{code:'OUTPUT_SOURCE_FORBIDDEN'});
+ await assert.rejects(stat(output),{code:'ENOENT'});
+});
+test('P2: report destination symlink cannot redirect upstream heatmap write',async t=>{
+ const f=await fixture(t);
+ const real=join(dirname(f.out),'empty');await mkdir(real);
+ const alias=join(dirname(f.out),'alias');
+ try{await symlink(real,alias,'dir');}catch(err){
+  if(['EPERM','EACCES','ENOTSUP'].includes(err?.code)){t.skip('OS does not permit test symlinks');return;}
+  throw err;
+ }
+ await assert.rejects(compareReference({...f,out:alias}),{code:'OUTPUT_UNSAFE'});
+ assert.deepEqual(await (await import('node:fs/promises')).readdir(real),[]);
+});
+test('P2: output parent symlink into repository cannot bypass report protection',async t=>{
+ const f=await fixture(t);
+ const repo=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+ const alias=join(dirname(f.out),'repo-alias');
+ try{await symlink(repo,alias,'dir');}catch(err){
+  if(['EPERM','EACCES','ENOTSUP'].includes(err?.code)){t.skip('OS does not permit test symlinks');return;}
+  throw err;
+ }
+ await assert.rejects(compareReference({...f,out:join(alias,'src','new-report')}),{code:'OUTPUT_SOURCE_FORBIDDEN'});
+});
+test('P2: existing truly empty real output directory remains supported',async t=>{
+ const f=await fixture(t);await mkdir(f.out);
+ const response=await compareReference(f);
+ assert.equal(response.report.status,'MEASURED_NOT_APPROVED');
 });

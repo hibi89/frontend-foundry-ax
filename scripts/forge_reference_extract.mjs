@@ -5,6 +5,7 @@ import {readFile,writeFile,mkdir,realpath,stat} from 'node:fs/promises';
 import {resolve,join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
+import {reserveLocalReportDirectory} from './ffax_local_report_guard.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const pngSig=Buffer.from([137,80,78,71,13,10,26,10]);
 const maxBytes=24*1024*1024;
@@ -40,7 +41,7 @@ async function runEngine(path,args){
 export async function extractReference({reference,out,engineEntry=join(root,'node_modules/one-shot-ui/dist/cli.mjs')}={}){
  if(!reference||!out)fail('FORGE_EXTRACT_INPUT_REQUIRED');
  const src=await parsePng(reference),dir=resolve(out);
- await mkdir(dir,{recursive:false});
+ await reserveLocalReportDirectory(dir);
  const extracted=await runEngine(engineEntry,['extract',src.path,'--json','--no-ocr']);
  if(!extracted||typeof extracted!=='object'||Array.isArray(extracted))fail('FORGE_EXTRACT_PAYLOAD_INVALID');
  const report={schema:'ffax.reference-structural-analysis.v1',engine:'one-shot-ui',input:src,structuralResult:extracted,
