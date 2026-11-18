@@ -409,9 +409,11 @@
       ],
       "allowed_paths": [
         "src/forge-style-intelligence.mjs",
-        "src/design-forge.mjs"
+        "src/design-forge.mjs",
+        "src/server.mjs",
+        "tests/server-security.test.mjs"
       ],
-      "acceptance": "brief → 3 reproducible industry-ranked styles, pinned data provenance and fallback",
+      "acceptance": "brief → 3 reproducible industry-ranked styles, pinned data provenance and fallback; server serves complete browser module dependency chain for offline recommender (real localhost HTTP allowlist smoke)",
       "complexity": {
         "S": 1,
         "C": 0,
@@ -421,8 +423,8 @@
         "total": 2,
         "assumption": "Code-only scope; P2 and independent owner gate separate"
       },
-      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
-      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
+      "p1_check": "GITHUB_WORKFLOW_PENDING",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
@@ -902,5 +904,5 @@
       "implementation_scope_status": "CODE_CANDIDATE_ONLY"
     }
   ],
-  "lastUpdatedStatus": "ALL 25 SWU SOURCE_CANDIDATE_CI_PENDING P2_UNASSESSED"
+  "lastUpdatedStatus": "P1 implementation 25/25; repaired missing browser module allowlist; LOCAL_HTTP_CI_PENDING"
 }

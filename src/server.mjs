@@ -12,6 +12,7 @@ const publicAssets = new Map([
   ['/styles.css', 'text/css; charset=utf-8'],
   ['/src/app.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/forge-style-intelligence.mjs', 'text/javascript; charset=utf-8'],
   ['/src/reference-analysis.mjs', 'text/javascript; charset=utf-8'],
   ['/src/external-reference-to-forge.mjs', 'text/javascript; charset=utf-8'],
   ['/src/reference-assets.mjs', 'text/javascript; charset=utf-8'],
