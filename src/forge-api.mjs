@@ -101,7 +101,7 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
       const id=randomBytes(16).toString('hex');
       captures.set(id,{bytes,receipt});
       while(captures.size>2)captures.delete(captures.keys().next().value);
-      value={schema:'ffax.design-capture-result.v1',id,receipt,download:'/api/design/captures/'+id+'.png',status:'CAPTURED_NOT_VISUALLY_APPROVED'};
+      value={schema:'ffax.design-capture-result.v1',id,receipt,download:'/api/design/captures/'+id+'.png',status:'CAPTURED_WITH_WARNINGS_NOT_VISUALLY_APPROVED',qualityWarnings:receipt.qualityWarnings||[]};
      }finally{await rm(dir,{recursive:true,force:true});}
      break;}
     case '/api/design/finalize':{

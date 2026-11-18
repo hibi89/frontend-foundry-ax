@@ -30,6 +30,7 @@ on:
       - 'scripts/forge_reference_extract.mjs'
       - 'tests/design-forge.test.mjs'
       - 'tests/forge-api.test.mjs'
+      - 'tests/forge-capture-readiness.test.mjs'
       - 'tests/forge-correction.test.mjs'
       - 'tests/forge-convergence.test.mjs'
       - 'tests/forge-runner.test.mjs'
@@ -82,4 +83,4 @@ jobs:
           node --check scripts/forge_reference_extract.mjs
           python -m py_compile scripts/forge_capture.py scripts/forge_pixel_metric.py
       - name: Local deterministic core source contract smoke (no model/network)
-        run: node --test tests/design-forge.test.mjs tests/forge-api.test.mjs tests/forge-correction.test.mjs tests/forge-convergence.test.mjs tests/forge-runner.test.mjs tests/reference-vault.test.mjs tests/ffax-swu-progress.test.mjs tests/external-reference-to-forge.test.mjs tests/forge-safe-integration.test.mjs tests/reference-assets.test.mjs tests/ffax-reference-fidelity.test.mjs
+        run: node --test tests/design-forge.test.mjs tests/forge-api.test.mjs tests/forge-capture-readiness.test.mjs tests/forge-correction.test.mjs tests/forge-convergence.test.mjs tests/forge-runner.test.mjs tests/reference-vault.test.mjs tests/ffax-swu-progress.test.mjs tests/external-reference-to-forge.test.mjs tests/forge-safe-integration.test.mjs tests/reference-assets.test.mjs tests/ffax-reference-fidelity.test.mjs

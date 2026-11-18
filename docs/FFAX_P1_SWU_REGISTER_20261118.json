@@ -2,7 +2,7 @@
   "schema": "ffax.p1.swu.v1",
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
-  "baselineSha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+  "baselineSha": "ceae896aee43f1e349165bf0b5c46a4ac7ca5c4d",
   "calculation": "equal_count_source_candidate_units_only",
   "policy": "High 1 meaningful vertical SWU, P1 implementation and P2 validation separated",
   "sourceUnitOrigin": "FFAX legacy L01-L10 audited code paths + DF-01..07 and RF-01..08 existing blueprint slices",
@@ -12,9 +12,9 @@
   "requestedOwnerApprovalForFinalNumericalRubric": false,
   "snapshotSummary": {
     "total": 25,
-    "candidate": 19,
-    "partial": 6,
-    "sourceCandidatePercent": 76,
+    "candidate": 20,
+    "partial": 5,
+    "sourceCandidatePercent": 80,
     "p2Verification": "NOT_RUN"
   },
   "units": [
@@ -508,31 +508,33 @@
         "REQ-09"
       ],
       "goal": "Actual capture with font/asset quality gates",
-      "status": "PARTIAL_SOURCE",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
       "dependency_swu_ids": [
         "FFAX-SWU-DF-04"
       ],
       "allowed_paths": [
         "scripts/forge_capture.mjs",
-        "src/forge-api.mjs"
+        "src/forge-api.mjs",
+        "src/design-forge-ui.mjs",
+        "tests/forge-capture-readiness.test.mjs"
       ],
-      "acceptance": "selected A/B/C → browser PNG plus warning for missing fonts/assets and mismatched viewport",
+      "acceptance": "owner selected frozen A/B/C → live Chromium capture via CLI/API, linked SHA/viewport receipt, explicit missing or unknown fonts/assets and viewport mismatch preflight warnings, bad external assets denied; display warnings in GUI",
       "complexity": {
-        "S": 1,
+        "S": 2,
         "C": 0,
         "I": 1,
         "D": 0,
         "U": 1,
-        "total": 3,
-        "assumption": "Code-only scope; P2 and independent owner gate separate"
+        "total": 4,
+        "assumption": "Crosses script/API and existing GUI warning display; all static preflight + smoke code-only, actual font availability is not independently proven"
       },
-      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
-      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
+      "p1_check": "GITHUB_WORKFLOW_PENDING",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
     },
     {
       "swu_id": "FFAX-SWU-DF-06",
@@ -887,5 +889,6 @@
       "owner_original_write_allowed": false,
       "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
     }
-  ]
+  ],
+  "lastUpdatedStatus": "DF-05 SOURCE_CANDIDATE_CI_PENDING"
 }

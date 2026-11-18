@@ -224,14 +224,16 @@ $('forge-capture-run').addEventListener('click',async()=>{
   const digest=await crypto.subtle.digest('SHA-256',await png.arrayBuffer());
   const check=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
   if(check!==response.receipt.sha256)throw Error('FORGE_CAPTURE_PNG_SHA_MISMATCH');
+  if(response.receipt.preflight?.schema!=='ffax.capture-preflight.v1'||!Array.isArray(response.qualityWarnings))throw Error('FORGE_CAPTURE_QUALITY_RECEIPT_MISSING');
+  const captureWarnings=response.qualityWarnings.map(w=>w.code).slice(0,8).join(', ');
   if(!frozen || frozen.sha256!==originalFrozenSha)throw Error('FORGE_CAPTURE_SOURCE_CHANGED');
   if(captureUrl)URL.revokeObjectURL(captureUrl);
   capturedPng=png;captureId=response.id;captureBundleSha=originalFrozenSha;captureUrl=URL.createObjectURL(png);$('forge-capture-preview').src=captureUrl;$('forge-capture-download').disabled=false;$('forge-finalize').disabled=false;
   try{
    const transfer=new DataTransfer();transfer.items.add(new File([png],'FFAX-real-browser.png',{type:'image/png'}));
    $('forge-compare-render').files=transfer.files;
-   report('실제 Playwright PNG SHA 확인 · 비교 패널의 구현 화면 파일에 자동 지정했습니다. 원본 레퍼런스를 선택하고 비교를 실행하세요.');
-  }catch{report('실제 Playwright PNG 확인 완료. 자동 파일 지정 미지원: PNG를 저장하여 비교 패널에 직접 선택하세요.');}
+   report('Playwright PNG SHA 확인 · 폰트/자산 경고: '+(captureWarnings||'없음')+'. 비교 패널에서 차이를 검토하고 승인하세요.');
+  }catch{report('Playwright PNG 확인 완료 · 폰트/자산 경고: '+(captureWarnings||'없음')+'. 파일을 저장해 비교 패널에 직접 선택하세요.');}
  }catch(err){report('캡처 실패: '+err.message,true);}
  finally{button.disabled=!frozen || frozen.manifest?.referencePng!==null;$('forge-capture-consent').checked=false;}
 });
