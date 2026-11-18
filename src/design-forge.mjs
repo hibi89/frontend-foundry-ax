@@ -92,6 +92,24 @@ export async function freezeForgeVariant(variant,{approval,referencePng=null}={}
  const receipt=await sha256(JSON.stringify(manifest));
  return {schema:FORGE_BUNDLE_SCHEMA,manifest,sha256:receipt,approval:'OWNER_APPROVED_THIS_VARIANT',renderProof:referencePng?'SUPPLIED_NOT_INDEPENDENTLY_VERIFIED':'PENDING_PLAYWRIGHT_CAPTURE',handoff:'SAME_SOURCE_REACT_NOT_SCREENSHOT_RECONSTRUCTION'};
 }
+export async function finalizeForgeBundleWithCapture(bundle,captureReceipt,{approval}={}){
+ if(approval!=='APPROVE_FINAL_REFERENCE_PNG')throw Error('FORGE_FINAL_IMAGE_APPROVAL_REQUIRED');
+ await verifyForgeBundle(bundle);
+ if(bundle.manifest.referencePng!==null)throw Error('FORGE_REFERENCE_IMAGE_ALREADY_LOCKED');
+ if(captureReceipt?.schema!=='ffax.capture.v1'||captureReceipt.engine!=='playwright-chromium'||
+    captureReceipt.bundleSha256!==bundle.sha256 || !/^[a-f0-9]{64}$/.test(captureReceipt.sha256||'') ||
+    !Number.isInteger(captureReceipt.width)||!Number.isInteger(captureReceipt.height)||
+    captureReceipt.width<320||captureReceipt.height<320||captureReceipt.width>2560||captureReceipt.height>2200||
+    ![1,2].includes(captureReceipt.dpr))throw Error('FORGE_CAPTURE_RECEIPT_INVALID');
+ const next=clone(bundle);
+ next.manifest.parentBundleSha256=bundle.sha256;
+ next.manifest.referencePng={sha256:captureReceipt.sha256,width:captureReceipt.width,height:captureReceipt.height,dpr:captureReceipt.dpr,engine:'playwright-chromium',browserVersion:captureReceipt.browserVersion};
+ next.sha256=await sha256(JSON.stringify(next.manifest));
+ next.renderProof='OWNER_APPROVED_PNG_SHA_WITH_PLAYWRIGHT_RECEIPT';
+ next.handoff='SOURCE_AND_RENDER_PNG_HASH_LOCKED';
+ await verifyForgeBundle(next);
+ return next;
+}
 export async function verifyForgeBundle(bundle){
  if(bundle?.schema!==FORGE_BUNDLE_SCHEMA||!bundle.manifest||typeof bundle.sha256!=='string'||!/^[a-f0-9]{64}$/.test(bundle.sha256))throw Error('FORGE_BUNDLE_INVALID');
  validateProjectImport(bundle.manifest.project);
