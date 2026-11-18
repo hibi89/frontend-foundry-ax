@@ -135,6 +135,17 @@
       <button id="apply-reference" class="ghost-btn" type="button">이미지에서 색상 2안 추출</button>
       <div id="reference-result" class="helper" role="status">이미지는 브라우저 안에서만 분석합니다.</div><div id="reference-choices" class="reference-choices" role="group" aria-label="이미지 스타일 후보와 승인"></div>
       <button id="export-reference-inventory" type="button" class="ghost-btn" disabled>외부 이미지 SHA·레이어 불확실성 분석 JSON 저장</button>
+
+      <p class="subheading">외부 이미지에서 실제 UI 코드로 (사용자 영역 지정)</p>
+      <p class="helper">자동 분석으로 알 수 없는 텍스트·컴포넌트는 직접 입력합니다. 한 줄에 타입|텍스트를 쓰면 위·중간·아래 영역 순서대로 FFAX React 컴포넌트를 생성합니다. 복원 불가능한 원본 일러스트·폰트·숨겨진 동작은 별도 검토가 필요합니다.</p>
+      <label for="reference-owner-labels">영역 지정 · 최대 3행 (Navbar/Hero/Card/Button/Input/Form 등 17종)</label>
+      <textarea id="reference-owner-labels" rows="3" maxlength="700" placeholder="Navbar|역학달력
+Hero|오늘의 역학 날짜
+Card|날짜 선택 · 사주 정보"></textarea>
+      <label class="check"><input id="reference-owner-labels-approval" type="checkbox" /> 원본 사용권과 입력한 컴포넌트 종류·텍스트를 검토했으며, 이 구조로 FFAX 코드 시안을 생성합니다.</label>
+      <button id="reference-owner-map" type="button" class="ghost-btn" disabled>확인한 이미지 영역 → React 시안 생성 · 소스 번들 저장</button>
+      <p id="reference-owner-map-status" class="helper" role="status">이미지 분석 및 사용자 영역 지정 후 실행할 수 있습니다.</p>
+
       <p class="micro-note">이미지 인식은 기본 색상 힌트 단계입니다. 구조·레이어·디자인 1:1 복원은 지원하지 않습니다.</p>
     </aside>
     <section class="canvas-panel" aria-label="프론트엔드 미리보기">
