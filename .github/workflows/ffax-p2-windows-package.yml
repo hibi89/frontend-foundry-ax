@@ -1,0 +1,88 @@
+name: FFAX V2.1 P2 extracted Windows owner-review package
+on:
+  push:
+    branches:
+      - feature/ffax-reference-fidelity-20261118
+    paths:
+      - '.github/workflows/ffax-p2-windows-package.yml'
+      - 'src/**'
+      - 'scripts/**'
+      - 'index.html'
+      - 'styles.css'
+permissions:
+  contents: read
+jobs:
+  windows-package-verification:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build unsigned isolated source ZIP with Forge runtime scripts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $out = Join-Path $PWD "FFAX-OWNER-REVIEW"
+          New-Item -ItemType Directory -Path $out -Force | Out-Null
+          foreach($name in @("src","assets","scripts","index.html","styles.css","package.json","START-FFAX.cmd","RUN-LIVE-MODEL-CHECK.cmd","OWNER_QUICKSTART_KO.md","THIRD_PARTY_NOTICES.md","REQUIREMENTS.md")){
+            if(-not (Test-Path -LiteralPath $name)){throw "REVIEW_SOURCE_MISSING $name"}
+            Copy-Item -LiteralPath $name -Destination $out -Recurse -Force
+          }
+          Set-Content -LiteralPath (Join-Path $out "SOURCE_SHA.txt") -Value "${{ github.sha }}" -Encoding ascii
+          $zip = Join-Path $PWD "FFAX-OWNER-REVIEW.zip"
+          Compress-Archive -Path $out -DestinationPath $zip -CompressionLevel Optimal
+          if(-not (Test-Path -LiteralPath $zip)){throw "REVIEW_PACKAGE_NOT_CREATED"}
+          Write-Output "FFAX_OWNER_REVIEW_ZIP_SHA256=$((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash)"
+          $inspect = Join-Path $PWD "VERIFY-FFAX-OWNER-REVIEW"
+          Expand-Archive -LiteralPath $zip -DestinationPath $inspect
+          $extracted = Join-Path $inspect "FFAX-OWNER-REVIEW"
+          if((Get-Content -LiteralPath (Join-Path $extracted "SOURCE_SHA.txt") -Raw).Trim() -ne "${{ github.sha }}"){throw "REVIEW_PACKAGE_SHA_MISMATCH"}
+          foreach($rel in @("src/server.mjs","src/core.mjs","src/forge-style-intelligence.mjs","src/reference-vault.mjs","src/forge-runner.mjs","src/forge-api.mjs","src/design-forge-ui.mjs","scripts/forge_capture.mjs","scripts/forge_capture.py","scripts/forge_converge.mjs","scripts/ffax_reference_fidelity.mjs","index.html","styles.css")){
+            $p = Join-Path $extracted $rel
+            if(-not (Test-Path -LiteralPath $p)){throw "REVIEW_PACKAGE_MISSING $rel"}
+          }
+          foreach($rel in @("src/server.mjs","src/design-forge.mjs","src/forge-api.mjs","scripts/forge_capture.mjs")){
+            & node --check (Join-Path $extracted $rel)
+            if($LASTEXITCODE -ne 0){throw "REVIEW_PACKAGE_SYNTAX_FAILED $rel"}
+          }
+          $before=(Get-FileHash -LiteralPath "src/core.mjs" -Algorithm SHA256).Hash
+          $after=(Get-FileHash -LiteralPath (Join-Path $extracted "src/core.mjs") -Algorithm SHA256).Hash
+          if($before -ne $after){throw "REVIEW_PACKAGE_SOURCE_BYTES_CHANGED"}
+          Write-Output "FFAX_PACKAGE_EXTRACT_SHA_AND_SOURCE_IDENTITY_PASS"
+          $env:PORT = "4178"
+          $proc = Start-Process -FilePath "node" -ArgumentList "src/server.mjs" -WorkingDirectory $extracted -PassThru -NoNewWindow
+          try {
+            $ready = $false
+            for($i=0; $i -lt 50; $i++){
+              if($proc.HasExited){throw "REVIEW_PACKAGE_SERVER_CRASHED"}
+              try{
+                $home=Invoke-WebRequest "http://127.0.0.1:4178/" -TimeoutSec 3
+                if($home.StatusCode -eq 200){$ready=$true;break}
+              }catch{Start-Sleep -Milliseconds 250}
+            }
+            if(-not $ready){throw "REVIEW_PACKAGE_LOCAL_SERVER_NOT_READY"}
+            foreach($rel in @("/src/app.mjs","/src/design-forge-ui.mjs","/src/forge-style-intelligence.mjs","/src/reference-assets.mjs","/styles.css")){
+              $asset=Invoke-WebRequest ("http://127.0.0.1:4178"+$rel) -TimeoutSec 5
+              if($asset.StatusCode -ne 200){throw "REVIEW_PACKAGE_ASSET_FAILED $rel"}
+            }
+            $blocked=$false
+            try {
+              Invoke-WebRequest "http://127.0.0.1:4178/api/design/variants" -Method POST -Headers @{Origin="http://127.0.0.1:4178"} -ContentType "application/json" -Body "{}" -TimeoutSec 4 | Out-Null
+            }catch{
+              if([int]$_.Exception.Response.StatusCode -eq 403){$blocked=$true}
+            }
+            if(-not $blocked){throw "REVIEW_PACKAGE_CSRF_BYPASS"}
+            Write-Output "FFAX_WINDOWS_EXTRACTED_PACKAGE_HTTP_PASS endpoints=6 csrf_403=true release=HOLD source=${{ github.sha }}"
+          }finally{
+            if($proc -and -not $proc.HasExited){Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue}
+          }
+      - name: Retain unsigned private-to-runner review ZIP only (no publication)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffax-v21-windows-extracted-owner-review-unreleased
+          path: FFAX-OWNER-REVIEW.zip
+          if-no-files-found: error
+          retention-days: 7
