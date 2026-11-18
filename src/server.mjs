@@ -1,6 +1,7 @@
 import http from 'node:http';
 import {runLocalOllama} from './local-ollama.mjs';
 import {createLocalInferenceGate} from './inference-gate.mjs';
+import {createForgeApi} from './forge-api.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,7 @@ const publicAssets = new Map([
   ['/src/app.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge-ui.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/forge-api.mjs', 'text/javascript; charset=utf-8'],
   ['/src/core.mjs', 'text/javascript; charset=utf-8'],
   ['/src/local-repo-intake.mjs', 'text/javascript; charset=utf-8'],
   ['/src/github-readonly-intake.mjs', 'text/javascript; charset=utf-8'],
@@ -24,6 +26,7 @@ const port=Number(process.env.PORT || '4173');
 const host='127.0.0.1';
 if (!Number.isSafeInteger(port) || port < 1024 || port > 65535) throw new Error('Invalid PORT');
 const localInferenceGate=createLocalInferenceGate();
+const forgeApi=createForgeApi({host,port});
 const server=http.createServer(async(req,res)=>{
   // A loopback listener alone is not protection against Host-header/DNS rebinding.
   if(req.headers.host !== `${host}:${port}`) {
@@ -33,6 +36,7 @@ const server=http.createServer(async(req,res)=>{
   let url;
   try { url=new URL(req.url || '/',`http://${host}:${port}`); }
   catch { res.writeHead(400).end(); return; }
+  if(await forgeApi.handle(req,res,url.pathname))return;
   if(url.pathname==='/api/local-model'){
     if(req.method!=='POST'){res.writeHead(405,{'Allow':'POST'}).end();return;}
     if(req.headers.origin!=='http://'+host+':'+port || req.headers['content-type']!=='application/json'){
