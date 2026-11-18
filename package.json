@@ -29,7 +29,8 @@
     "forge:capture": "node scripts/forge_capture.mjs capture",
     "forge:export": "node scripts/forge_export.mjs",
     "forge:compare": "node scripts/forge_reconstruct.mjs run",
-    "forge:extract": "node scripts/forge_reference_extract.mjs extract"
+    "forge:extract": "node scripts/forge_reference_extract.mjs extract",
+    "forge:converge": "node scripts/forge_converge.mjs run"
   },
   "engines": {
     "node": ">=20"
