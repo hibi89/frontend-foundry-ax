@@ -68,6 +68,8 @@
         <button id="forge-capture-run" type="button" class="ghost-btn" disabled>Playwright 실제 PNG 캡처 → 비교 패널로 전달</button>
         <img id="forge-capture-preview" alt="FFAX 확정 시안에서 촬영한 로컬 Chromium 캡처" class="forge-capture-preview" />
         <button id="forge-capture-download" type="button" class="ghost-btn" disabled>촬영한 PNG 저장</button>
+        <label class="check"><input id="forge-finalize-consent" type="checkbox" /> 이 Chromium PNG를 최종 디자인 레퍼런스로 확정하고 소스 번들과 함께 SHA256으로 잠급니다.</label>
+        <button id="forge-finalize" type="button" class="primary-btn" disabled>실제 PNG 포함 레퍼런스 최종 확정</button>
 
         <pre id="forge-status" class="brief-text" role="status" aria-live="polite">Design Forge 준비 중.</pre>
         <p class="micro-note">이 단계는 실제 HTML 미리보기이며 Playwright PNG 촬영/정밀 시각 비교·실기능 수락은 별도입니다. 외부 이미지 레퍼런스는 기존 이미지 분석 경로에서 다룹니다.</p>
