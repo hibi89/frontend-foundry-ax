@@ -1,3 +1,5 @@
+> **V2.1 사용자 최종 UX 수락 절차 (2026-11-18):** [현재 코드 SHA·Windows 검수 패키지 및 순서](FFAX_P2_OWNER_READY_20261118.md) 참고. 기존 2안 외에 Design Forge **A/B/C 3안**, 부분 수정·혼합·Undo/Redo, source+PNG SHA 확정/불러오기, 외부 원본의 실제 사용권·차이보드, 375/768/1440 레이아웃/키보드/axe를 실제 PC에서 점검한다. 자동 browser CI나 개발자 자체 검사만으로 AC-09/RG-06 사용자 APPROVED를 기록하지 않는다. Codex/Astra 독립 검수도 실제 실행 전 NOT_RUN.
+
 # FFAX 화면 사용자 수락 체크리스트 (최종 승인 전용)
 
 - 범위: **실제 FFAX 실행 화면**, `assets/concepts/ffax-v1-vision.webp` 같은 콘셉트 이미지가 아니다.
