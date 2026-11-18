@@ -1,0 +1,47 @@
+name: FFAX V2.1 P2 real Chromium Forge path
+on:
+  push:
+    branches:
+      - feature/ffax-reference-fidelity-20261118
+    paths:
+      - '.github/workflows/ffax-p2-forge-browser.yml'
+      - 'scripts/forge_p2_browser_probe.py'
+      - 'src/**'
+      - 'scripts/forge_capture.py'
+      - 'scripts/forge_capture.mjs'
+      - 'index.html'
+      - 'styles.css'
+permissions:
+  contents: read
+concurrency:
+  group: ffax-p2-forge-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  forge-local-chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Pin browser test runtime, no package installation scripts or remote AI
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install chromium
+          CHROME_PATH="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
+          test -x "$CHROME_PATH"
+          sudo ln -sfn "$CHROME_PATH" /usr/bin/chromium
+      - name: P2 live loopback UI revision, SHA render, pixel comparison and blocked original asset
+        run: python scripts/forge_p2_browser_probe.py
+      - name: Retain synthetic-only browser evidence for defect analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffax-v21-p2-forge-chromium-evidence
+          path: artifacts/qa/forge-p2-*
+          if-no-files-found: warn
+          retention-days: 7
