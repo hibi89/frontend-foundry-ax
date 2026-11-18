@@ -16,7 +16,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ffax-forge-p1-\${{ github.ref }}
+  group: ffax-forge-p1-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   source-smoke:
