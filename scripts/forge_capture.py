@@ -47,8 +47,10 @@ def main() -> int:
         page.on('pageerror',lambda exc:failures.append('page-error'))
         page.set_content(markup,wait_until='load',timeout=15000)
         stage('HTML_LOADED')
-        page.add_style_tag(content='*{animation:none!important;transition:none!important;caret-color:transparent!important}')
-        stage('CSS_ADDED')
+        # CSS is already embedded in the trusted markup. Injecting an additional
+        # stylesheet may indefinitely wait in headless Chromium when all
+        # network routes are aborted; avoid it. screenshot(animations='disabled')
+        # is the supported fixed local rendering mechanism.
         page.screenshot(path=str(out_file),full_page=False,animations='disabled',timeout=18000)
         stage('PNG_CAPTURED')
         version=browser.version
