@@ -23,7 +23,7 @@ async function compare(){
  if(files.some(x=>!x))throw Error('FORGE_COMPARE_BOTH_FILES_REQUIRED');
  let a,b;
  try{
-  [a,b]=await Promise.all(files.map(loadPng));
+  a=await loadPng(files[0]);b=await loadPng(files[1]);
   if(a.width!==b.width||a.height!==b.height)throw Error('FORGE_COMPARE_VIEWPORT_MISMATCH');
   const width=a.width,height=a.height,ref=pixelData(a.bitmap,width,height),img=pixelData(b.bitmap,width,height);
   const heat=document.createElement('canvas');heat.width=width;heat.height=height;
