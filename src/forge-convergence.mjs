@@ -67,7 +67,7 @@ export async function runBoundedConvergence({variant,plan,measure,approval,maxPa
  const baseline=await measure(structuredClone(base),0);
  let bestScore=safeScore(baseline),best=structuredClone(base),referenceSha=baseline.referenceSha256,nonImproving=0;
  records.push({pass:0,accepted:true,score:bestScore,referenceSha256:referenceSha,renderSha256:baseline.renderSha256,receipt:baseline.receipt??null});
- for(let i=0;i<all.length;i++){
+ for(let i=0;i<all.length && bestScore>minImprovement;i++){
   const patch=all[i];
   // Trial patch is applied to the best known candidate, not the customer's source.
   let trial=refineForgeVariant(best,{kind:'update',id:patch.id,prop:patch.prop,value:patch.value});
