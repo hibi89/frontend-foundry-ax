@@ -13,6 +13,7 @@ const publicAssets = new Map([
   ['/src/app.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge.mjs', 'text/javascript; charset=utf-8'],
   ['/src/reference-analysis.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/external-reference-to-forge.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge-ui.mjs', 'text/javascript; charset=utf-8'],
   ['/src/forge-compare-ui.mjs', 'text/javascript; charset=utf-8'],
   ['/src/forge-convergence-ui.mjs', 'text/javascript; charset=utf-8'],
