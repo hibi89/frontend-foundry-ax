@@ -81,8 +81,10 @@ function updateReference(){const f=el('reference-file').files?.[0];if(!f){el('re
     try{bitmap=await createImageBitmap(f);const c=document.createElement('canvas');c.width=40;c.height=20;const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(bitmap,0,0,40,20);const pixels=cx.getImageData(0,0,40,20).data;
       const average=(start,end)=>{let r=0,g=0,b=0,cnt=0;for(let y=0;y<20;y++)for(let x=start;x<end;x++){const i=(y*40+x)*4;if(pixels[i+3]<180)continue;r+=pixels[i];g+=pixels[i+1];b+=pixels[i+2];cnt++;}return cnt?[r,g,b].map(c=>Math.round(c/cnt).toString(16).padStart(2,'0')).join(''):'64748b'};
       const colorA='#'+average(0,20),colorB='#'+average(20,40);
-      const d=createReference(history.present,f.name,true,[colorA,colorB]);history.past.push(history.present);history.present=d;history.future=[];
-      el('reference-result').textContent=`${f.name}: ${colorA} / ${colorB} · 스타일 후보 A/B · 사용자 승인 전`;updateAll();
+      const bits=await crypto.subtle.digest('SHA-256',await f.arrayBuffer());
+      const sha256=[...new Uint8Array(bits)].map(x=>x.toString(16).padStart(2,'0')).join('');
+      const d=createReference(history.present,f.name,true,[colorA,colorB],'user-provided',{sha256,width:bitmap.width,height:bitmap.height});history.past.push(history.present);history.present=d;history.future=[];
+      el('reference-result').textContent=`${f.name}: ${bitmap.width}×${bitmap.height} · SHA256 ${sha256.slice(0,16)}… · ${colorA} / ${colorB} · 후보 A/B · 사용자 승인 전`;updateAll();
     }catch(e){el('reference-result').textContent=`참고 이미지 분석 실패: ${e.message}`;}finally{bitmap?.close();}
   })();
 }
