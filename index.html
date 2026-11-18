@@ -58,6 +58,17 @@
         <label for="forge-import">기존 확정 번들 다시 불러오기 (SHA 검증)</label>
         <input id="forge-import" type="file" accept="application/json,.json" />
         <button id="forge-apply" type="button" class="ghost-btn" disabled>확정 시안의 동일 코드를 FFAX 편집기로 전달</button>
+
+        <p class="subheading">확정 시안 · 실제 Playwright 화면 촬영 (선택)</p>
+        <label for="forge-capture-width">촬영 너비 (픽셀)</label>
+        <select id="forge-capture-width"><option value="375">375</option><option value="768">768</option><option value="1440" selected>1440</option><option value="1920">1920</option></select>
+        <label for="forge-capture-height">촬영 높이</label>
+        <input id="forge-capture-height" type="number" min="320" max="2200" value="900" />
+        <label class="check"><input id="forge-capture-consent" type="checkbox" /> 확정된 안전한 로컬 FFAX 시안을 이 PC에서 Playwright Chromium으로 렌더링하는 데 동의합니다.</label>
+        <button id="forge-capture-run" type="button" class="ghost-btn" disabled>Playwright 실제 PNG 캡처 → 비교 패널로 전달</button>
+        <img id="forge-capture-preview" alt="FFAX 확정 시안에서 촬영한 로컬 Chromium 캡처" class="forge-capture-preview" />
+        <button id="forge-capture-download" type="button" class="ghost-btn" disabled>촬영한 PNG 저장</button>
+
         <pre id="forge-status" class="brief-text" role="status" aria-live="polite">Design Forge 준비 중.</pre>
         <p class="micro-note">이 단계는 실제 HTML 미리보기이며 Playwright PNG 촬영/정밀 시각 비교·실기능 수락은 별도입니다. 외부 이미지 레퍼런스는 기존 이미지 분석 경로에서 다룹니다.</p>
       </section>
