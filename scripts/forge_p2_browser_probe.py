@@ -5,13 +5,14 @@ No customer files, production writes, external AI or cloud image uploads.
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import socket
 import subprocess
 import time
 import urllib.request
 import urllib.error
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 ROOT=Path(__file__).resolve().parents[1]
 ART=ROOT/'artifacts'/'qa'
@@ -90,7 +91,7 @@ try:
         page.locator('.forge-card > button').first.click()
         page.locator('#forge-instruction').fill('그리드 배치')
         page.locator('#forge-refine').click()
-        page.wait_for_function("document.querySelector('.forge-card h3')?.textContent.includes('v2')",timeout=12000)
+        expect(page.locator('.forge-card h3').first).to_contain_text('v2',timeout=12000)
         check('forge-typed-revision-v2','v2' in page.locator('.forge-card h3').first.inner_text())
         page.locator('#forge-undo').click()
         check('forge-undo-v1','v1' in page.locator('.forge-card h3').first.inner_text())
@@ -103,14 +104,13 @@ try:
         responsive(page)
         page.locator('#forge-approval').check()
         page.locator('#forge-freeze').click()
-        page.wait_for_function("!document.querySelector('#forge-export').disabled",timeout=20000)
+        expect(page.locator('#forge-export')).to_be_enabled(timeout=20000)
         check('forge-approved-sha-frozen','SHA256' in page.locator('#forge-status').inner_text())
         page.locator('#forge-capture-width').select_option('375')
         page.locator('#forge-capture-height').fill('600')
         page.locator('#forge-capture-consent').check()
         page.locator('#forge-capture-run').click()
-        page.wait_for_function("""() => document.querySelector('#forge-capture-preview')?.src.startsWith('blob:') ||
-          document.querySelector('#forge-status')?.textContent?.includes('캡처 실패')""",timeout=100000)
+        expect(page.locator('#forge-capture-preview')).to_have_attribute('src',re.compile(r'^blob:'),timeout=100000)
         capture_status=page.locator('#forge-status').inner_text()
         check('forge-real-browser-png',page.locator('#forge-capture-preview').get_attribute('src').startswith('blob:'),
               capture_status)
@@ -132,14 +132,14 @@ try:
               and len(evidence['sha256'])==64)
         page.locator('#forge-vault-consent').check()
         page.locator('#forge-vault-save').click()
-        page.wait_for_function("document.querySelector('#forge-vault-status')?.textContent.includes('로컬 이미지 불변 보관 완료')",timeout=25000)
+        expect(page.locator('#forge-vault-status')).to_contain_text('로컬 이미지 불변 보관 완료',timeout=25000)
         check('forge-explicit-vault-input-only',page.locator('#forge-vault-sha').input_value()==evidence['sha256'])
         page.locator('#forge-vault-reload').click()
-        page.wait_for_function("document.querySelector('#forge-vault-status')?.textContent.includes('로컬 불러오기 완료')",timeout=25000)
+        expect(page.locator('#forge-vault-status')).to_contain_text('로컬 불러오기 완료',timeout=25000)
         check('forge-verified-local-restore',page.locator('#forge-compare-reference').input_value()!='' and
              evidence['sha256'] in page.locator('#forge-vault-status').inner_text())
         page.locator('#forge-compare-run').click()
-        page.wait_for_function("!document.querySelector('#forge-compare-download').disabled",timeout=45000)
+        expect(page.locator('#forge-compare-download')).to_be_enabled(timeout=45000)
         check('forge-byte-identical-local-compare',
               '불일치 기준 픽셀 0/' in page.locator('#forge-compare-status').inner_text(),
               page.locator('#forge-compare-status').inner_text())
