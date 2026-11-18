@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {Readable} from 'node:stream';
+import {createForgeApi} from '../src/forge-api.mjs';
+const makeReq=(method,path,body,headers={})=>{
+ const req=Readable.from(body===undefined?[]:[Buffer.from(JSON.stringify(body))]);
+ req.method=method;req.headers=headers;return {req,path};
+};
+const respond=()=>({status:0,headers:{},data:null,writeHead(code,headers){this.status=code;this.headers=headers;return this;},end(text){this.data=text?JSON.parse(text):null;return this;}});
+test('Forge API: token, typed variants, approval freeze, and local-only refusal',async()=>{
+ const api=createForgeApi({host:'127.0.0.1',port:4173});
+ let res=respond();let {req,path}=makeReq('GET','/api/design/session');
+ assert.equal(await api.handle(req,res,path),true);
+ assert.equal(res.status,200);assert.match(res.data.csrf,/^[a-f0-9]{64}$/);
+ const csrf=res.data.csrf;
+ const headers={origin:'http://127.0.0.1:4173','content-type':'application/json','x-ffax-csrf':csrf};
+ const brief={prompt:'역학달력을 현대적이고 고급스러운 UI로 만들어줘',audience:'모바일 사용자'};
+ ({req,path}=makeReq('POST','/api/design/variants',{brief},headers));res=respond();
+ await api.handle(req,res,path);
+ assert.equal(res.status,200);assert.equal(res.data.variants.length,3);
+ const variant=res.data.variants[0];
+ ({req,path}=makeReq('POST','/api/design/freeze',{variant,approval:'APPROVE_FORGE_REFERENCE',persist:false},headers));res=respond();
+ await api.handle(req,res,path);
+ assert.equal(res.status,200);assert.equal(res.data.persisted,false);
+ assert.match(res.data.bundle.sha256,/^[a-f0-9]{64}$/);
+ ({req,path}=makeReq('POST','/api/design/variants',{brief},{...headers,origin:'https://external.invalid'}));res=respond();
+ await api.handle(req,res,path);
+ assert.equal(res.status,403);assert.equal(res.data.error,'FORGE_ORIGIN_FORBIDDEN');
+ ({req,path}=makeReq('POST','/api/design/variants',{brief},{...headers,'x-ffax-csrf':'nope'}));res=respond();
+ await api.handle(req,res,path);
+ assert.equal(res.status,403);
+});
