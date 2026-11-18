@@ -60,3 +60,6 @@
 /* Forge tokens are optional and never alter legacy project files. */
 .ff-canvas{font-family:var(--ff-font,system-ui,sans-serif);gap:var(--ff-gap,15px);border-radius:var(--ff-radius,14px)}
 .ff-canvas .ff-component{border-radius:var(--ff-radius,12px)}
+
+/* Forge-only motif, retaining the original FFAX hero gradient for non-Forge projects. */
+.ff-canvas[style*="--ff-hero-art"] .ff-hero{background-image:var(--ff-hero-art);background-color:var(--surface);background-size:cover;background-position:center}
