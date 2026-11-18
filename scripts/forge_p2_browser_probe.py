@@ -38,7 +38,7 @@ def responsive(page):
         metrics=page.evaluate("""() => ({documentWidth:document.documentElement.scrollWidth,
                     windowWidth:window.innerWidth,forgeCards:document.querySelectorAll('.forge-card').length})""")
         out=ART/f'forge-p2-{width}.png'
-        page.screenshot(path=str(out),full_page=True,timeout=20000)
+        page.screenshot(path=str(out),full_page=False,timeout=20000)
         REPORT['viewports'].append({'width':width,'metrics':metrics,'screenshot':out.name})
         check('forge-responsive-'+str(width),metrics['documentWidth']<=width+2,metrics)
 
@@ -151,7 +151,7 @@ try:
               page.locator('#forge-compare-status').inner_text())
         check('no-browser-errors',not REPORT['errors'],REPORT['errors'])
         check('no-external-browser-requests',not REPORT['requestsExternal'],REPORT['requestsExternal'])
-        page.screenshot(path=str(ART/'forge-p2-reviewed.png'),full_page=True,timeout=25000)
+        page.screenshot(path=str(ART/'forge-p2-reviewed.png'),full_page=False,timeout=25000)
         browser.close()
     REPORT['status']='PASS'
 finally:

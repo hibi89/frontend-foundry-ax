@@ -31,18 +31,29 @@ def main() -> int:
         raise RuntimeError('FORGE_PLAYWRIGHT_NOT_INSTALLED') from exc
     markup=html_file.read_text(encoding='utf-8')
     failures=[]
+    def stage(name: str) -> None:
+        # Exact public enum only; never logs HTML, user content, local paths or source.
+        print('FORGE_CAPTURE_STAGE_'+name, file=sys.stderr, flush=True)
+    stage('BEGIN')
     with sync_playwright() as playwright:
-        browser=playwright.chromium.launch(headless=True,args=['--no-first-run','--disable-extensions'])
+        stage('DRIVER_READY')
+        browser=playwright.chromium.launch(headless=True,args=['--no-first-run','--disable-extensions'],timeout=25000)
+        stage('BROWSER_READY')
         context=browser.new_context(viewport={'width':args.width,'height':args.height},device_scale_factor=args.dpr,java_script_enabled=False,offline=True)
         page=context.new_page()
+        stage('PAGE_READY')
         page.route('**/*',lambda route:route.abort())
         page.on('console',lambda msg:failures.append('console-error') if msg.type=='error' else None)
         page.on('pageerror',lambda exc:failures.append('page-error'))
         page.set_content(markup,wait_until='load',timeout=15000)
+        stage('HTML_LOADED')
         page.add_style_tag(content='*{animation:none!important;transition:none!important;caret-color:transparent!important}')
-        page.screenshot(path=str(out_file),full_page=False,animations='disabled',timeout=15000)
+        stage('CSS_ADDED')
+        page.screenshot(path=str(out_file),full_page=False,animations='disabled',timeout=18000)
+        stage('PNG_CAPTURED')
         version=browser.version
         page.close();context.close();browser.close()
+    stage('BROWSER_CLOSED')
     if failures: raise RuntimeError('FORGE_BROWSER_ERRORS')
     data=out_file.read_bytes()
     if data[:8]!=bytes([137,80,78,71,13,10,26,10]):raise RuntimeError('FORGE_CAPTURE_NOT_PNG')

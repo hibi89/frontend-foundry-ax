@@ -64,18 +64,25 @@ function parse(argv){
  if(!Number.isInteger(width)||width<320||width>2560||!Number.isInteger(height)||height<320||height>2200||![1,2].includes(dpr))throw Error('FORGE_VIEWPORT_UNSUPPORTED');
  return {bundle:a['--bundle'],out:a['--out'],width,height,dpr};
 }
-function runPython(args,timeoutMs=45000){
+function runPython(args,timeoutMs=100000){
  return new Promise((ok,fail)=>{
   // Python executable comes from the owner's own PATH; fixed trusted repository script only.
   const executable=process.platform==='win32'?'python':'python3';
   const cp=spawn(executable,args,{shell:false,windowsHide:true,stdio:['ignore','pipe','pipe'],env:{...process.env,PYTHONDONTWRITEBYTECODE:'1'}});
   let stdout='',stderr='',done=false;
   const complete=(error,value)=>{if(done)return;done=true;clearTimeout(timer);error?fail(error):ok(value);};
-  const timer=setTimeout(()=>{cp.kill();complete(Error('FORGE_CAPTURE_TIMEOUT'));},timeoutMs);
+  const timer=setTimeout(()=>{
+   cp.kill();
+   const stage=[...stderr.matchAll(/FORGE_CAPTURE_STAGE_(BEGIN|DRIVER_READY|BROWSER_READY|PAGE_READY|HTML_LOADED|CSS_ADDED|PNG_CAPTURED|BROWSER_CLOSED)/g)].at(-1)?.[1]||'UNKNOWN';
+   complete(Error('FORGE_CAPTURE_TIMEOUT_STAGE_'+stage));
+  },timeoutMs);
   cp.stdout.on('data',x=>{stdout+=x.toString('utf8');if(stdout.length>40000){cp.kill();complete(Error('FORGE_CAPTURE_OUTPUT_OVERSIZE'));}});
-  cp.stderr.on('data',x=>{stderr+=x.toString('utf8').slice(0,1000);});
+  cp.stderr.on('data',x=>{if(stderr.length<2500)stderr+=x.toString('utf8').slice(0,2500-stderr.length);});
   cp.on('error',()=>complete(Error('FORGE_PYTHON_MISSING')));
-  cp.on('close',code=>{if(code!==0)complete(Error('FORGE_CAPTURE_FAILED: '+stderr.slice(0,300)));else{try{complete(null,JSON.parse(stdout));}catch{complete(Error('FORGE_CAPTURE_RECEIPT_INVALID'));}}});
+  cp.on('close',code=>{if(code!==0){
+   const stage=[...stderr.matchAll(/FORGE_CAPTURE_STAGE_(BEGIN|DRIVER_READY|BROWSER_READY|PAGE_READY|HTML_LOADED|CSS_ADDED|PNG_CAPTURED|BROWSER_CLOSED)/g)].at(-1)?.[1]||'UNKNOWN';
+   complete(Error('FORGE_CAPTURE_FAILED_STAGE_'+stage));
+  }else{try{complete(null,JSON.parse(stdout));}catch{complete(Error('FORGE_CAPTURE_RECEIPT_INVALID'));}}});
  });
 }
 async function capture({bundle,out,width,height,dpr}){
