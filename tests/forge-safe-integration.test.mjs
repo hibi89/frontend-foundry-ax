@@ -101,7 +101,11 @@ test('RF-08: changed source and dynamic module discovery block audit and draft P
 
 test('P2 AC07: generated Forge React 19 UI + 10 actual service flows preserve both synthetic apps and rollback',async()=>{
  const require=createRequire(import.meta.url);
- const ts=require('typescript'),React=require('react'),ReactServer=require('react-dom/server');
+ let ts;
+ try{ts=require('typescript');}
+ catch{const {execFileSync}=await import('node:child_process');
+  ts=require(execFileSync('npm',['root','-g'],{encoding:'utf8'}).trim()+'/typescript');}
+ const React=require('react'),ReactServer=require('react-dom/server');
  const repoRoot=new URL('../',import.meta.url);
  let checked=0,executedFlows=0;
  for(const kind of ['react-market','react-analytics']){
