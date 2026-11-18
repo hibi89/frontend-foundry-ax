@@ -74,3 +74,6 @@
 .forge-compare-panel #forge-compare-status{white-space:pre-wrap;max-height:180px;overflow:auto}
 .forge-compare-panel #forge-compare-status[data-failed="true"]{color:#fecaca}
 @media(max-width:760px){.forge-compare-board{grid-template-columns:1fr}}
+
+.forge-capture-preview{display:block;width:100%;max-height:240px;object-fit:contain;background:#0b1220;border:1px solid #334155;border-radius:8px;margin:9px 0}
+.forge-capture-preview:not([src]){display:none}
