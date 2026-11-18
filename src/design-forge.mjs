@@ -3,10 +3,13 @@ import { buildBrief, newDocument, makeComponent, assertDocument, applyCommand, e
 
 export const FORGE_VARIANT_SCHEMA='ffax.design-variant.v1';
 export const FORGE_BUNDLE_SCHEMA='ffax.design-bundle.v1';
+// Style-taxonomy research: MIT nextlevelbuilder/ui-ux-pro-max-skill
+// pinned repository 7436a6e0b6dc3add7c12d5b6ef1ccd3d410dd7fd; styles.csv blob 7ed18d6ef06557b9a6f2285b87b458fd71e4722f.
+// The following authored token values are FFAX adaptations, not copied assets/fonts or an upstream quality certification.
 const styles=Object.freeze([
-  {id:'editorial',name:'Editorial',rationale:'정보 우선순위와 넓은 여백으로 과한 장식을 줄입니다.',theme:'daylight',layout:'stack',sequence:['Navbar','Hero','Badge','Button','Card','Stat','Form','Tabs','Alert'],origin:'FFAX_ORIGINAL'},
-  {id:'structured',name:'Structured',rationale:'표·정보 탐색이 많은 서비스에 명확한 카드 그리드를 사용합니다.',theme:'midnight',layout:'grid',sequence:['Navbar','Stat','Card','Table','Chart','Form','Button','Error','Empty'],origin:'FFAX_ORIGINAL'},
-  {id:'expressive',name:'Expressive',rationale:'핵심 행동과 브랜드 톤을 강조하되 색상 대비를 우선합니다.',theme:'ocean',layout:'stack',sequence:['Navbar','Hero','Button','Card','Tabs','Stat','Alert','Form','Loader'],origin:'FFAX_ORIGINAL'}
+  {id:'editorial',name:'Editorial',rationale:'정보 우선순위와 넓은 여백으로 과한 장식을 줄입니다.',theme:'daylight',layout:'stack',sequence:['Navbar','Hero','Badge','Button','Card','Stat','Form','Tabs','Alert'],origin:'minimalism-and-swiss-style',tokens:{name:'Editorial',surface:'#fafaf9',ink:'#172033',muted:'#475569',accent:'#2563eb',fontStack:'Georgia, serif',radius:12,density:'airy'}},
+  {id:'structured',name:'Structured',rationale:'표·정보 탐색이 많은 서비스에 명확한 카드 그리드를 사용합니다.',theme:'midnight',layout:'grid',sequence:['Navbar','Stat','Card','Table','Chart','Form','Button','Error','Empty'],origin:'minimalism-and-swiss-style',tokens:{name:'Structured',surface:'#0f172a',ink:'#f8fafc',muted:'#94a3b8',accent:'#38bdf8',fontStack:'system-ui, sans-serif',radius:6,density:'compact'}},
+  {id:'expressive',name:'Expressive',rationale:'핵심 행동과 브랜드 톤을 강조하되 색상 대비를 우선합니다.',theme:'ocean',layout:'stack',sequence:['Navbar','Hero','Button','Card','Tabs','Stat','Alert','Form','Loader'],origin:'FFAX_ORIGINAL',tokens:{name:'Expressive',surface:'#102a36',ink:'#effaff',muted:'#a5ced7',accent:'#14b8a6',fontStack:"'Malgun Gothic', system-ui, sans-serif",radius:18,density:'balanced'}}
 ]);
 const sensitive=/(?:github_pat_[\w-]{15,}|gh[opusr]_[\w-]{15,}|sk-[\w-]{12,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:password|secret|api[_-]?key|access[_-]?token)\s*[:=]\s*\S+|\.env\b|주민등록번호)/i;
 const clean=(v,max=180)=>String(v??'').trim().slice(0,max);
@@ -27,7 +30,7 @@ export function recommendForgeStyles(brief){
  const density=/표|관리|대시보드|데이터|admin|통계|금융/i.test(brief.prompt+' '+brief.mustHave);
  const expressive=/문화|달력|역학|예술|브랜드|hero|감성/i.test(brief.prompt+' '+brief.mood);
  const sorted=density?[styles[1],styles[0],styles[2]]:expressive?[styles[2],styles[0],styles[1]]:[...styles];
- return sorted.map((s,i)=>({styleId:s.id,name:s.name,rationale:s.rationale,rank:i+1,theme:s.theme,layout:s.layout,source:{provider:'FFAX',kind:'builtin',license:'internal',version:'2.1'},quality:'RULE_BASED_NOT_AESTHETICALLY_VERIFIED'}));
+ return sorted.map((s,i)=>({styleId:s.id,name:s.name,rationale:s.rationale,rank:i+1,theme:s.theme,layout:s.layout,source:s.origin==='FFAX_ORIGINAL'?{provider:'FFAX',kind:'builtin',license:'internal',version:'2.1'}:{provider:'UI UX Pro Max',kind:'inspired-style-taxonomy',license:'MIT',repo:'nextlevelbuilder/ui-ux-pro-max-skill',sha:'7436a6e0b6dc3add7c12d5b6ef1ccd3d410dd7fd',styleId:s.origin,notice:'Styles adapted by FFAX; only provenance is inherited.'},quality:'RULE_BASED_NOT_AESTHETICALLY_VERIFIED'}));
 }
 export function generateForgeVariants(brief){
  const recommendations=recommendForgeStyles(brief);
@@ -35,7 +38,7 @@ export function generateForgeVariants(brief){
    const style=styles.find(s=>s.id===rec.styleId);
    const doc=newDocument(brief.legacy,style.layout==='grid'?'B':'A');
    doc.title=clean(brief.legacy.objective,120);
-   doc.theme=style.theme;doc.layout=style.layout;
+   doc.theme=style.theme;doc.layout=style.layout;doc.designSystem=clone(style.tokens);
    doc.components=style.sequence.map((type,i)=>{
      const subject=type==='Hero'?brief.legacy.objective:type==='Navbar'?(brief.legacy.pages.slice(0,3).join(' · ')||brief.legacy.objective):type==='Card'?(brief.mustHave||brief.legacy.features.slice(0,2).join(' · ')||'서비스 개요'):undefined;
      return makeComponent(type,'node-'+(i+1),subject);
