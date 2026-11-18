@@ -1,0 +1,80 @@
+/* FFAX Design Forge V2.1: deterministic local React variants. No network or model dependency. */
+import { buildBrief, newDocument, makeComponent, assertDocument, applyCommand, exportReact, validateProjectImport, THEME_OPTIONS } from './core.mjs';
+
+export const FORGE_VARIANT_SCHEMA='ffax.design-variant.v1';
+export const FORGE_BUNDLE_SCHEMA='ffax.design-bundle.v1';
+const styles=Object.freeze([
+  {id:'editorial',name:'Editorial',rationale:'정보 우선순위와 넓은 여백으로 과한 장식을 줄입니다.',theme:'daylight',layout:'stack',sequence:['Navbar','Hero','Badge','Button','Card','Stat','Form','Tabs','Alert'],origin:'FFAX_ORIGINAL'},
+  {id:'structured',name:'Structured',rationale:'표·정보 탐색이 많은 서비스에 명확한 카드 그리드를 사용합니다.',theme:'midnight',layout:'grid',sequence:['Navbar','Stat','Card','Table','Chart','Form','Button','Error','Empty'],origin:'FFAX_ORIGINAL'},
+  {id:'expressive',name:'Expressive',rationale:'핵심 행동과 브랜드 톤을 강조하되 색상 대비를 우선합니다.',theme:'ocean',layout:'stack',sequence:['Navbar','Hero','Button','Card','Tabs','Stat','Alert','Form','Loader'],origin:'FFAX_ORIGINAL'}
+]);
+const sensitive=/(?:github_pat_[\w-]{15,}|gh[opusr]_[\w-]{15,}|sk-[\w-]{12,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:password|secret|api[_-]?key|access[_-]?token)\s*[:=]\s*\S+|\.env\b|주민등록번호)/i;
+const clean=(v,max=180)=>String(v??'').trim().slice(0,max);
+const clone=x=>JSON.parse(JSON.stringify(x));
+const isText=(x,max)=>typeof x==='string' && x.length<=max && !/[\u0000-\u001f\u007f]/.test(x);
+function requireSafeText(value,max=2000){if(!isText(value,max)||value.trim().length<8||sensitive.test(value))throw Error('FORGE_BRIEF_INVALID_OR_SENSITIVE');return value.trim();}
+function checkVariant(variant){if(!variant || variant.schema!==FORGE_VARIANT_SCHEMA || !['A','B','C'].includes(variant.id) || !Number.isInteger(variant.revision)||variant.revision<1||variant.revision>200 || !styles.some(s=>s.id===variant.styleId))throw Error('FORGE_VARIANT_INVALID');validateProjectImport(variant.document);return true;}
+function digestHex(buffer){return [...new Uint8Array(buffer)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function sha256(text){if(!globalThis.crypto?.subtle)throw Error('FORGE_CRYPTO_UNAVAILABLE');return digestHex(await globalThis.crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)));}
+export function makeForgeBrief({prompt,audience='',mood='',mustHave='',avoid=''}={}){
+ const raw=requireSafeText(prompt);
+ for(const val of [audience,mood,mustHave,avoid])if(!isText(val,500)||sensitive.test(val))throw Error('FORGE_CONSTRAINT_INVALID');
+ const legacy=buildBrief(raw);
+ return {schema:'ffax.design-brief.v2',prompt:raw,audience:clean(audience,120)||legacy.users,mood:clean(mood,150)||'균형 잡힌 전문적 디자인',mustHave:clean(mustHave,500),avoid:clean(avoid,500),scope:'LOCAL_PREVIEW_ONLY',rightsConfirmed:false,legacy};
+}
+export function recommendForgeStyles(brief){
+ if(brief?.schema!=='ffax.design-brief.v2')throw Error('FORGE_BRIEF_REQUIRED');
+ const density=/표|관리|대시보드|데이터|admin|통계|금융/i.test(brief.prompt+' '+brief.mustHave);
+ const expressive=/문화|달력|역학|예술|브랜드|hero|감성/i.test(brief.prompt+' '+brief.mood);
+ const sorted=density?[styles[1],styles[0],styles[2]]:expressive?[styles[2],styles[0],styles[1]]:[...styles];
+ return sorted.map((s,i)=>({styleId:s.id,name:s.name,rationale:s.rationale,rank:i+1,theme:s.theme,layout:s.layout,source:{provider:'FFAX',kind:'builtin',license:'internal',version:'2.1'},quality:'RULE_BASED_NOT_AESTHETICALLY_VERIFIED'}));
+}
+export function generateForgeVariants(brief){
+ const recommendations=recommendForgeStyles(brief);
+ return recommendations.map((rec,index)=>{
+   const style=styles.find(s=>s.id===rec.styleId);
+   const doc=newDocument(brief.legacy,style.layout==='grid'?'B':'A');
+   doc.title=clean(brief.legacy.objective,120);
+   doc.theme=style.theme;doc.layout=style.layout;
+   doc.components=style.sequence.map((type,i)=>{
+     const subject=type==='Hero'?brief.legacy.objective:type==='Navbar'?(brief.legacy.pages.slice(0,3).join(' · ')||brief.legacy.objective):type==='Card'?(brief.mustHave||brief.legacy.features.slice(0,2).join(' · ')||'서비스 개요'):undefined;
+     return makeComponent(type,'node-'+(i+1),subject);
+   });
+   assertDocument(doc);validateProjectImport(doc);
+   return {schema:FORGE_VARIANT_SCHEMA,id:['A','B','C'][index],styleId:style.id,revision:1,parentVariantId:null,brief:{prompt:brief.prompt,audience:brief.audience,mood:brief.mood,mustHave:brief.mustHave,avoid:brief.avoid},document:doc,recommendation:rec,previewStatus:'SOURCE_READY_RENDER_NOT_VERIFIED'};
+ });
+}
+export function refineForgeVariant(variant,{kind,id,prop,value}={}){
+ checkVariant(variant);
+ let command;
+ if(kind==='theme' && typeof value==='string' && Object.hasOwn(THEME_OPTIONS,value))command={kind:'theme',value};
+ else if(kind==='update' && typeof id==='string' && ['text','spacing','align','color','type'].includes(prop))command={kind,id,prop,value};
+ else if(kind==='move' && typeof id==='string' && Number.isInteger(value))command={kind:'move',id,index:value};
+ else if(kind==='insert' && typeof value==='string')command={kind:'insert',type:value};
+ else if(kind==='remove' && typeof id==='string')command={kind:'remove',id};
+ else throw Error('FORGE_REFINEMENT_UNSUPPORTED');
+ const result=clone(variant);result.document=applyCommand(variant.document,command);result.parentVariantId=variant.id+':'+variant.revision;result.revision++;result.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(result);return result;
+}
+export function mixForgeVariants(primary,secondary,{takeTheme=true,takeLayout=false}={}){
+ checkVariant(primary);checkVariant(secondary);
+ const next=clone(primary);next.parentVariantId=primary.id+':'+primary.revision;next.revision++;
+ if(takeTheme)next.document.theme=secondary.document.theme;
+ if(takeLayout)next.document.layout=secondary.document.layout;
+ next.document.version++;next.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(next);return next;
+}
+export async function freezeForgeVariant(variant,{approval,referencePng=null}={}){
+ checkVariant(variant);
+ if(approval!=='APPROVE_FORGE_REFERENCE')throw Error('FORGE_OWNER_APPROVAL_REQUIRED');
+ const source=exportReact(variant.document);
+ const project=clone(variant.document);
+ const manifest={schema:FORGE_BUNDLE_SCHEMA,source:'FFAX_FORGE_NATIVE',variantId:variant.id,revision:variant.revision,styleId:variant.styleId,project,reactSource:source,assets:[],designTokens:{theme:project.theme,layout:project.layout},referencePng};
+ const receipt=await sha256(JSON.stringify(manifest));
+ return {schema:FORGE_BUNDLE_SCHEMA,manifest,sha256:receipt,approval:'OWNER_APPROVED_THIS_VARIANT',renderProof:referencePng?'SUPPLIED_NOT_INDEPENDENTLY_VERIFIED':'PENDING_PLAYWRIGHT_CAPTURE',handoff:'SAME_SOURCE_REACT_NOT_SCREENSHOT_RECONSTRUCTION'};
+}
+export async function verifyForgeBundle(bundle){
+ if(bundle?.schema!==FORGE_BUNDLE_SCHEMA||!bundle.manifest||typeof bundle.sha256!=='string'||!/^[a-f0-9]{64}$/.test(bundle.sha256))throw Error('FORGE_BUNDLE_INVALID');
+ validateProjectImport(bundle.manifest.project);
+ if(bundle.manifest.reactSource!==exportReact(bundle.manifest.project))throw Error('FORGE_BUNDLE_SOURCE_MISMATCH');
+ if(await sha256(JSON.stringify(bundle.manifest))!==bundle.sha256)throw Error('FORGE_BUNDLE_HASH_MISMATCH');
+ return clone(bundle.manifest.project);
+}
