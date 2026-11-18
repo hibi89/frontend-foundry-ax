@@ -15,7 +15,7 @@
     "candidate": 25,
     "partial": 0,
     "sourceCandidatePercent": 100,
-    "p2Verification": "NOT_RUN"
+    "p2Verification": "P2_SELF_VERIFIED_CI_4_OF_4_OWNER_AND_INDEPENDENT_PENDING"
   },
   "units": [
     {
@@ -913,8 +913,32 @@
       "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44292450144"
     }
   ],
-  "lastUpdatedStatus": "ALL_25_SWU_SOURCE_CANDIDATE_WITH_LOCAL_SMOKE_PASS; P2_NOT_RUN; RELEASE_HOLD",
+  "lastUpdatedStatus": "P1_25_OF_25_CODE_CANDIDATES; P2_SELF_VERIFIED_LOCAL_CI_4_OF_4_PASS; OWNER_HARDWARE_REAL_CUSTOMER_AND_INDEPENDENT_AUDIT_NOT_RUN; RELEASE_HOLD",
   "lastSourceHead": "780b4cc416dedb6013470e1b11b7f8105e644978",
   "lastEvidenceRun": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44292749024",
-  "officialAC100Verification": "UNASSESSED"
+  "officialAC100Verification": "UNASSESSED",
+  "lastP2SourceHead": "f9c1fcc44beee78950596b34bf5103baec040041",
+  "lastP2EvidenceRun": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44301266661",
+  "lastP2DependencyAuditRun": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44301022612",
+  "p2SelfVerification": {
+    "sourceSha": "f9c1fcc44beee78950596b34bf5103baec040041",
+    "githubActionsRun": 44301266661,
+    "ciJobsPassed": 4,
+    "ciJobsTotal": 4,
+    "ubuntuNodeTestsPassed": 209,
+    "windowsNodeTestsPassed": 209,
+    "realForgeChromiumChecksPassed": 23,
+    "windowsEdgeForgeChecksPassed": 23,
+    "linuxBrowserScriptsPassed": 14,
+    "reactComputedStyleChecksPassed": 18,
+    "axeSeriousCritical": 0,
+    "cleanroomStepsPassed": 7,
+    "localAcceptanceStepsPassed": 5,
+    "dependencyAuditRun": 44301022612,
+    "highCriticalNpmVulnerabilities": 0,
+    "independentAudit": "NOT_RUN",
+    "ownerAcceptance": "NOT_RUN",
+    "realCustomerIntegration": "NOT_RUN",
+    "release": "HOLD"
+  }
 }
