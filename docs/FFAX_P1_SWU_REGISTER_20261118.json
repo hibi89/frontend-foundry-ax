@@ -23,8 +23,8 @@
       "legacy_task_id": "FFAX-V1-L01",
       "req_ids": [
         "REQ-01",
-        "08",
-        "10"
+        "REQ-08",
+        "REQ-10"
       ],
       "goal": "Read-only project snapshot and isolated import",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -56,8 +56,8 @@
       "legacy_task_id": "FFAX-V1-L02",
       "req_ids": [
         "REQ-01",
-        "10",
-        "12"
+        "REQ-10",
+        "REQ-12"
       ],
       "goal": "Local project version save/reopen",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -91,7 +91,7 @@
       "legacy_task_id": "FFAX-V1-L03",
       "req_ids": [
         "REQ-03",
-        "07"
+        "REQ-07"
       ],
       "goal": "17 structured component registry",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -123,7 +123,7 @@
       "legacy_task_id": "FFAX-V1-L04",
       "req_ids": [
         "REQ-02",
-        "03"
+        "REQ-03"
       ],
       "goal": "Legacy natural-language 2-direction brief",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -157,7 +157,7 @@
       "legacy_task_id": "FFAX-V1-L05",
       "req_ids": [
         "REQ-05",
-        "10"
+        "REQ-10"
       ],
       "goal": "Visual editor command and undo/redo",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -191,7 +191,7 @@
       "legacy_task_id": "FFAX-V1-L06",
       "req_ids": [
         "REQ-04",
-        "07"
+        "REQ-07"
       ],
       "goal": "Typed React TSX export",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -225,7 +225,7 @@
       "legacy_task_id": "FFAX-V1-L07",
       "req_ids": [
         "REQ-04",
-        "11"
+        "REQ-11"
       ],
       "goal": "Owner-approved local model and manual adapter gate",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -260,8 +260,8 @@
       "legacy_task_id": "FFAX-V1-L08",
       "req_ids": [
         "REQ-08",
-        "10",
-        "11"
+        "REQ-10",
+        "REQ-11"
       ],
       "goal": "GitHub read-only comparison and review gate",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -295,7 +295,7 @@
       "legacy_task_id": "FFAX-V1-L09",
       "req_ids": [
         "REQ-09",
-        "12"
+        "REQ-12"
       ],
       "goal": "Multi-viewport browser QA report path",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -330,7 +330,7 @@
       "legacy_task_id": "FFAX-V1-L10",
       "req_ids": [
         "REQ-08",
-        "10"
+        "REQ-10"
       ],
       "goal": "Isolated UI patch and rollback",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -363,9 +363,9 @@
       "legacy_task_id": "DF-01",
       "req_ids": [
         "REQ-01",
-        "02",
-        "06",
-        "11"
+        "REQ-02",
+        "REQ-06",
+        "REQ-11"
       ],
       "goal": "Forge brief and local consent constraints",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -399,8 +399,8 @@
       "legacy_task_id": "DF-02",
       "req_ids": [
         "REQ-02",
-        "03",
-        "11"
+        "REQ-03",
+        "REQ-11"
       ],
       "goal": "Version-pinned offline style recommendation",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -434,8 +434,8 @@
       "legacy_task_id": "DF-03",
       "req_ids": [
         "REQ-03",
-        "04",
-        "07"
+        "REQ-04",
+        "REQ-07"
       ],
       "goal": "A/B/C distinct React source candidates",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -469,8 +469,8 @@
       "legacy_task_id": "DF-04",
       "req_ids": [
         "REQ-03",
-        "05",
-        "10"
+        "REQ-05",
+        "REQ-10"
       ],
       "goal": "Free-form revisioned design editing and mix",
       "status": "PARTIAL_SOURCE",
@@ -505,7 +505,7 @@
       "legacy_task_id": "DF-05",
       "req_ids": [
         "REQ-06",
-        "09"
+        "REQ-09"
       ],
       "goal": "Actual capture with font/asset quality gates",
       "status": "PARTIAL_SOURCE",
@@ -539,9 +539,9 @@
       "legacy_task_id": "DF-06",
       "req_ids": [
         "REQ-01",
-        "06",
-        "10",
-        "12"
+        "REQ-06",
+        "REQ-10",
+        "REQ-12"
       ],
       "goal": "Immutable approved source/spec PNG bundle",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -575,9 +575,9 @@
       "legacy_task_id": "DF-07",
       "req_ids": [
         "REQ-05",
-        "08",
-        "10",
-        "12"
+        "REQ-08",
+        "REQ-10",
+        "REQ-12"
       ],
       "goal": "Forge GUI→API approval and editor handoff",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -612,8 +612,8 @@
       "legacy_task_id": "RF-01",
       "req_ids": [
         "REQ-01",
-        "06",
-        "10"
+        "REQ-06",
+        "REQ-10"
       ],
       "goal": "External reference import/hash and immutable storage",
       "status": "PARTIAL_SOURCE",
@@ -647,7 +647,7 @@
       "legacy_task_id": "RF-02",
       "req_ids": [
         "REQ-03",
-        "06"
+        "REQ-06"
       ],
       "goal": "Raster region and usable asset inventory",
       "status": "PARTIAL_SOURCE",
@@ -681,7 +681,7 @@
       "legacy_task_id": "RF-03",
       "req_ids": [
         "REQ-04",
-        "07"
+        "REQ-07"
       ],
       "goal": "External raster reconstruction to React candidate",
       "status": "PARTIAL_SOURCE",
@@ -715,7 +715,7 @@
       "legacy_task_id": "RF-04",
       "req_ids": [
         "REQ-06",
-        "09"
+        "REQ-09"
       ],
       "goal": "Exact-DPR Chromium render receipt",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -749,8 +749,8 @@
       "legacy_task_id": "RF-05",
       "req_ids": [
         "REQ-05",
-        "06",
-        "09"
+        "REQ-06",
+        "REQ-09"
       ],
       "goal": "Read-only reference pixel comparison",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -784,8 +784,8 @@
       "legacy_task_id": "RF-06",
       "req_ids": [
         "REQ-05",
-        "10",
-        "11"
+        "REQ-10",
+        "REQ-11"
       ],
       "goal": "Bounded copy-only corrections and rollback",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -819,9 +819,9 @@
       "legacy_task_id": "RF-07",
       "req_ids": [
         "REQ-05",
-        "09",
-        "10",
-        "12"
+        "REQ-09",
+        "REQ-10",
+        "REQ-12"
       ],
       "goal": "Owner comparison and visual acceptance UI",
       "status": "SOURCE_COMPLETE_P2_PENDING",
@@ -855,9 +855,9 @@
       "legacy_task_id": "RF-08",
       "req_ids": [
         "REQ-08",
-        "10",
-        "11",
-        "12"
+        "REQ-10",
+        "REQ-11",
+        "REQ-12"
       ],
       "goal": "Customer React integration with preserved contracts",
       "status": "PARTIAL_SOURCE",
