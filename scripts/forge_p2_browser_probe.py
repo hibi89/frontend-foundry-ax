@@ -67,7 +67,11 @@ try:
     with sync_playwright() as p:
         exe='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None
         launch={'headless':True,'args':['--no-sandbox','--disable-gpu']}
-        if exe:launch['executable_path']=exe
+        channel=os.environ.get('FFAX_BROWSER_CHANNEL')
+        if channel:
+            launch['channel']=channel
+        elif exe:
+            launch['executable_path']=exe
         browser=p.chromium.launch(**launch)
         ctx=browser.new_context(viewport={'width':1440,'height':900},accept_downloads=True)
         page=ctx.new_page()
@@ -75,7 +79,8 @@ try:
         page.on('console',lambda msg:REPORT['errors'].append('console:'+msg.text[:220]) if msg.type=='error' else None)
         page.on('requestfailed',lambda req:REPORT['errors'].append('requestfailed:'+req.url[:220]))
         page.on('request',lambda req:REPORT['requestsExternal'].append(req.url[:220])
-                if not req.url.startswith(BASE+'/') else None)
+                if not (req.url.startswith(BASE+'/') or
+                    req.url.startswith('blob:'+BASE+'/') or req.url.startswith('data:')) else None)
         response=page.goto(BASE+'/',wait_until='networkidle',timeout=25000)
         check('forge-served-browser-http',response.status==200)
         page.locator('#forge-brief').fill('현대적인 금융 대시보드, 고객 메뉴와 차트, 검색 버튼을 포함한 새 디자인을 만들어줘')
@@ -121,11 +126,12 @@ try:
           return {mime:b.type,bytes:b.size,sha256:hex};
         }""")
         REPORT['capture']={'sha256':evidence['sha256'],'bytes':evidence['bytes'],'width':375,'height':600}
-        check('forge-real-capture-hash',evidence['mime']=='image/png' and evidence['bytes']>1000)
+        check('forge-real-capture-hash',evidence['mime']=='image/png' and evidence['bytes']>1000
+              and len(evidence['sha256'])==64)
         page.locator('#forge-compare-run').click()
         page.wait_for_function("!document.querySelector('#forge-compare-download').disabled",timeout=45000)
-        check('forge-byte-identical-local-compare','0.00' in page.locator('#forge-compare-status').inner_text() or
-              '0%' in page.locator('#forge-compare-status').inner_text(),
+        check('forge-byte-identical-local-compare',
+              '불일치 기준 픽셀 0/' in page.locator('#forge-compare-status').inner_text(),
               page.locator('#forge-compare-status').inner_text())
         check('no-browser-errors',not REPORT['errors'],REPORT['errors'])
         check('no-external-browser-requests',not REPORT['requestsExternal'],REPORT['requestsExternal'])

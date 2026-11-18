@@ -88,6 +88,18 @@ jobs:
           } finally {
             if($proc -and -not $proc.HasExited){ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
           }
+      - name: Windows real Edge Forge browser and nested Chromium capture (P2, synthetic only)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -m pip install 'playwright==1.56.0'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m playwright install chromium
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:FFAX_BROWSER_CHANNEL = "msedge"
+          python scripts/forge_p2_browser_probe.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
   browser-qa:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
