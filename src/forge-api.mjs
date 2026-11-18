@@ -132,7 +132,7 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
     default:reply(res,404,{error:'FORGE_ROUTE_UNKNOWN'});return true;
    }
    reply(res,200,value);
-  }catch(err){const name=String(err?.message||'FORGE_UNAVAILABLE');reply(res,/^(FORGE_|PROJECT_)/.test(name)?400:500,{error:/^[A-Z_]{4,90}$/.test(name)?name:'FORGE_OPERATION_FAILED'});}
+  }catch(err){const name=String(err?.message||'FORGE_UNAVAILABLE');reply(res,/^(FORGE_|PROJECT_)/.test(name)?400:500,{error:/^[A-Z0-9_]{4,90}$/.test(name)?name:'FORGE_OPERATION_FAILED'});}
   finally{busy=false;}
   return true;
  };
