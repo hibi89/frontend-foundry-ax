@@ -1,4 +1,4 @@
-import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign,exportLocalProject,importLocalProject } from './core.mjs';
+import { DEFAULT_PROMPT,THEME_OPTIONS,REGISTRY,COMPONENT_TYPES,buildBrief,newDocument,DocumentHistory,assertDocument,renderMarkup,exportReact,createReference,approveReference,makeManualAIPrompt,parseModelDesign,exportLocalProject,importLocalProject,validateProjectImport } from './core.mjs';
 import {bindPreviewActions} from './demo-interactions.mjs';
 const el=id=>document.getElementById(id);
 const promptEl=el('prompt');promptEl.value=DEFAULT_PROMPT;
@@ -356,4 +356,18 @@ for(const type of COMPONENT_TYPES){const o=document.createElement('option');o.va
 for(const type of COMPONENT_TYPES){const o=document.createElement('option');o.value=type;o.textContent=REGISTRY[type].label;el('insert-component-type').append(o);}
 el('insert-component-type').value='Card';
 for(const [key,t] of Object.entries(THEME_OPTIONS)){const o=document.createElement('option');o.value=key;o.textContent=t.label;el('theme-select').append(o);}
+// Design Forge transfers only a SHA-approved native FFAX document, never arbitrary code or imported scripts.
+window.addEventListener('ffax:forge-apply',event=>{
+ try{
+  const detail=event.detail;
+  if(detail?.approval!=='APPROVE_FORGE_REFERENCE'||!/^[a-f0-9]{64}$/.test(detail.referenceSha256))throw Error('FORGE_REFERENCE_APPROVAL_INVALID');
+  validateProjectImport(detail.document);
+  const next=JSON.parse(JSON.stringify(detail.document));
+  history.past.push(history.present);if(history.past.length>history.max)history.past.shift();
+  history.present=next;history.future=[];selected=next.components[0]?.id||null;
+  brief=next.brief;promptEl.value=brief.raw;updateAll();
+  log('FORGE SOURCE HANDOFF · 승인된 동일 React 컴포넌트를 편집기에 반영했습니다. 실 브라우저 시각 검증은 별도입니다.');
+ }catch(err){log('FORGE HANDOFF FAIL: '+err.message,true);}
+});
+
 updateAll();
