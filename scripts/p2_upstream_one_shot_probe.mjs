@@ -7,6 +7,7 @@ import {mkdtemp,writeFile,readFile,stat,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {compareReference} from './ffax_reference_fidelity.mjs';
+import {extractReference} from './forge_reference_extract.mjs';
 const sig=Buffer.from([137,80,78,71,13,10,26,10]);
 const sha=x=>createHash('sha256').update(x).digest('hex');
 function crc32(x){let c=0xffffffff;for(const v of x){c^=v;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
@@ -18,7 +19,7 @@ function png(shift){
  return Buffer.concat([sig,chunk('IHDR',ih),chunk('IDAT',deflateSync(raw)),chunk('IEND',Buffer.alloc(0))]);
 }
 const entry=process.env.FFAX_ONE_SHOT_CLI;
-if(typeof entry!=='string'||!entry.endsWith('/dist/cli.mjs'))throw Error('P2_PINNED_CLI_REQUIRED');
+if(typeof entry!=='string'||!entry.replaceAll('\\','/').endsWith('/dist/cli.mjs'))throw Error('P2_PINNED_CLI_REQUIRED');
 const dir=await mkdtemp(join(tmpdir(),'ffax-p2-real-one-shot-'));
 try{
  const ref=join(dir,'reference.png'),render=join(dir,'render.png'),out=join(dir,'result');
@@ -38,8 +39,17 @@ try{
  assert.equal(heat.readUInt32BE(16),96);assert.equal(heat.readUInt32BE(20),64);
  assert.equal(response.report.comparison.summary.mismatchRatio,receipt.comparison.summary.mismatchRatio);
  assert.ok((await stat(join(out,'heatmap.png'))).size>33);
+ const extracted=await extractReference({reference:ref,out:join(dir,'extract'),engineEntry:resolve(entry)});
+ const structure=JSON.parse(await readFile(join(dir,'extract','structure.json'),'utf8'));
+ assert.equal(extracted.schema,'ffax.reference-structural-analysis.v1');
+ assert.equal(extracted.referenceSha256,sha(r));
+ assert.equal(extracted.humanReviewRequired,true);
+ assert.equal(structure.schema,'ffax.reference-structural-analysis.v1');
+ assert.equal(structure.input.sha256,sha(r));
+ assert.equal(structure.text,'NOT_EXTRACTED_NO_OCR');
+ assert.equal(structure.assetManifest.status,'NEEDS_MANUAL_REVIEW');
  console.log(JSON.stringify({test:'FFAX_P2_REAL_UPSTREAM_0_12_0',status:'PASS',
   referenceSha256:sha(r),renderSha256:sha(i),heatmapSha256:sha(heat),
   mismatchRatio:receipt.comparison.summary.mismatchRatio,issues:receipt.comparison.issues.length,
-  synthetic:true,externalUploads:0,sourceWrites:0,ownerVisualApproval:false}));
+  synthetic:true,structuralExtraction:true,os:process.platform,externalUploads:0,sourceWrites:0,ownerVisualApproval:false}));
 }finally{await rm(dir,{recursive:true,force:true});}
