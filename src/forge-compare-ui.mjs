@@ -4,6 +4,7 @@ const MAX_PNG=14*1024*1024;
 const SHA_RE=/^[a-f0-9]{64}$/;
 const setStatus=(text,failed=false)=>{const target=byId('forge-compare-status');target.textContent=text;target.dataset.failed=String(failed);};
 let current=null,urls=[];
+export function getOwnerVisualReviewReceipt(){return current?structuredClone(current):null;}
 function clearPreview(){for(const url of urls)URL.revokeObjectURL(url);urls=[];byId('forge-compare-approval').checked=false;byId('forge-compare-approve').disabled=true;byId('forge-compare-download').disabled=true;}
 async function loadPng(file){
  if(!file||file.type!=='image/png'||file.size<33||file.size>MAX_PNG)throw Error('FORGE_COMPARE_PNG_REQUIRED');
