@@ -1,0 +1,891 @@
+{
+  "schema": "ffax.p1.swu.v1",
+  "repo": "hibi89/frontend-foundry-ax",
+  "branch": "feature/ffax-reference-fidelity-20261118",
+  "baselineSha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+  "calculation": "equal_count_source_candidate_units_only",
+  "policy": "High 1 meaningful vertical SWU, P1 implementation and P2 validation separated",
+  "sourceUnitOrigin": "FFAX legacy L01-L10 audited code paths + DF-01..07 and RF-01..08 existing blueprint slices",
+  "officialFinal100PointACScore": "UNASSESSED",
+  "officialFullBlueprintWeightedImplementation": "UNASSESSED",
+  "release": "HOLD",
+  "requestedOwnerApprovalForFinalNumericalRubric": false,
+  "snapshotSummary": {
+    "total": 25,
+    "candidate": 19,
+    "partial": 6,
+    "sourceCandidatePercent": 76,
+    "p2Verification": "NOT_RUN"
+  },
+  "units": [
+    {
+      "swu_id": "FFAX-SWU-L01",
+      "legacy_task_id": "FFAX-V1-L01",
+      "req_ids": [
+        "REQ-01",
+        "08",
+        "10"
+      ],
+      "goal": "Read-only project snapshot and isolated import",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [],
+      "allowed_paths": [
+        "src/workspace.mjs",
+        "scripts/workspace_cli.mjs"
+      ],
+      "acceptance": "source → isolated digest-preserving copy; symlink/secret rejection",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 2,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L02",
+      "legacy_task_id": "FFAX-V1-L02",
+      "req_ids": [
+        "REQ-01",
+        "10",
+        "12"
+      ],
+      "goal": "Local project version save/reopen",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L01"
+      ],
+      "allowed_paths": [
+        "src/core.mjs",
+        "src/app.mjs"
+      ],
+      "acceptance": "owner export/import → schema validation → restored editable document; corruption rejected",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 1,
+        "U": 0,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L03",
+      "legacy_task_id": "FFAX-V1-L03",
+      "req_ids": [
+        "REQ-03",
+        "07"
+      ],
+      "goal": "17 structured component registry",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [],
+      "allowed_paths": [
+        "src/core.mjs",
+        "src/demo-interactions.mjs"
+      ],
+      "acceptance": "typed component insertion → generated node and behavior; unsupported type denied",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 0,
+        "U": 0,
+        "total": 1,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L04",
+      "legacy_task_id": "FFAX-V1-L04",
+      "req_ids": [
+        "REQ-02",
+        "03"
+      ],
+      "goal": "Legacy natural-language 2-direction brief",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L03"
+      ],
+      "allowed_paths": [
+        "src/core.mjs",
+        "src/app.mjs"
+      ],
+      "acceptance": "prompt → structured objective/constraints → 2 selectable directions; invalid brief rejected",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 0,
+        "U": 0,
+        "total": 1,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L05",
+      "legacy_task_id": "FFAX-V1-L05",
+      "req_ids": [
+        "REQ-05",
+        "10"
+      ],
+      "goal": "Visual editor command and undo/redo",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L03"
+      ],
+      "allowed_paths": [
+        "src/core.mjs",
+        "src/app.mjs"
+      ],
+      "acceptance": "typed edit/move → history and preview update → undo/redo; invalid property rejected",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 1,
+        "U": 0,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L06",
+      "legacy_task_id": "FFAX-V1-L06",
+      "req_ids": [
+        "REQ-04",
+        "07"
+      ],
+      "goal": "Typed React TSX export",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L03"
+      ],
+      "allowed_paths": [
+        "src/core.mjs",
+        "src/app.mjs"
+      ],
+      "acceptance": "validated document → deterministic TSX source; unsafe document refused",
+      "complexity": {
+        "S": 1,
+        "C": 1,
+        "I": 0,
+        "D": 0,
+        "U": 0,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L07",
+      "legacy_task_id": "FFAX-V1-L07",
+      "req_ids": [
+        "REQ-04",
+        "11"
+      ],
+      "goal": "Owner-approved local model and manual adapter gate",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L04"
+      ],
+      "allowed_paths": [
+        "src/ai-gate.mjs",
+        "src/local-ollama.mjs",
+        "src/server.mjs"
+      ],
+      "acceptance": "approval and bounded typed prompt → local-only result or safe provider/secret refusal",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 1,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L08",
+      "legacy_task_id": "FFAX-V1-L08",
+      "req_ids": [
+        "REQ-08",
+        "10",
+        "11"
+      ],
+      "goal": "GitHub read-only comparison and review gate",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L01"
+      ],
+      "allowed_paths": [
+        "src/github-compare-review.mjs",
+        "src/github-review.mjs"
+      ],
+      "acceptance": "consented public comparison → scoped review/draft-PR path or denied unsafe input",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 1,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L09",
+      "legacy_task_id": "FFAX-V1-L09",
+      "req_ids": [
+        "REQ-09",
+        "12"
+      ],
+      "goal": "Multi-viewport browser QA report path",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L06"
+      ],
+      "allowed_paths": [
+        "src/app.mjs",
+        "scripts/browser_qa.py",
+        "scripts/served_browser_qa.py"
+      ],
+      "acceptance": "three viewport QA → diagnostic output or explicit browser failure",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 0,
+        "U": 1,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-L10",
+      "legacy_task_id": "FFAX-V1-L10",
+      "req_ids": [
+        "REQ-08",
+        "10"
+      ],
+      "goal": "Isolated UI patch and rollback",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L01"
+      ],
+      "allowed_paths": [
+        "src/workspace.mjs"
+      ],
+      "acceptance": "exact-SHA approved CSS diff → isolated file patch/backup/restore; original unchanged",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 2,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-DF-01",
+      "legacy_task_id": "DF-01",
+      "req_ids": [
+        "REQ-01",
+        "02",
+        "06",
+        "11"
+      ],
+      "goal": "Forge brief and local consent constraints",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-L04"
+      ],
+      "allowed_paths": [
+        "src/design-forge.mjs",
+        "src/forge-api.mjs"
+      ],
+      "acceptance": "GUI brief → typed scoped brief or sensitive/malformed input rejection",
+      "complexity": {
+        "S": 1,
+        "C": 1,
+        "I": 0,
+        "D": 0,
+        "U": 0,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-DF-02",
+      "legacy_task_id": "DF-02",
+      "req_ids": [
+        "REQ-02",
+        "03",
+        "11"
+      ],
+      "goal": "Version-pinned offline style recommendation",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-DF-01"
+      ],
+      "allowed_paths": [
+        "src/forge-style-intelligence.mjs",
+        "src/design-forge.mjs"
+      ],
+      "acceptance": "brief → 3 reproducible industry-ranked styles, pinned data provenance and fallback",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 0,
+        "U": 1,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-DF-03",
+      "legacy_task_id": "DF-03",
+      "req_ids": [
+        "REQ-03",
+        "04",
+        "07"
+      ],
+      "goal": "A/B/C distinct React source candidates",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-DF-02"
+      ],
+      "allowed_paths": [
+        "src/design-forge.mjs",
+        "src/core.mjs"
+      ],
+      "acceptance": "recommendations → 3 typed trees and real generated React; invalid props blocked",
+      "complexity": {
+        "S": 1,
+        "C": 1,
+        "I": 0,
+        "D": 0,
+        "U": 0,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-DF-04",
+      "legacy_task_id": "DF-04",
+      "req_ids": [
+        "REQ-03",
+        "05",
+        "10"
+      ],
+      "goal": "Free-form revisioned design editing and mix",
+      "status": "PARTIAL_SOURCE",
+      "dependency_swu_ids": [
+        "FFAX-SWU-DF-03"
+      ],
+      "allowed_paths": [
+        "src/design-forge.mjs",
+        "src/design-forge-ui.mjs",
+        "index.html"
+      ],
+      "acceptance": "free text selective layout/branding/asset changes → reversible source revisions with stable component contracts",
+      "complexity": {
+        "S": 1,
+        "C": 1,
+        "I": 0,
+        "D": 1,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+    },
+    {
+      "swu_id": "FFAX-SWU-DF-05",
+      "legacy_task_id": "DF-05",
+      "req_ids": [
+        "REQ-06",
+        "09"
+      ],
+      "goal": "Actual capture with font/asset quality gates",
+      "status": "PARTIAL_SOURCE",
+      "dependency_swu_ids": [
+        "FFAX-SWU-DF-04"
+      ],
+      "allowed_paths": [
+        "scripts/forge_capture.mjs",
+        "src/forge-api.mjs"
+      ],
+      "acceptance": "selected A/B/C → browser PNG plus warning for missing fonts/assets and mismatched viewport",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 0,
+        "U": 1,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+    },
+    {
+      "swu_id": "FFAX-SWU-DF-06",
+      "legacy_task_id": "DF-06",
+      "req_ids": [
+        "REQ-01",
+        "06",
+        "10",
+        "12"
+      ],
+      "goal": "Immutable approved source/spec PNG bundle",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-DF-03"
+      ],
+      "allowed_paths": [
+        "src/design-forge.mjs",
+        "src/forge-api.mjs"
+      ],
+      "acceptance": "explicit approval → hashed source bundle and reopened same source; changed hash refused",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 1,
+        "U": 0,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-DF-07",
+      "legacy_task_id": "DF-07",
+      "req_ids": [
+        "REQ-05",
+        "08",
+        "10",
+        "12"
+      ],
+      "goal": "Forge GUI→API approval and editor handoff",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-DF-06"
+      ],
+      "allowed_paths": [
+        "src/design-forge-ui.mjs",
+        "src/forge-api.mjs",
+        "src/app.mjs"
+      ],
+      "acceptance": "select/refine/freeze → exact-source editor handoff and clear local errors",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 0,
+        "U": 0,
+        "total": 2,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-01",
+      "legacy_task_id": "RF-01",
+      "req_ids": [
+        "REQ-01",
+        "06",
+        "10"
+      ],
+      "goal": "External reference import/hash and immutable storage",
+      "status": "PARTIAL_SOURCE",
+      "dependency_swu_ids": [],
+      "allowed_paths": [
+        "src/reference-analysis.mjs",
+        "src/reference-vault.mjs",
+        "src/forge-runner.mjs",
+        "src/forge-convergence-ui.mjs"
+      ],
+      "acceptance": "owner PNG/JPEG/WebP rights/scope → immutable bytes+manifest+retrieve; changed SHA rejected",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 2,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-02",
+      "legacy_task_id": "RF-02",
+      "req_ids": [
+        "REQ-03",
+        "06"
+      ],
+      "goal": "Raster region and usable asset inventory",
+      "status": "PARTIAL_SOURCE",
+      "dependency_swu_ids": [
+        "FFAX-SWU-RF-01"
+      ],
+      "allowed_paths": [
+        "src/reference-assets.mjs",
+        "src/reference-analysis.mjs"
+      ],
+      "acceptance": "external image → observed/inferred/unknown layer/asset manifest, owner-approved usable assets or BLOCKED_ASSET",
+      "complexity": {
+        "S": 1,
+        "C": 1,
+        "I": 0,
+        "D": 1,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-03",
+      "legacy_task_id": "RF-03",
+      "req_ids": [
+        "REQ-04",
+        "07"
+      ],
+      "goal": "External raster reconstruction to React candidate",
+      "status": "PARTIAL_SOURCE",
+      "dependency_swu_ids": [
+        "FFAX-SWU-RF-02"
+      ],
+      "allowed_paths": [
+        "src/external-reference-to-forge.mjs",
+        "src/core.mjs"
+      ],
+      "acceptance": "source-checked asset manifest → valid generation adapter with fallback/unknown labels, no fake layer inference",
+      "complexity": {
+        "S": 1,
+        "C": 1,
+        "I": 0,
+        "D": 1,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-04",
+      "legacy_task_id": "RF-04",
+      "req_ids": [
+        "REQ-06",
+        "09"
+      ],
+      "goal": "Exact-DPR Chromium render receipt",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-DF-06"
+      ],
+      "allowed_paths": [
+        "scripts/forge_capture.py",
+        "scripts/forge_capture.mjs"
+      ],
+      "acceptance": "approved candidate → Chromium PNG/size/browser receipt; missing binary fails closed",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 0,
+        "U": 1,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-05",
+      "legacy_task_id": "RF-05",
+      "req_ids": [
+        "REQ-05",
+        "06",
+        "09"
+      ],
+      "goal": "Read-only reference pixel comparison",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-RF-04"
+      ],
+      "allowed_paths": [
+        "scripts/ffax_reference_fidelity.mjs",
+        "scripts/forge_pixel_metric.py"
+      ],
+      "acceptance": "same-dimension SHA pair → metrics/heatmap or version/mismatch failure, no silent npx",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 0,
+        "U": 1,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-06",
+      "legacy_task_id": "RF-06",
+      "req_ids": [
+        "REQ-05",
+        "10",
+        "11"
+      ],
+      "goal": "Bounded copy-only corrections and rollback",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-RF-05"
+      ],
+      "allowed_paths": [
+        "src/forge-convergence.mjs",
+        "scripts/forge_converge.mjs"
+      ],
+      "acceptance": "typed 1–5 trial changes → recapture/compare/best rollback, original kept",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 2,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-07",
+      "legacy_task_id": "RF-07",
+      "req_ids": [
+        "REQ-05",
+        "09",
+        "10",
+        "12"
+      ],
+      "goal": "Owner comparison and visual acceptance UI",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
+      "dependency_swu_ids": [
+        "FFAX-SWU-RF-06"
+      ],
+      "allowed_paths": [
+        "src/forge-convergence-ui.mjs",
+        "src/forge-compare-ui.mjs"
+      ],
+      "acceptance": "local reference/result → review board and explicit evidence-bound owner approval",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 1,
+        "D": 1,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+    },
+    {
+      "swu_id": "FFAX-SWU-RF-08",
+      "legacy_task_id": "RF-08",
+      "req_ids": [
+        "REQ-08",
+        "10",
+        "11",
+        "12"
+      ],
+      "goal": "Customer React integration with preserved contracts",
+      "status": "PARTIAL_SOURCE",
+      "dependency_swu_ids": [
+        "FFAX-SWU-RF-07",
+        "FFAX-SWU-L10"
+      ],
+      "allowed_paths": [
+        "src/forge-safe-integration.mjs",
+        "scripts/forge_integration_review.mjs"
+      ],
+      "acceptance": "reviewed diff → route/auth/API/event/data parity and separately approved scoped PR, safe rollback",
+      "complexity": {
+        "S": 1,
+        "C": 0,
+        "I": 0,
+        "D": 2,
+        "U": 0,
+        "total": 3,
+        "assumption": "Code-only scope; P2 and independent owner gate separate"
+      },
+      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
+      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "retry_stage": "NOT_TRIGGERED",
+      "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
+      "p2_status": "NOT_RUN",
+      "owner_original_write_allowed": false,
+      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+    }
+  ]
+}

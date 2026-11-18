@@ -31,7 +31,8 @@
     "forge:compare": "node scripts/forge_reconstruct.mjs run",
     "forge:extract": "node scripts/forge_reference_extract.mjs extract",
     "forge:converge": "node scripts/forge_converge.mjs run",
-    "forge:integration-review": "node scripts/forge_integration_review.mjs"
+    "forge:integration-review": "node scripts/forge_integration_review.mjs",
+    "swu:progress": "node scripts/ffax_swu_progress.mjs"
   },
   "engines": {
     "node": ">=20"
