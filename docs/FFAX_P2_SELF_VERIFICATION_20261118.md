@@ -68,3 +68,12 @@
 - **P2 남은 필수 게이트:** 사용자 실제 Windows 11 GTX1050 Ti·RAM16GB/Ollama 라이브 요청(OWNER 환경), 권리 확인된 외부 이미지+실 one-shot-ui 충실도 수락, 실고객 React auth/API/routes/적용·rollback, Codex 기술·보안/독립 Astra UI UX 감사, 사용자 최종 디자인·기능 GO **NOT_RUN**. 독립 감사나 실사용을 자체 CI로 대체하지 않음.
 - **공식 진척/보존:** 25/25 P1 SWU 소스 구현 후보 =100%; 고정 12 AC 총 100 가중치 공식 P2 검증완료율 = **UNASSESSED**. `RELEASE HOLD`, main/Production/고객 원본/비밀/유료/권한/상품 등록 변경 없음.
 
+## 8. 2026-11-18 — one-shot-ui 실제 upstream CLI 합성 환경 통합 검증
+
+- **작업 기준 코드 SHA:** `a1c17cbb9a42a532464e3fe915e18781aba375ed` on `feature/ffax-reference-fidelity-20261118`. [커밋](https://github.com/hibi89/frontend-foundry-ax/commit/a1c17cbb9a42a532464e3fe915e18781aba375ed).
+- **P2 미검증 게이트 일부 해소:** 선택형 외부 이미지 비교 모듈 `scripts/ffax_reference_fidelity.mjs`을 upstream `TN0123/one-shot-ui` **정확한 npm 버전 0.12.0**으로 실제 실행. 엔진 명칭·버전·MIT 라이선스·CLI binary contract를 runner에서 검사. upstream 소스는 제품에 vendoring/런타임 필수 설치하지 않음.
+- **실제 실행 증거:** [FFAX P2 real one-shot-ui #44324629302](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44324629302) **completed/success**. `compare --json --no-ocr --heatmap heatmap.png` 및 `suggest-fixes --json --no-ocr` 수행. 96×64 자체 생성 합성 PNG 2장에 **mismatchRatio 0.08072916666666667, issues 2**, heatmap PNG SHA `1786a242de5543dbaef0c563043f3e145df255337859266f3e725d4931fd4fef`. 참조 SHA `beda94d41cff5f93da56ae0f488843fe7bb93cdbf1685b4fc5562f37e5a6f095`; 구현 SHA `d7efac9aed762c599918a3e263cb6d03d9536d049bab3c6541b70a273a14dac0`. JSON ratio/issues, 96×64 실제 히트맵 PNG, SHA 불변을 검사. **검증 대상: upstream CLI의 실행 가능성과 FFAX 호출 계약뿐**.
+- **실제 수정:** 무검증 arbitrary JSON/없는 히트맵도 통과 가능했던 adapter를 보강해 실제 summary·issues·PNG 매직/크기 검증, 실패시 fail-closed; upstream 이미지 분석에 `--no-ocr` 적용해 불필요한 OCR 모델 실행/다운로드 경로 방지. 독립 runner npm package 설치는 `--ignore-scripts`, runner temp, repo `contents:read`, `persist-credentials:false`, 버전 exact pin. 고객 이미지·권리 확인 필요 참고자료/고객 앱/운영 원본은 사용하지 않았음.
+- **기존 코드 회귀:** [소스 smoke #44324629188](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44324629188) SUCCESS; [Windows 검수용 package #44324629046](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44324629046) SUCCESS. 전체 P2 CI 실행 [#44324629104](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44324629104)은 별도 상태 확인을 요함; 성공 증거 없이 PASS로 선기재하지 않음.
+- **여전히 NOT_RUN:** 사용자 실 Windows11 Qwen3 4B 성능·호출, 사용권 확인된 실제 외부 이미지/one-shot-ui 재현 수락, 실제 고객 React 인증·라우팅·API 시나리오, Codex 독립 보안·코드 감사, Astra 독립 UI/UX 감사, 최종 사용자 GO. **25/25 P1 source candidate (100%) / 공식 AC 검증완료율 UNASSESSED / RELEASE HOLD**.
+
