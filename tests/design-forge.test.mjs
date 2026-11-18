@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,verifyForgeBundle} from '../src/design-forge.mjs';
+import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,finalizeForgeBundleWithCapture,verifyForgeBundle} from '../src/design-forge.mjs';
 import {exportReact,renderMarkup,validateProjectImport} from '../src/core.mjs';
 
 test('DF-01/02/03: real three distinct local React source variants',()=>{
@@ -52,4 +52,20 @@ test('Forge design tokens produce distinct preview CSS and exported React source
  }
  const invalid=structuredClone(variants[0].document);invalid.designSystem.fontStack='url(https://evil.example/font)';
  assert.throws(()=>validateProjectImport(invalid),/DESIGN_SYSTEM_INVALID/);
+});
+
+
+test('DF-06/RF: freeze real local capture SHA in child bundle; mismatch/replay refused',async()=>{
+ const [candidate]=generateForgeVariants(makeForgeBrief({prompt:'역학달력 오늘 날짜와 생년월일시를 보여주는 화면을 만들어줘'}));
+ const original=await freezeForgeVariant(candidate,{approval:'APPROVE_FORGE_REFERENCE'});
+ const receipt={schema:'ffax.capture.v1',engine:'playwright-chromium',bundleSha256:original.sha256,
+  sha256:'1'.repeat(64),width:1440,height:900,dpr:1,browserVersion:'local-chromium'};
+ await assert.rejects(finalizeForgeBundleWithCapture(original,receipt,{approval:'NO'}),/FORGE_FINAL_IMAGE_APPROVAL_REQUIRED/);
+ const final=await finalizeForgeBundleWithCapture(original,receipt,{approval:'APPROVE_FINAL_REFERENCE_PNG'});
+ assert.notEqual(final.sha256,original.sha256);
+ assert.equal(final.manifest.parentBundleSha256,original.sha256);
+ assert.equal(final.manifest.referencePng.sha256,receipt.sha256);
+ assert.deepEqual(await verifyForgeBundle(final),candidate.document);
+ await assert.rejects(finalizeForgeBundleWithCapture(final,receipt,{approval:'APPROVE_FINAL_REFERENCE_PNG'}),/FORGE_REFERENCE_IMAGE_ALREADY_LOCKED/);
+ await assert.rejects(finalizeForgeBundleWithCapture(original,{...receipt,bundleSha256:'0'.repeat(64)},{approval:'APPROVE_FINAL_REFERENCE_PNG'}),/FORGE_CAPTURE_RECEIPT_INVALID/);
 });
