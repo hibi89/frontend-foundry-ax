@@ -88,7 +88,7 @@ export function newDocument(brief = buildBrief(DEFAULT_PROMPT), approach = 'A') 
     components: defaultTypes.map((type, i) => makeComponent(type, `node-${i + 1}`))
   };
 }
-const FORGE_FONTS=['system-ui, sans-serif','Georgia, serif','Arial, sans-serif','"Malgun Gothic", system-ui, sans-serif'];
+const FORGE_FONTS=['system-ui, sans-serif','Georgia, serif','Arial, sans-serif',"\'Malgun Gothic\', system-ui, sans-serif"];
 const FORGE_DENSITIES={airy:24,balanced:15,compact:10};
 function validateDesignSystem(tokens){
  if(tokens===undefined)return true;
