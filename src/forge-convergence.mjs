@@ -27,6 +27,30 @@ function safeScore(result){
  * @param {object} opts - approved candidate and typed patch plan
  * @param {(variant:object, pass:number)=>Promise<{meanAbsoluteChannelError:number,referenceSha256:string,renderSha256:string,receipt?:object}>} opts.measure
  */
+// Safe bounded trial selection for the zero-configuration path.
+// No language model or third-party output is executed, and no CSS text is accepted.
+export function planLocalTrials(variant,{maxPasses=MAX_PASSES}={}){
+ if(!Number.isInteger(maxPasses)||maxPasses<1||maxPasses>MAX_PASSES)throw Error('FORGE_LOOP_BUDGET_INVALID');
+ if(!variant?.document)throw Error('FORGE_LOOP_VARIANT_INVALID');
+ validateProjectImport(variant.document);
+ const selected=[
+  ...variant.document.components.filter(c=>['Hero','Card','Stat','Navbar','Form'].includes(c.type)),
+  ...variant.document.components
+ ];
+ const used=new Set(),proposals=[];
+ for(const node of selected){
+  if(used.has(node.id))continue;
+  used.add(node.id);
+  const padding=node.spacing===16?24:16;
+  if(padding!==node.spacing)proposals.push({schema:'ffax.visual-patch.v1',kind:'update',id:node.id,prop:'spacing',value:padding});
+  if(node.align==='start')proposals.push({schema:'ffax.visual-patch.v1',kind:'update',id:node.id,prop:'align',value:'center'});
+  else proposals.push({schema:'ffax.visual-patch.v1',kind:'update',id:node.id,prop:'align',value:'start'});
+  if(proposals.length>=maxPasses)break;
+ }
+ return {schema:'ffax.visual-patch-plan.v1',proposals:proposals.slice(0,maxPasses),unsupported:[],
+   action:'LOCAL_CANDIDATE_ONLY',sourceModified:false,needsRealRecapture:true,
+   provenance:'DETERMINISTIC_EXPLORATORY_TRIAL_NOT_INFERRED_CSS_GROUND_TRUTH'};
+}
 export async function runBoundedConvergence({variant,plan,measure,approval,maxPasses=5,minImprovement=0.01}={}){
  if(approval!=='APPROVE_LOCAL_CANDIDATE_CONVERGENCE')throw Error('FORGE_LOOP_APPROVAL_REQUIRED');
  if(typeof measure!=='function')throw Error('FORGE_LOOP_RENDERER_REQUIRED');
