@@ -1,0 +1,97 @@
+/* FFAX loopback Design Forge API: strict origin/CSRF, typed only, optional owner-approved local storage. */
+import {randomBytes} from 'node:crypto';
+import {homedir} from 'node:os';
+import {join} from 'node:path';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,verifyForgeBundle} from './design-forge.mjs';
+const MAX_BYTES=150000,MAX_RESPONSE=350000;
+const storeRoot=join(homedir(),'.ffax','forge-bundles');
+function reply(res,status,value){
+ const data=JSON.stringify(value);
+ if(data.length>MAX_RESPONSE){res.writeHead(413,{'Cache-Control':'no-store'}).end();return;}
+ res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}).end(data);
+}
+async function parseJson(req){
+ let data='',bytes=0;
+ for await(const part of req){
+  bytes+=part.length;if(bytes>MAX_BYTES)throw Error('FORGE_INPUT_TOO_LARGE');
+  data+=part.toString('utf8');
+ }
+ let result;try{result=JSON.parse(data);}catch{throw Error('FORGE_JSON_INVALID');}
+ if(!result||Array.isArray(result)||typeof result!=='object'||Object.getPrototypeOf(result)!==Object.prototype)throw Error('FORGE_BODY_INVALID');
+ return result;
+}
+function assertKeys(body,allowed){
+ if(Object.keys(body).some(x=>!allowed.includes(x)))throw Error('FORGE_FIELDS_INVALID');
+}
+export function createForgeApi({host='127.0.0.1',port=4173}={}){
+ const origin='http://'+host+':'+port;
+ const csrf=randomBytes(32).toString('hex');
+ let busy=false;
+ const handle=async(req,res,path)=>{
+  if(!path.startsWith('/api/design/'))return false;
+  const requestOrigin=req.headers.origin;
+  const fetchSite=req.headers['sec-fetch-site'];
+  if(requestOrigin&&requestOrigin!==origin){reply(res,403,{error:'FORGE_ORIGIN_FORBIDDEN'});return true;}
+  if(fetchSite&&fetchSite!=='same-origin'&&fetchSite!=='none'){reply(res,403,{error:'FORGE_FETCH_SITE_FORBIDDEN'});return true;}
+  if(path==='/api/design/session'){
+   if(req.method!=='GET'){reply(res,405,{error:'FORGE_METHOD_FORBIDDEN'});return true;}
+   reply(res,200,{schema:'ffax.forge-session.v1',csrf,origin,storage:'OWNER_OPT_IN_ONLY'});return true;
+  }
+  if(req.headers['x-ffax-csrf']!==csrf){reply(res,403,{error:'FORGE_CSRF_FORBIDDEN'});return true;}
+  if(req.method==='GET'&&/^\/api\/design\/jobs\/[a-f0-9]{64}$/.test(path)){
+   try{
+    const id=path.slice('/api/design/jobs/'.length);
+    const body=JSON.parse(await readFile(join(storeRoot,id+'.json'),'utf8'));
+    await verifyForgeBundle(body);
+    if(body.sha256!==id)throw Error('FORGE_STORED_ID_MISMATCH');
+    reply(res,200,{schema:'ffax.design-job.v1',id,state:'DESIGN_LOCKED',bundle:body});return true;
+   }catch{reply(res,404,{error:'FORGE_JOB_UNAVAILABLE'});return true;}
+  }
+  if(req.method!=='POST'){reply(res,405,{error:'FORGE_METHOD_FORBIDDEN'});return true;}
+  if(req.headers['content-type']!=='application/json'||requestOrigin!==origin){
+   reply(res,403,{error:'FORGE_LOCAL_POST_ONLY'});return true;
+  }
+  if(busy){reply(res,429,{error:'FORGE_BUSY'});return true;}
+  busy=true;
+  try{
+   const body=await parseJson(req);
+   let value;
+   switch(path){
+    case '/api/design/brief':
+     assertKeys(body,['brief']);value={schema:'ffax.design-brief-result.v1',brief:makeForgeBrief(body.brief)};break;
+    case '/api/design/recommend':{
+     assertKeys(body,['brief']);const brief=makeForgeBrief(body.brief);
+     value={schema:'ffax.design-recommend-result.v1',brief,recommendations:recommendForgeStyles(brief)};break;}
+    case '/api/design/variants':{
+     assertKeys(body,['brief']);const brief=makeForgeBrief(body.brief);
+     value={schema:'ffax.design-variants-result.v1',brief,variants:generateForgeVariants(brief)};break;}
+    case '/api/design/refine':
+     assertKeys(body,['variant','command']);value={schema:'ffax.design-refine-result.v1',variant:refineForgeVariant(body.variant,body.command)};break;
+    case '/api/design/mix':
+     assertKeys(body,['primary','secondary','options']);value={schema:'ffax.design-mix-result.v1',variant:mixForgeVariants(body.primary,body.secondary,body.options)};break;
+    case '/api/design/freeze':{
+     assertKeys(body,['variant','approval','persist','persistConsent']);
+     const bundle=await freezeForgeVariant(body.variant,{approval:body.approval});
+     if(body.persist===true){
+      if(body.persistConsent!=='APPROVE_LOCAL_FORGE_STORAGE')throw Error('FORGE_STORAGE_APPROVAL_REQUIRED');
+      await mkdir(storeRoot,{recursive:true,mode:0o700});
+      const path=join(storeRoot,bundle.sha256+'.json');
+      try{await writeFile(path,JSON.stringify(bundle),{flag:'wx',mode:0o600});}
+      catch(err){
+       if(err?.code!=='EEXIST')throw Error('FORGE_STORAGE_FAILED');
+       const previous=JSON.parse(await readFile(path,'utf8'));
+       await verifyForgeBundle(previous);
+       if(previous.sha256!==bundle.sha256)throw Error('FORGE_STORAGE_CONFLICT');
+      }
+     }
+     value={schema:'ffax.design-freeze-result.v1',id:bundle.sha256,persisted:body.persist===true,bundle};break;}
+    default:reply(res,404,{error:'FORGE_ROUTE_UNKNOWN'});return true;
+   }
+   reply(res,200,value);
+  }catch(err){const name=String(err?.message||'FORGE_UNAVAILABLE');reply(res,/^(FORGE_|PROJECT_)/.test(name)?400:500,{error:/^[A-Z_]{4,90}$/.test(name)?name:'FORGE_OPERATION_FAILED'});}
+  finally{busy=false;}
+  return true;
+ };
+ return {handle};
+}
