@@ -68,6 +68,21 @@ export function mixForgeVariants(primary,secondary,{takeTheme=true,takeLayout=fa
  if(takeLayout)next.document.layout=secondary.document.layout;
  next.document.version++;next.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(next);return next;
 }
+export function adoptLocalModelDesign(variant,document,{approval,model,sha256:outputSha256}={}){
+ checkVariant(variant);
+ if(approval!=='APPROVE_LOCAL_DESIGN_VARIANT')throw Error('FORGE_MODEL_APPROVAL_REQUIRED');
+ if(model!=='qwen3:4b-instruct'||!/^[a-f0-9]{64}$/.test(outputSha256||''))throw Error('FORGE_MODEL_RECEIPT_INVALID');
+ validateProjectImport(document);
+ const next=clone(variant);next.parentVariantId=variant.id+':'+variant.revision;next.revision++;
+ next.document=clone(document);
+ // Preserve the approved FFAX design tokens and local style ownership; only replace typed component structure.
+ next.document.designSystem=clone(variant.document.designSystem);
+ next.document.theme=variant.document.theme;
+ next.modelReceipt={model,sha256:outputSha256,origin:'LOCAL_OWNER_APPROVED_TEXT_JSON',external:false};
+ next.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';
+ checkVariant(next);
+ return next;
+}
 export async function freezeForgeVariant(variant,{approval,referencePng=null}={}){
  checkVariant(variant);
  if(approval!=='APPROVE_FORGE_REFERENCE')throw Error('FORGE_OWNER_APPROVAL_REQUIRED');
