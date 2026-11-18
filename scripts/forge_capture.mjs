@@ -4,7 +4,7 @@ import { readFile,writeFile,mkdir,realpath,stat,mkdtemp,rm } from 'node:fs/promi
 import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {tmpdir} from 'node:os';
-import {join,resolve,dirname} from 'node:path';
+import {join,resolve,dirname,basename,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {renderMarkup} from '../src/core.mjs';
 import {verifyForgeBundle} from '../src/design-forge.mjs';
@@ -85,12 +85,25 @@ function runPython(args,timeoutMs=65000){
   }else{try{complete(null,JSON.parse(stdout));}catch{complete(Error('FORGE_CAPTURE_RECEIPT_INVALID'));}}});
  });
 }
+/** A capture must never create an output directory inside the FFAX source tree.
+ * Resolve the existing parent to catch symlinks and use OS-specific separators on Windows.
+ * The actual output directory must not exist (mkdir remains non-recursive).
+ */
+export async function validateCaptureOutputDestination(out){
+ if(typeof out!=='string'||!out.trim())throw Error('FORGE_OUTPUT_CONFLICT');
+ const destination=resolve(out);
+ const [sourceRoot,parent]=await Promise.all([realpath(join(root,'src')),realpath(dirname(destination))]);
+ const canonicalTarget=resolve(parent,basename(destination));
+ if(canonicalTarget===sourceRoot||canonicalTarget.startsWith(sourceRoot+sep))
+  throw Error('FORGE_OUTPUT_CONFLICT');
+ return destination;
+}
 async function capture({bundle,out,width,height,dpr}){
  const source=await realpath(resolve(bundle));
  const s=await stat(source);if(!s.isFile()||s.size>500000||s.size<100)throw Error('FORGE_BUNDLE_FILE_INVALID');
  const item=JSON.parse(await readFile(source,'utf8'));const document=await verifyForgeBundle(item);
- const destination=resolve(out);
- if(destination===source||destination.startsWith(root+'/src/'))throw Error('FORGE_OUTPUT_CONFLICT');
+ const destination=await validateCaptureOutputDestination(out);
+ if(destination===source)throw Error('FORGE_OUTPUT_CONFLICT');
  const preflight=inspectCaptureReadiness(item,{width,height,dpr});
  await mkdir(destination,{recursive:false});
  const scratch=await mkdtemp(join(tmpdir(),'ffax-forge-capture-'));
