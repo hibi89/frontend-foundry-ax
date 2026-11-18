@@ -4,8 +4,11 @@ import {mapReferenceToSource,approveMappedReference} from '../src/external-refer
 import {validateProjectImport,exportReact} from '../src/core.mjs';
 import {verifyForgeBundle} from '../src/design-forge.mjs';
 const inventory={schema:'ffax.external-reference-inventory.v1',name:'owner-astrology.png',
-  rightsConfirmed:true,sha256:'a'.repeat(64),width:1440,height:900,
-  regions:[{id:'band-1'},{id:'band-2'},{id:'band-3'}],paletteHints:['#112233','#334455','#778899']};
+  mime:'image/png',bytes:2048,rightsConfirmed:true,sha256:'a'.repeat(64),width:1440,height:900,
+  regions:[0,1,2].map(i=>({id:'band-'+(i+1),
+    bounds:{x:0,y:i*300,width:1440,height:300},
+    colorHint:['#112233','#334455','#778899'][i]})),
+  paletteHints:['#112233','#334455','#778899']};
 const annotations=[
  {regionId:'band-1',type:'Navbar',text:'역학 달력'},
  {regionId:'band-2',type:'Hero',text:'오늘의 역학 날짜'},
@@ -21,6 +24,8 @@ test('RF-02/03: explicit annotated screenshot yields real valid FFAX React sourc
  assert.match(result.bundle.sha256,/^[a-f0-9]{64}$/);
  assert.deepEqual(await verifyForgeBundle(result.bundle),result.variant.document);
  assert.equal(result.evidence.automaticLayerRecovery,false);
+ assert.equal(result.evidence.assetManifest.reference.sha256,inventory.sha256);
+ assert.equal(result.bundle.manifest.externalAssetManifest.state,'STRUCTURE_OWNER_REVIEWED_ASSETS_INCOMPLETE');
 });
 test('RF-02/03: missing owner approval, unsupported components, or invalid inventory are blocked',()=>{
  const options={prompt:'역학달력 날짜 조회와 사주 입력을 포함한 프론트엔드를 제작해줘',approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true};
