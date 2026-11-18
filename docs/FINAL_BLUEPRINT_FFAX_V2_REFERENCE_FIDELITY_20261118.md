@@ -1,5 +1,130 @@
 # FFAX V2.0 — Reference Fidelity Mode 최종설계 정본
 
+> **[2026-11-18 KST · OWNER-SELECTED V2.1 DESIGN FORGE CANONICAL ADDITION]** 사용자는 **레퍼런스를 확정하기 전 디자인 추천·개선·다중 시안·사용자 지시 반영**까지 FFAX 내부화하도록 지시했다. 이 §0A는 아래 기존 §1의 '레퍼런스 이미지가 이미 존재한다'는 묵시적 전제를 대체한다. **신규 Design Forge 경로**와 **기존 외부 이미지 역설계 경로**를 명확히 나누며 나머지 보존·인증·비밀/원본·P1/P2·출시 게이트는 그대로다. 본문은 **확정 설계**이지 구현/검증 완료가 아니다.
+
+## 0A. Design Forge — 레퍼런스 생성·개선·추천·승인 (V2.1 최우선 신규 진입단계)
+
+### 0A-1. 핵심 결정: GitHub 기술 재사용 + FFAX 고유 엔진, 새 저장소 없음
+
+- **FFAX 저장소 유지:** `hibi89/frontend-foundry-ax` 단일 제품·현재 `feature/ffax-reference-fidelity-20261118` 개발 브랜치. FFAX 기존 17종 UI 컴포넌트, structured React 생성/편집, 디자인 브리프/2안, Undo/Redo, 로컬 저장/복원, read-only repo 검토, Ollama local adapter, Playwright/원본 변경 승인 흐름은 절대 축소하지 않는다.
+- **지식 추천 엔진: UI UX Pro Max** (`nextlevelbuilder/ui-ux-pro-max-skill`, source snapshot `7436a6e0b6dc3add7c12d5b6ef1ccd3d410dd7fd`, MIT; skill metadata version 2.15.0). 검토된 스타일/산업별 팔레트/폰트 페어링/UX anti-pattern 추천 규칙을 **오프라인으로 추출한 정형 추천 데이터**로 채택한다. 소스 전체/CLI 설치는 자동 수행하지 않고 데이터·의존성·폰트의 라이선스/보안/중복 검토 후 필요한 자료만 버전 고정해 캐시/어댑터로 사용한다. GitHub Trending은 **신기술 탐색 채널**이지 런타임 필수 호출, 실제 유행 순위 기반 디자인 품질 보증, 자동 원격 코드 실행이 아니다.
+- **OpenUI** (`scalewithalap/openui@8b87248a2605a164df55e47a6d9db3210102b822`, MIT): moodboard, typography/style preset, design token 실시간 동기화 등 **패턴만 참조**. 다른 대형 UI/DB/React 편집기 전체 이식은 중복·의존성 위험으로 불채택.
+- **OpenStitch** (`heldernoid/openstitch@22815d1c071c49d177275a1a42b84018e84e88fb`, MIT): multi-screen `DESIGN.md`와 반복 디자인 흐름의 **연구 참고**. Docker/Ollama 다중 고사양 모델과 iframe 기반 전체 앱 **필수 의존성 불채택**(현재 GTX1050 Ti/RAM16GB, VM/컨테이너 회피, 로컬/0원 제약; 실제 성능 측정 전 추정).
+- **기존 FFAX 자체 기술 핵심:** `src/core.mjs` `buildBrief`/`newDocument`/`createReference`/`approveReference`/`exportReact`, `src/local-ollama.mjs` Qwen `qwen3:4b-instruct` 구조화 텍스트 요청(검증 코드상 local-only; 실제 모델 시각 생성/품질 PASS는 NOT_RUN). 현행 '2개 색상 스와치+stack/grid'는 **다중 미학 시안 생성에 불충분**하므로 아래 사용자 기능으로 강화한다. Qwen 4B는 **이미지 생성 모델도 비전 기반 정밀 역설계 모델도 아니다**. 텍스트 계획/문구/디자인 설명 제안에만 선택 사용; 완전 무료 오프라인 fallback은 규칙·디자인 데이터·기존 컴포넌트 생성.
+- **MLA/EAI/AXZERO:** 원본 repo의 고유 신뢰 모델·제품 정체성을 보존. MLA는 독립 자율개발/코드 실행 주체, EAI는 독립 Architect/Player 제품, AXZERO는 아직 실운용 증명 없는 옵션이다. **Design Forge의 필수 런타임 의존성·권한 주체·프롬프트/원본 전송 대상으로 사용하지 않는다.** 추후 실제 검증된 versioned read-only `DesignProposal`/quality advisor API 계약과 사용자 GO가 존재하는 경우에만 선택적 협력; FFAX 승인권/소스 생성 소유권은 이동하지 않는다.
+- **외부 이미지 모델/스크린샷-투-코드 SaaS:** 초기 P0 필수 아님. 브랜드 일러스트/히어로 사진 같은 비CSS 자산은 사용자 소유 자산·안전한 로컬 SVG/일러스트 구성 우선; 무료 이미지 생성이 실제 가용하고 명시 승인이 있을 때만 **독립 AssetProvider**로 선택 사용. ChatGPT 이미지 생성 기능을 FFAX에서 자동 호출 가능하다고 가정하지 않는다. 유료 또는 외부 업로드는 별도 승인 없으면 HOLD.
+
+### 0A-2. 가장 중요한 설계 원칙 — FFAX 내부에서 만든 레퍼런스는 다시 스크린샷 역설계하지 않는다
+
+**Forge-native:** 사용자가 FFAX에서 요구사항/참고 이미지/스타일을 입력하면, FFAX는 먼저 **실제 렌더링 가능한 컴포넌트 트리 + 타입/색/레이아웃 토큰 + 자산 manifest + 텍스트 + viewport별 규칙**을 만들어 Playwright로 A/B/C 시안 PNG를 캡처한다. 사용자가 고르면 **그 시안의 코드/컴포넌트/자산을 그대로 구현 단계에 전달**하고, PNG와 소스 사양을 함께 SHA로 잠근다. `image-to-code`로 PNG를 재해석해 코드를 재생성하지 않는다. 결과가 달라지는 원인을 원천적으로 줄인다.
+
+**External-image:** FFAX 외부에서 공급한 1장의 평면 PNG/JPEG는 디자인 소스가 없으므로 기존 `Image-to-code` 분석·레이어/자산 사양 재구성→FFAX 구현→실화면 캡처·비교의 순서를 유지한다. 불명확한 폰트·가려진 그림·숨겨진 인터랙션을 정확하게 복원했다고 주장하지 않는다.
+
+원본 `referenceId`와 구현 `candidateId`는 별도이며, FFAX 안에서 만든 시안은 `designSourceId`도 함께 보존한다. **이미지 한 장이 아닌 `Design Source Bundle`이 정본**이다.
+
+### 0A-3. 사용자가 실제로 보는 'Design Forge' 프론트엔드
+
+```text
+[새 디자인 생성 | 기존 이미지 개선 | 기존 프로젝트 UI 재설계]
+  ├ 요구사항 입력: 사용목적/대상/꼭 필요한 기능/화면/데이터/수정 금지/접근성/모바일
+  ├ 선택: 기존 이미지(로컬·사용권), 브랜드 키워드·로고·색감·예산·원본 보호
+  ├ 디자인 취향: 클래식↔현대적, 미니멀↔화려, 밝음↔다크, 밀도, 동적효과
+  ├ "더 고급스럽게/촌티 제거/젊은 감성/한국적 신비감/가독성 향상" 텍스트 지시
+  ↓
+[추천 카드] 적합성 근거 1-2문장 + 사용한 스타일 데이터/모델 여부 + 제한/추정
+  ↓
+[A/B/C 실제 HTML/React 렌더 시안] 기본 3안, 2~4안 설정 가능
+  ├ 구조: hero/cards/forms/calendar/nav 등의 실제 컴포넌트
+  ├ 색채/여백/타이포/그림/버튼/상태·화면 너비가 다른 원본 variants
+  ├ 비교·확대/모바일/폰트 대체/키보드/색 대비 경고
+  ↓
+[선택·수정·혼합] A의 배치 + B의 배색 + C의 글꼴 등 선언적 토큰/컴포넌트 diff
+  ├ "수정할 부분만" 대화/세부 속성/Undo·Redo
+  ├ 자동 품질 피드백(규칙·측정) / 외부 모델은 명시 승인 때만
+  ├ 재추천/재생성 default 최대 3회, 초과는 owner가 선택적으로 재시작
+  ↓
+[레퍼런스로 확정] source + assets + spec + viewport PNG 묶음 hash/manifest
+  ↓
+[FFAX 기존 구현 파이프라인] 바로 사용 가능 + Playwright/reference-fidelity QA
+  ↓
+[원본 앱 적용] Diff/rollback + owner GO → separate Production GO
+```
+
+이 단계의 **실제 Design Forge 화면은 P1 구현 대상으로 아직 NOT_IMPLEMENTED**. 사용자 대화 내용이 전체 시스템의 런타임 입력 계약이 되며, A/B/C 시안의 아름다움/순위는 모델의 취향 점수만으로 증명하지 않는다.
+
+### 0A-4. 취향 추천·촌티 제거의 측정과 한계
+
+- **추천은 규칙+데이터 기반:** 제품 카테고리, 사용자 특성, 접근성, 콘텐츠 밀도, 시안 레퍼런스와 비용·반응형 제약을 사용. 템플릿 복사만 반복하지 않도록 레이아웃 계층/타이포 계층/장식 예산/브랜드 독창성을 별도 축으로 생성.
+- **일단 3안:** A=브랜드/콘텐츠 중심 고품질 편집형, B=정보 밀도 높은 대시보드형, C=대조적인 표현형. 특정 업종에 불리한 고정 3테마를 강제하지 않고 분산된 미학 방향을 유지한다. 선택·수정·혼합은 component IDs와 design tokens 교차 참조로 deterministic; 직접 PNG 덧칠하여 수동 작업을 가장하지 않는다.
+- **Anti-pattern 체크:** 과도한 그라데이션·글로우·그림자·금색/보라색 남용, 무작위 폰트·장식, 흔한 AI 템플릿 조합, 불필요한 카드, 정보 계층 불분명, 색 대비 미달, 글자 뭉개짐·줄바꿈, HTML과 PNG 텍스트 불일치, 깨진 한글/한자, 레이아웃 오버플로, 버튼의 부재/의미 불명확. 미학 판단은 **추천**이며 최종 사용자 선택을 덮지 않는다.
+- **객관적 게이트:** 폰트/자산 가용·라이선스, contrast, overflow, 스크린 리더/키보드, 필수 텍스트·버튼 존재, 링크/상호작용 의도, 회귀 금지. 완성도/미학 점수는 기준 픽스처·독립 평가 전 수치화 금지.
+- **랜덤성/차별화:** 동일 brief+version+seed+theme+component registry면 같은 정형 스펙을 재생산; 3안의 layout archetype과 팔레트/타이포/정보 밀도가 의도적으로 다르게 설계. `seed`는 재현 가능한 선택에만 적용하고 외부 모델/폰트/렌더러의 완전 결정성을 가장하지 않는다.
+- **원본 이미지 개선:** 변형 전 원본 hash·권리 출처 유지, 매 수정은 새 variant ID. 외부 이미지의 가려진 자산을 생성·추출했다고 거짓말 금지. 사용자 검토/허가 없이 원본 장식·브랜딩을 없애지 않는다.
+- **실제 사용성과 별개인 렌더:** 시안 PNG는 브라우저 UI 캡처일 뿐 실제 기능 API가 동작한다는 뜻이 아니다. 기능은 P1 코딩/후행 P2 검증으로 별도 기록.
+
+### 0A-5. 데이터·API 계약 (v2.1)
+
+`DesignBriefV2`:
+`{briefId, projectId, text, purpose, audience, mustKeep[], mustHave[], mayChange[], forbidden[], viewportProfiles[], designDials, referenceAssets[], sourceProvenance, ownerConstraints, chosenModel:{kind,version,consent}, budget}`.
+
+`StyleRecommendationV1`:
+`{styleId, dataSource:{repo,sha,license,version}, rationale, category, archetype, palette, typography, constraints, antiPatterns[], confidence, provenance}`.
+
+`DesignVariantV1`:
+`{variantId, parentVariantId|null, briefHash, presetId, seed, componentTree, designTokens, assetManifest, textCopy, responsiveRules, warnings[], sourceBundleSha256, previewCaptures:[{viewport,dpr,path,sha256}]}`.
+
+`OwnerDesignApprovalV1`:
+`{approvalId, selectedVariantId, sourceBundleSha256, referenceImageSha256, designSpecSha256, approvedAtKst, allowedChanges[], approvedByOwner:boolean, version}`.
+
+`FrozenDesignBundleV1`:
+`{referenceId, selectedVariant, codeSnapshot, specPath, designTokensPath, assetManifestPath, captures[], licenseManifest, provenance, immutableManifestSha256, noAutoOverwrite:true}`.
+
+**필수 동작:** `POST /api/design/brief`→validated local brief; `POST /api/design/recommend`→A/B/C reproducible style proposals; `POST /api/design/variants`→real FFAX structured React candidates in disposable workspaces + captured previews; `POST /api/design/refine`→targeted typed patch/variant child; `POST /api/design/freeze`→owner-signaled SHA-locked bundle, atomic local commit, immutable receipt; `GET /api/design/jobs/{id}` read-only resume/status. These are **contract proposals, not pre-existing deployed endpoints**. Bind loopback + exact Host/Origin + CSRF/owner action; no arbitrary filesystem paths; do not expose local project/secret assets on public routes. Avoid requiring OS-admin service or GitHub App grants.
+
+**State machine:** `DRAFT→RECOMMENDED→VARIANTS_READY→REFINING→READY_FOR_DESIGN_APPROVAL→DESIGN_LOCKED→IMPLEMENTING`; alternate `BLOCKED_ASSET|BLOCKED_MODEL|BLOCKED_LICENSE|CANCELLED|FAILED`. After `DESIGN_LOCKED`, edits create `DESIGN_REVISION_PENDING` with new SHA/approval, never silently mutate current reference. The existing downstream `REFERENCE_LOCKED→ASSETS_READY→CANDIDATE_GENERATED` applies on **external image** ingress; Forge-native with source bundle skips redundant image analysis and begins from `ASSETS_READY` after manifest verification.
+
+### 0A-6. 결합 지점과 자원/보안 예산
+
+- **FFAX engine owns orchestration.** Use local `DesignRecommendationAdapter` (versioned data), `VariantEngine` (existing FFAX core + extend registry), `PreviewCaptureAdapter` (Playwright), `FrozenBundleStore`, `QualityRules`. Design source and generated variants kept locally; no customer data in public repo. No new repo or GitHub push required for user projects.
+- **GTX1050 Ti + RAM16 GB:** default no image diffusion, no 30B vision model, no Docker/VM, single Qwen 4B optional for text only; static templates/JS/React/CSS/SVG + Chromium captures are baseline. Control concurrent jobs, memory/CPU, per-job timeout, model call count; no performance promise without Windows measurement. Runtime install/upgrade exact version reviewed separately.
+- **External references:** require usage rights check; user-provided sketches may not be commercially licensable. Generated template style data license != font/license != illustration ownership. Any image generation or external LLM call requires availability/consent/cost check; unsupported => `BLOCKED_MODEL` or deterministic local fallback, never silent paid/cloud upgrade.
+- **Security:** model output treated as typed untrusted JSON, no arbitrary JS/CSS URL imports/external network. Untrusted generated code cannot be executed on ordinary owner host without genuine restriction, else HOLD. Local Chromium of **registered trusted component templates** is not arbitrary code execution. Allowed path/backup/rollback/owner GO unchanged.
+- **Existing downstream:** Reference Fidelity `one-shot-ui` compare stays optional diagnostics; internal Forge variant should have parity to its own captured approved code/PNG by construction. Recompare on code changes/viewport differences and preserve capture version/font/source hashes; imported images still need full reconstruction.
+
+### 0A-7. P1 구현 후보/의존 DAG (기존 SWU 분모 미변경)
+
+```text
+DF-01 Brief+design dials+provenance validation
+       → DF-02 style recommender (offline UI UX Pro Max dataset adapter + fallback)
+          → DF-03 independent A/B/C typed React variant generator
+             → DF-04 token+component edit/mix+revision history
+                → DF-05 preview actual render & quality warning
+                   → DF-06 immutable freeze+bundle manifest+reopen
+                      → DF-07 UI tabs/approval→same-source implementation handoff
+                         → existing RF-04/05/06/07/08 fidelity & review flow
+[External image branch] existing RF-01/02/03→RF-04...
+```
+
+| Candidate | Maps to existing REQ | P1 completion candidate |
+|---|---|---|
+| DF-01 | REQ-01/02/06/11 | Korean brief+constraints+local reference intake/invalid consent→typed `DesignBriefV2` |
+| DF-02 | REQ-02/03/11 | offline design dataset → grounded recommendation with provenance and fallback |
+| DF-03 | REQ-03/04/07 | 3 distinct browser-renderable component tree candidates + error path; no mock-only PNG |
+| DF-04 | REQ-03/05/10 | targeted variant mutation/mix, Undo/Redo, invariant IDs and new immutable revisions |
+| DF-05 | REQ-06/09 | Playwright local output and deterministic warning source, fails if missing font/asset |
+| DF-06 | REQ-01/06/10/12 | owner freeze exact bundle, SHA receipts, reload, no silent overwrite |
+| DF-07 | REQ-05/08/10/12 | FE click→BE/CLI→real variant/freeze→same-source React handoff, normal/refusal |
+
+`DF` is **candidate implementation slicing**, not approved new SWU denominator or artificially weighted REQ. Preserve all original RF-01..08 and existing REQ-01..12 / AC-01..12 totals/weight & retry histories. P1: complete real FE/BE caller→callee→state/output/error and minimal syntax/type/smoke/security checks. P2: real frozen image render, UI/UX comparison, image/font/accessibility/Windows tests, independent Codex/Astra audit + owner acceptance. Implementation + verification rates **UNASSESSED** until audited against this enlarged full blueprint.
+
+### 0A-8. Exclusions and definitive proof boundaries
+
+- **No dependency on GitHub Trending live ranks** (changes daily) for UI quality; researching GitHub projects does not mean they are currently Trending top-ranked. No dynamic download/execute from trending.
+- **No heavy local image generation claim:** FFAX Qwen 4B is text-only in current code; photo-real hero art, fantasy dragons and the exact look of a generated raster illustration are not guaranteed offline on current device. Real image asset support must be explicit with actual provider and rights.
+- **No automatic fidelity 100%** from comparing the output image to itself; freeze is an identity/provenance check, while human aesthetic acceptance + real UI behavior/correctness remains independent.
+- **No hidden privilege or external transmission:** no payment, remote reference images, main merge, Production changes, permission or dangerous repo writes without separate GO.
+- **V2.1 blueprint is finalized design only:** owner user instruction to update design does not authorize third-party installation or source execution; new Design Forge code, render pipeline, freeze UI and actual upstream adoption remain `NOT_IMPLEMENTED / NOT_RUN` until distinct actual source commits & evidence.
+
 - **결정일:** 2026-11-18 KST
 - **결정 주체:** 사용자(현재 채팅에서 최종설계·저장소 선택 위임)
 - **저장소:** `hibi89/frontend-foundry-ax`
