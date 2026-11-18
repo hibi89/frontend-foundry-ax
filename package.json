@@ -28,7 +28,8 @@
     "reference:compare": "node scripts/ffax_reference_fidelity.mjs compare",
     "forge:capture": "node scripts/forge_capture.mjs capture",
     "forge:export": "node scripts/forge_export.mjs",
-    "forge:compare": "node scripts/forge_reconstruct.mjs run"
+    "forge:compare": "node scripts/forge_reconstruct.mjs run",
+    "forge:extract": "node scripts/forge_reference_extract.mjs extract"
   },
   "engines": {
     "node": ">=20"
