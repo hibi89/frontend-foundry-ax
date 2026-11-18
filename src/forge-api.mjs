@@ -3,7 +3,7 @@ import {randomBytes} from 'node:crypto';
 import {homedir,tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {mkdir,readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
-import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,verifyForgeBundle} from './design-forge.mjs';
+import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,finalizeForgeBundleWithCapture,verifyForgeBundle} from './design-forge.mjs';
 import {proposeTypedVisualFixes,applyBoundedVisualPatches} from './forge-correction.mjs';
 import {capture} from '../scripts/forge_capture.mjs';
 const MAX_BYTES=150000,MAX_RESPONSE=350000;
@@ -97,6 +97,14 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
       while(captures.size>2)captures.delete(captures.keys().next().value);
       value={schema:'ffax.design-capture-result.v1',id,receipt,download:'/api/design/captures/'+id+'.png',status:'CAPTURED_NOT_VISUALLY_APPROVED'};
      }finally{await rm(dir,{recursive:true,force:true});}
+     break;}
+    case '/api/design/finalize':{
+     assertKeys(body,['bundle','captureId','approval']);
+     if(typeof body.captureId!=='string'||!/^[a-f0-9]{32}$/.test(body.captureId))throw Error('FORGE_CAPTURE_ID_INVALID');
+     const captured=captures.get(body.captureId);
+     if(!captured)throw Error('FORGE_CAPTURE_EXPIRED');
+     const finalized=await finalizeForgeBundleWithCapture(body.bundle,captured.receipt,{approval:body.approval});
+     value={schema:'ffax.design-finalized-result.v1',bundle:finalized,parentSha256:body.bundle.sha256,pngSha256:captured.receipt.sha256};
      break;}
     case '/api/design/visual-propose':
      assertKeys(body,['issues','variant']);value={schema:'ffax.design-visual-proposal-result.v1',plan:proposeTypedVisualFixes(body.issues,body.variant)};break;
