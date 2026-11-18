@@ -100,6 +100,12 @@ export async function freezeForgeVariant(variant,{approval,referencePng=null}={}
  const source=exportReact(variant.document);
  const project=clone(variant.document);
  const manifest={schema:FORGE_BUNDLE_SCHEMA,source:'FFAX_FORGE_NATIVE',variantId:variant.id,revision:variant.revision,styleId:variant.styleId,project,reactSource:source,assets:[],designTokens:{theme:project.theme,layout:project.layout},referencePng};
+ if(variant.sourceEvidence?.assetManifest?.schema==='ffax.external-asset-manifest.v1'){
+  // Hash provenance and explicit unknowns with the owner-approved React source; no raster bytes embedded.
+  if(variant.sourceEvidence.assetManifest.reference.sha256!==variant.sourceEvidence.externalImageSha256)
+   throw Error('FORGE_EXTERNAL_ASSET_REFERENCE_MISMATCH');
+  manifest.externalAssetManifest=clone(variant.sourceEvidence.assetManifest);
+ }
  const receipt=await sha256(JSON.stringify(manifest));
  return {schema:FORGE_BUNDLE_SCHEMA,manifest,sha256:receipt,approval:'OWNER_APPROVED_THIS_VARIANT',renderProof:referencePng?'SUPPLIED_NOT_INDEPENDENTLY_VERIFIED':'PENDING_PLAYWRIGHT_CAPTURE',handoff:'SAME_SOURCE_REACT_NOT_SCREENSHOT_RECONSTRUCTION'};
 }

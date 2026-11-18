@@ -311,6 +311,7 @@ el('reference-owner-map').addEventListener('click',async()=>{
    {prompt:promptEl.value,approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true});
   save('FFAX-External-Mapped-Reference.json',JSON.stringify(result.bundle,null,2),'application/json');
   save('FFAX-External-Region-Evidence.json',JSON.stringify(result.evidence,null,2),'application/json');
+  save('FFAX-External-Asset-Manifest.json',JSON.stringify(result.evidence.assetManifest,null,2),'application/json');
   // This is an explicitly reviewed local FFAX type-safe candidate, not an automatic push or deployment.
   window.dispatchEvent(new CustomEvent('ffax:forge-apply',{detail:{
    document:result.variant.document,referenceSha256:result.bundle.sha256,approval:'APPROVE_FORGE_REFERENCE'
