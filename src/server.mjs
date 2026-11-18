@@ -2,6 +2,7 @@ import http from 'node:http';
 import {runLocalOllama} from './local-ollama.mjs';
 import {createLocalInferenceGate} from './inference-gate.mjs';
 import {createForgeApi} from './forge-api.mjs';
+import {readBoundedUtf8} from './http-body.mjs';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -48,8 +49,7 @@ const server=http.createServer(async(req,res)=>{
       res.writeHead(403,{'Content-Type':'application/json','Cache-Control':'no-store'}).end('{"error":"LOCAL_REQUEST_FORBIDDEN"}');return;
     }
     try{
-      let data='',size=0;
-      for await(const chunk of req){size+=chunk.length;if(size>6000)throw Error('LOCAL_REQUEST_TOO_LARGE');data+=chunk.toString('utf8');}
+      const data=await readBoundedUtf8(req,6000,'LOCAL_REQUEST_TOO_LARGE','LOCAL_REQUEST_INVALID_UTF8');
       let body;try{body=JSON.parse(data);}catch{throw Error('LOCAL_REQUEST_INVALID_JSON');}
       if(!body||Object.keys(body).sort().join(',')!=='consent,model,prompt')throw Error('LOCAL_REQUEST_INVALID_FIELDS');
       // Limit expensive local CPU/GPU inference to a single running request.

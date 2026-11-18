@@ -46,3 +46,19 @@ test('FFAX localhost static assets require exact Host and path allowlist',async(
   if(proc.exitCode===null){proc.kill();await Promise.race([new Promise(ok=>proc.once('exit',ok)),new Promise(ok=>setTimeout(ok,600))]);}
  }
 });
+test('P2: bounded UTF-8 decoder preserves split Korean sensitive text and rejects malformed input',async()=>{
+ const {Readable}=await import('node:stream');
+ const {readBoundedUtf8}=await import('../src/http-body.mjs');
+ const prompt='주민등록번호와 한글 프롬프트를 보호해야 합니다';
+ const bytes=Buffer.from(prompt,'utf8');
+ const split=bytes.indexOf(Buffer.from('주'))+1;
+ const output=await readBoundedUtf8(Readable.from([bytes.subarray(0,split),bytes.subarray(split)]),6000,
+  'LOCAL_REQUEST_TOO_LARGE','LOCAL_REQUEST_INVALID_UTF8');
+ assert.equal(output,prompt);
+ const {validateLocalRequest}=await import('../src/local-ollama.mjs');
+ assert.throws(()=>validateLocalRequest({prompt:output,model:'qwen3:4b-instruct',consent:'APPROVE_LOCAL_MODEL_PROMPT_ONLY'}),/LOCAL_PROMPT_UNSAFE/);
+ await assert.rejects(readBoundedUtf8(Readable.from([Buffer.from([0xed,0xa0,0x80])]),6000,
+  'LOCAL_REQUEST_TOO_LARGE','LOCAL_REQUEST_INVALID_UTF8'),/LOCAL_REQUEST_INVALID_UTF8/);
+ await assert.rejects(readBoundedUtf8(Readable.from([Buffer.alloc(6001)]),6000,
+  'LOCAL_REQUEST_TOO_LARGE','LOCAL_REQUEST_INVALID_UTF8'),/LOCAL_REQUEST_TOO_LARGE/);
+});

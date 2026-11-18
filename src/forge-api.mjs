@@ -7,6 +7,7 @@ import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVar
 import {proposeTypedVisualFixes,applyBoundedVisualPatches} from './forge-correction.mjs';
 import {capture} from '../scripts/forge_capture.mjs';
 import {createForgeRunner} from './forge-runner.mjs';
+import {readBoundedUtf8} from './http-body.mjs';
 const MAX_BYTES=150000,MAX_RESPONSE=350000;
 const storeRoot=join(homedir(),'.ffax','forge-bundles');
 function reply(res,status,value){
@@ -15,11 +16,7 @@ function reply(res,status,value){
  res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}).end(data);
 }
 async function parseJson(req){
- let data='',bytes=0;
- for await(const part of req){
-  bytes+=part.length;if(bytes>MAX_BYTES)throw Error('FORGE_INPUT_TOO_LARGE');
-  data+=part.toString('utf8');
- }
+ const data=await readBoundedUtf8(req,MAX_BYTES,'FORGE_INPUT_TOO_LARGE','FORGE_UTF8_INVALID');
  let result;try{result=JSON.parse(data);}catch{throw Error('FORGE_JSON_INVALID');}
  if(!result||Array.isArray(result)||typeof result!=='object'||Object.getPrototypeOf(result)!==Object.prototype)throw Error('FORGE_BODY_INVALID');
  return result;
