@@ -34,7 +34,7 @@ test('RF-01 refuses absent approval, SHA mismatch, forged bytes and later tamper
 test('RF-01 refuses symlink reference vault and invalid binary data',async()=>{
  const home=await mkdtemp(join(tmpdir(),'ffax-vault-')),root=join(home,'safe');
  try{
-  await assert.rejects(saveLocalReference({root,bytes:Buffer.from('fake'),sha256:sha,rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'}),/PNG_INVALID/);
+  await assert.rejects(saveLocalReference({root,bytes:Buffer.from('fake'),sha256:sha,rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'}),/IMAGE_INVALID/);
   await assert.rejects(loadLocalReference({root,sha256:'../bad'}),/SHA_INVALID/);
  }finally{await rm(home,{recursive:true,force:true});}
 });
