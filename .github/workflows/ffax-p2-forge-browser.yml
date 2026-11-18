@@ -48,6 +48,10 @@ jobs:
           NODE
           node scripts/forge_capture.mjs capture --bundle /tmp/ffax-p2-direct/bundle.json --out /tmp/ffax-p2-direct/capture --width 375 --height 600 --dpr 1
           test -s /tmp/ffax-p2-direct/capture/render.png
+      - name: P2 React19 preview/export computed-style parity across 375/768/1440
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          python scripts/export_visual_token_browser_probe.py
       - name: P2 live loopback UI revision, SHA render, pixel comparison and blocked original asset
         run: python scripts/forge_p2_browser_probe.py
       - name: Retain synthetic-only browser evidence for defect analysis
