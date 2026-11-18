@@ -245,7 +245,7 @@ export function renderMarkup(doc) {
   assertDocument(doc);
   const t=doc.designSystem?{...THEME_OPTIONS[doc.theme],...doc.designSystem}:THEME_OPTIONS[doc.theme];
   const accent=doc.reference?.reviewed && doc.reference.selectedColor ? doc.reference.selectedColor : t.accent;
-  const cssVars=`--surface:${t.surface};--accent:${accent};--ink:${t.ink};--muted:${t.muted};--ff-radius:${t.radius||14}px;--ff-gap:${FORGE_DENSITIES[t.density]||15}px;--ff-font:${t.fontStack||'system-ui, sans-serif'};--ff-hero-art:${FORGE_HERO_ART[t.heroArt]||'none'};`;
+  const cssVars=`--surface:${t.surface};--accent:${accent};--ink:${t.ink};--muted:${t.muted};--ff-radius:${t.radius||14}px;--ff-gap:${FORGE_DENSITIES[t.density]||15}px;--ff-font:${t.fontStack||'system-ui, sans-serif'};${doc.designSystem?'--ff-hero-art:'+FORGE_HERO_ART[t.heroArt]+';':''}`;
   return `<main class="ff-canvas theme-${doc.theme} layout-${doc.layout}" data-theme="${doc.theme}" style="${cssVars}" aria-label="프론트엔드 미리보기">${doc.components.map(renderNode).join('')}</main>`;
 }
 export function exportReact(doc){
