@@ -46,3 +46,14 @@
 ## 5. 다음 안전한 작업
 
 실기기·실고객·실참조 및 독립 신뢰 주체 검증은 명시된 사용자 권한과 실행환경에서 수행해야 한다. 자체 CI PASS를 독립 감사나 출시 승인으로 대체하지 않는다. 새로운 문제 발생 시 본 문서의 기능 SHA/CI 링크로 재현·수정·재검증하고 원본·백업·RELEASE HOLD를 보존한다.
+
+## 6. 2026-11-18 21:43 KST — 추가 P2 결함 수정·재검증
+
+- **코드 기준 SHA:** `8515c30413d499c69c7e0066d458f5addf52131f` (브랜치: `feature/ffax-reference-fidelity-20261118`).
+- **결함 1:** `scripts/forge_capture.mjs`가 보호 경로를 문자열 `root+'/src/'`로 비교하여 Windows의 `\\` 경로 구분자 및 부모 심볼릭 링크를 놓칠 수 있었음. 수정: OS 구분자와 `realpath`로 source subtree 안의 새 캡처 출력 폴더 생성 거부. [수정 커밋](https://github.com/hibi89/frontend-foundry-ax/commit/25b6db44078353c21ac5fd23903635967949e699).
+- **결함 2:** `scripts/forge_converge.mjs`가 격리 출력 폴더의 겉보기 경로만 검사하여 외부 부모 심볼릭 링크의 저장소 내부 지향을 탐지하지 못할 수 있었음. 수정: 출력 부모 실제 경로 검사 및 저장소 전체 내부 출력 거부. [수정 커밋](https://github.com/hibi89/frontend-foundry-ax/commit/8515c30413d499c69c7e0066d458f5addf52131f).
+- **관련 테스트:** `tests/forge-capture-readiness.test.mjs`, `tests/forge-convergence.test.mjs`에 신규 P2 경로 방어 2건 추가.
+- **재검증:** [P2 Actions #44306309787](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44306309787) `completed/success`, **4/4 job SUCCESS**. Ubuntu `211/211 PASS, 0 FAIL`, Windows `211/211 PASS, 0 FAIL`. 신규 두 테스트는 양 OS에서 PASS. 동 실행에서 Chromium 브라우저 23/23, axe serious/critical 0, 로컬 D1~D5, cleanroom 및 Windows 검수용 패키지 워크플로 통과. 별도 [source smoke #44306309887](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44306309887), [Windows review ZIP #44306309723](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44306309723), [blueprint evidence #44306310296](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44306310296) `success`.
+- **보존:** 원본/source/client files, main, Production, 외부 업로드, 권한·유료 API, 릴리스 변경 없음. 이 코드는 사용자 장비에서의 실기기 재검증도, 별도 Codex/Astra 독립 감사도 아님.
+- **완료율/게이트:** P1 코드 SWU 25/25 (100% 후보); 고정 AC-01..12 공식 검증완료율 **UNASSESSED**; 실제 Windows11/GTX1050Ti/Ollama·권리 있는 외부 참고 이미지/one-shot-ui·실고객 인증/라우팅/API·독립 기술/보안·UI 감사·사용자 최종 수락 **NOT_RUN**. RG-06 미충족, **RELEASE HOLD**.
+
