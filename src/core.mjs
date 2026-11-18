@@ -88,8 +88,23 @@ export function newDocument(brief = buildBrief(DEFAULT_PROMPT), approach = 'A') 
     components: defaultTypes.map((type, i) => makeComponent(type, `node-${i + 1}`))
   };
 }
+const FORGE_FONTS=['system-ui, sans-serif','Georgia, serif','Arial, sans-serif','"Malgun Gothic", system-ui, sans-serif'];
+const FORGE_DENSITIES={airy:24,balanced:15,compact:10};
+function validateDesignSystem(tokens){
+ if(tokens===undefined)return true;
+ if(!tokens||Object.getPrototypeOf(tokens)!==Object.prototype ||
+    JSON.stringify(Object.keys(tokens).sort())!==JSON.stringify(['accent','density','fontStack','ink','muted','name','radius','surface'].sort()) ||
+    !/^[#][0-9a-fA-F]{6}$/.test(tokens.surface) || !/^[#][0-9a-fA-F]{6}$/.test(tokens.accent) ||
+    !/^[#][0-9a-fA-F]{6}$/.test(tokens.ink) || !/^[#][0-9a-fA-F]{6}$/.test(tokens.muted) ||
+    !FORGE_FONTS.includes(tokens.fontStack)|| !Object.hasOwn(FORGE_DENSITIES,tokens.density) ||
+    ![6,12,18,24].includes(tokens.radius) ||
+    typeof tokens.name!=='string'||tokens.name.length<1||tokens.name.length>60||/[\u0000-\u001f\u007f]/.test(tokens.name))
+   throw new Error('DESIGN_SYSTEM_INVALID');
+ return true;
+}
 export function assertDocument(doc) {
   if (!doc || !THEME_OPTIONS[doc.theme] || !['stack', 'grid'].includes(doc.layout)) throw new Error('프로젝트 테마/레이아웃 오류');
+  validateDesignSystem(doc.designSystem);
   if (!Array.isArray(doc.components) || doc.components.length > 80) throw new Error('컴포넌트 수가 유효하지 않습니다.');
   const ids = new Set();
   for (const node of doc.components) {
@@ -135,6 +150,7 @@ export function applyCommand(doc, command) {
   } else if (command.kind === 'theme') {
     if (!THEME_OPTIONS[command.value]) throw new Error('테마 선택 오류');
     next.theme = command.value;
+    if(next.designSystem)delete next.designSystem; // A deliberate legacy theme override resets Forge-specific tokens.
   } else {throw new Error('지원하지 않는 명령');}
   next.version++;assertDocument(next);return next;
 }
@@ -184,11 +200,12 @@ const isColor = c => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c);
 const briefKeys = ['objective','raw','pages','features','constraints','theme','users','widthTargets','approvalRequired','approaches'];
 const referenceKeys = ['name','rightsConfirmed','origin','colors','candidates','reviewed','approvedCandidate','selectedColor'];
 export function validateProjectImport(doc) {
-  if (!exactKeys(doc, ['version','title','theme','layout','approach','brief','reference','components'])) throw new Error('PROJECT_STRUCTURE_INVALID');
+  if (!exactKeys(doc, ['version','title','theme','layout','approach','brief','reference','components','designSystem'])) throw new Error('PROJECT_STRUCTURE_INVALID');
   if (!Number.isSafeInteger(doc.version) || doc.version < 1 || doc.version > 1000000 || !safeLine(doc.title, 120) || !['stack','grid'].includes(doc.layout) || !Object.hasOwn(THEME_OPTIONS, doc.theme) || !['A','B','MODEL'].includes(doc.approach)) throw new Error('PROJECT_HEADER_INVALID');
   const b=doc.brief;
   if (!exactKeys(b, briefKeys) || !safeLine(b.objective, 120) || !safeLine(b.raw, 2000) || !safeLine(b.users, 120) || !Object.hasOwn(THEME_OPTIONS, b.theme) || b.approvalRequired !== true || !safeCollection(b.pages, 7, 120) || b.pages.length < 1 || !safeCollection(b.features, 30, 150) || !safeCollection(b.constraints, 30, 180) || !Array.isArray(b.widthTargets) || JSON.stringify(b.widthTargets) !== '[375,768,1440]') throw new Error('PROJECT_BRIEF_INVALID');
   if (!Array.isArray(b.approaches) || b.approaches.length !== 2 || b.approaches.some((a,i) => !exactKeys(a,['id','label','theme','layout','description']) || a.id !== ['A','B'][i] || !safeLine(a.label,100) || !safeLine(a.description,200) || !Object.hasOwn(THEME_OPTIONS,a.theme) || !['stack','grid'].includes(a.layout))) throw new Error('PROJECT_APPROACH_INVALID');
+  validateDesignSystem(doc.designSystem);
   const ref=doc.reference;
   if (ref !== null) {
     if (!exactKeys(ref,referenceKeys) || ref.rightsConfirmed !== true || !safeLine(ref.name,120) || !safeLine(ref.origin,120) || !Array.isArray(ref.colors) || ref.colors.length < 2 || ref.colors.length > 4 || !ref.colors.every(isColor) || !Array.isArray(ref.candidates) || ref.candidates.length !== 2 || typeof ref.reviewed !== 'boolean') throw new Error('PROJECT_REFERENCE_INVALID');
@@ -222,14 +239,14 @@ export function importLocalProject(json) {
 
 export function renderMarkup(doc) {
   assertDocument(doc);
-  const t=THEME_OPTIONS[doc.theme];
+  const t=doc.designSystem?{...THEME_OPTIONS[doc.theme],...doc.designSystem}:THEME_OPTIONS[doc.theme];
   const accent=doc.reference?.reviewed && doc.reference.selectedColor ? doc.reference.selectedColor : t.accent;
-  const cssVars=`--surface:${t.surface};--accent:${accent};--ink:${t.ink};--muted:${t.muted};`;
+  const cssVars=`--surface:${t.surface};--accent:${accent};--ink:${t.ink};--muted:${t.muted};--ff-radius:${t.radius||14}px;--ff-gap:${FORGE_DENSITIES[t.density]||15}px;--ff-font:${t.fontStack||'system-ui, sans-serif'};`;
   return `<main class="ff-canvas theme-${doc.theme} layout-${doc.layout}" data-theme="${doc.theme}" style="${cssVars}" aria-label="프론트엔드 미리보기">${doc.components.map(renderNode).join('')}</main>`;
 }
 export function exportReact(doc){
   assertDocument(doc);
-  const t=THEME_OPTIONS[doc.theme];
+  const t=doc.designSystem?{...THEME_OPTIONS[doc.theme],...doc.designSystem}:THEME_OPTIONS[doc.theme];
   const accent=doc.reference?.reviewed && doc.reference.selectedColor ? doc.reference.selectedColor : t.accent;
   const isGrid=doc.layout==='grid';
   // Preserve the approved layout in the exported TSX instead of always stacking.
@@ -245,7 +262,7 @@ export function exportReact(doc){
     const ink=button?'#ffffff':t.ink;
     const surface=button?`color-mix(in srgb, ${accent} 60%, #0b1026)`:`color-mix(in srgb, ${t.surface} 83%, ${t.ink} 17%)`;
     const stroke=n.color==='neutral'?t.muted:`color-mix(in srgb, ${t.muted} 30%, transparent)`;
-    const s=`style={{ padding: ${n.spacing}, alignSelf: ${JSON.stringify(n.align)}, color: ${JSON.stringify(ink)},minWidth:0,maxWidth:'100%',boxSizing:'border-box',overflowWrap:'anywhere',borderRadius:12,backgroundColor:${JSON.stringify(surface)},border:${JSON.stringify(button?'0':`1px solid ${stroke}`)},lineHeight:1.45${button?',fontWeight:700,cursor:\'pointer\'':''}${gridSpan} }}`;
+    const s=`style={{ padding: ${n.spacing}, alignSelf: ${JSON.stringify(n.align)}, color: ${JSON.stringify(ink)},minWidth:0,maxWidth:'100%',boxSizing:'border-box',overflowWrap:'anywhere',borderRadius:${t.radius||12},backgroundColor:${JSON.stringify(surface)},border:${JSON.stringify(button?'0':`1px solid ${stroke}`)},lineHeight:1.45${button?',fontWeight:700,cursor:\'pointer\'':''}${gridSpan} }}`;
     const inputStyle=`style={{display:'block',width:'100%',boxSizing:'border-box',marginTop:8,padding:9,borderRadius:6,backgroundColor:${JSON.stringify(t.surface)},color:${JSON.stringify(t.ink)},border:${JSON.stringify(`1px solid ${t.muted}`)}}}`;
     switch(n.type){
       case 'Button':return `<button type="button" ${s}>${text}</button>`;
@@ -276,7 +293,7 @@ export function exportReact(doc){
       '  const [demoNav,setDemoNav]=React.useState<Record<string,string>>({});'
     ].join('\n')+'\n'
     : '';
-  return `/** Generated by FFAX. Visual prototype export only. Review data/API integration before use. */\nimport React from 'react';\nexport default function GeneratedScreen(){\n${demoHooks}  return (\n    <main className="ff-generated" data-theme=${JSON.stringify(doc.theme)} data-layout=${JSON.stringify(doc.layout)} style={{backgroundColor:${JSON.stringify(t.surface)}, color:${JSON.stringify(t.ink)},${containerLayout},gap:15,padding:20,minWidth:0,width:'100%',minHeight:380,boxSizing:'border-box',border:${JSON.stringify(`1px solid color-mix(in srgb, ${accent} 40%, transparent)`)},borderRadius:14,overflowWrap:'anywhere'}}>\n      ${safe}\n    </main>\n  );\n}\n`;
+  return `/** Generated by FFAX. Visual prototype export only. Review data/API integration before use. */\nimport React from 'react';\nexport default function GeneratedScreen(){\n${demoHooks}  return (\n    <main className="ff-generated" data-theme=${JSON.stringify(doc.theme)} data-layout=${JSON.stringify(doc.layout)} style={{backgroundColor:${JSON.stringify(t.surface)}, color:${JSON.stringify(t.ink)},${containerLayout},gap:${FORGE_DENSITIES[t.density]||15},padding:20,minWidth:0,width:'100%',minHeight:380,boxSizing:'border-box',border:${JSON.stringify(`1px solid color-mix(in srgb, ${accent} 40%, transparent)`)},borderRadius:${t.radius||14},fontFamily:${JSON.stringify(t.fontStack||'system-ui, sans-serif')},overflowWrap:'anywhere'}}>\n      ${safe}\n    </main>\n  );\n}\n`;
 }
 export function createReference(doc, imageName, rights, palette, origin='user-provided') {
   if (rights !== true) throw new Error('이미지 사용 권한 확인이 필요합니다.');
