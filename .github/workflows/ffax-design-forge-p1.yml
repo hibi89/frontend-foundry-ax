@@ -14,6 +14,8 @@ on:
       - 'src/forge-convergence.mjs'
       - 'src/forge-runner.mjs'
       - 'src/external-reference-to-forge.mjs'
+      - 'src/forge-safe-integration.mjs'
+      - 'scripts/forge_integration_review.mjs'
       - 'src/forge-convergence-ui.mjs'
       - 'src/reference-analysis.mjs'
       - 'src/server.mjs'
@@ -29,6 +31,7 @@ on:
       - 'tests/forge-convergence.test.mjs'
       - 'tests/forge-runner.test.mjs'
       - 'tests/external-reference-to-forge.test.mjs'
+      - 'tests/forge-safe-integration.test.mjs'
       - 'tests/ffax-reference-fidelity.test.mjs'
 permissions:
   contents: read
@@ -55,6 +58,8 @@ jobs:
           node --check src/forge-convergence.mjs
           node --check src/forge-runner.mjs
           node --check src/external-reference-to-forge.mjs
+          node --check src/forge-safe-integration.mjs
+          node --check scripts/forge_integration_review.mjs
           node --check src/forge-convergence-ui.mjs
           node --check src/reference-analysis.mjs
           node --check src/server.mjs
@@ -65,4 +70,4 @@ jobs:
           node --check scripts/forge_reference_extract.mjs
           python -m py_compile scripts/forge_capture.py scripts/forge_pixel_metric.py
       - name: Local deterministic core source contract smoke (no model/network)
-        run: node --test tests/design-forge.test.mjs tests/forge-api.test.mjs tests/forge-correction.test.mjs tests/forge-convergence.test.mjs tests/forge-runner.test.mjs tests/external-reference-to-forge.test.mjs tests/ffax-reference-fidelity.test.mjs
+        run: node --test tests/design-forge.test.mjs tests/forge-api.test.mjs tests/forge-correction.test.mjs tests/forge-convergence.test.mjs tests/forge-runner.test.mjs tests/external-reference-to-forge.test.mjs tests/forge-safe-integration.test.mjs tests/ffax-reference-fidelity.test.mjs
