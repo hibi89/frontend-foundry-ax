@@ -56,7 +56,18 @@ export function refineForgeVariant(variant,{kind,id,prop,value}={}){
  else if(kind==='insert' && typeof value==='string')command={kind:'insert',type:value};
  else if(kind==='remove' && typeof id==='string')command={kind:'remove',id};
  else throw Error('FORGE_REFINEMENT_UNSUPPORTED');
- const result=clone(variant);result.document=applyCommand(variant.document,command);result.parentVariantId=variant.id+':'+variant.revision;result.revision++;result.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(result);return result;
+ const result=clone(variant);
+ if(command.kind==='theme' && variant.document.designSystem){
+   const previous=variant.document.designSystem;
+   const palette=THEME_OPTIONS[command.value];
+   result.document=clone(variant.document);
+   result.document.theme=command.value;
+   result.document.designSystem={...previous,
+     surface:palette.surface,accent:palette.accent,ink:palette.ink,muted:palette.muted};
+   result.document.version++;
+ }else result.document=applyCommand(variant.document,command);
+ result.parentVariantId=variant.id+':'+variant.revision;result.revision++;
+ result.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(result);return result;
 }
 export function mixForgeVariants(primary,secondary,{takeTheme=true,takeLayout=false}={}){
  checkVariant(primary);checkVariant(secondary);
