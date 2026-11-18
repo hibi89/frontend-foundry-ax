@@ -35,6 +35,15 @@
         <label for="forge-musthave">반드시 포함할 구성 (선택)</label><textarea id="forge-musthave" rows="2" maxlength="500" placeholder="예: 달력, 검색, 생년월일시 폼"></textarea>
         <label for="forge-avoid">피할 스타일 (선택)</label><textarea id="forge-avoid" rows="2" maxlength="500" placeholder="예: 과도한 금색, 촌스러운 그라데이션"></textarea>
         <button id="forge-generate" type="button" class="primary-btn">A/B/C 실제 UI 시안 만들기</button>
+
+        <p class="helper">선택 사항: 이 PC의 Qwen 4B로 다른 UI 구조 초안을 제안받을 수 있습니다. 이미지 생성 AI가 아니며 사용자가 결과를 검토해야 합니다.</p>
+        <label class="check"><input id="forge-local-consent" type="checkbox" /> 이번 비민감 디자인 지시를 내 PC 로컬 Qwen에 전달하는 것에 동의합니다.</label>
+        <button id="forge-local-request" type="button" class="ghost-btn">로컬 Qwen UI 구조 제안 받기</button>
+        <label for="forge-local-response">로컬 모델이 제안한 구조 JSON (읽기 전용)</label>
+        <textarea id="forge-local-response" rows="3" readonly placeholder="모델 출력은 승인 전 적용되지 않습니다."></textarea>
+        <label class="check"><input id="forge-local-review" type="checkbox" /> 모델 출력과 변경 범위를 검토했고 선택 시안에 적용하는 것을 승인합니다.</label>
+        <button id="forge-local-adopt" type="button" class="ghost-btn" disabled>선택 시안에 검토한 모델 제안 반영</button>
+
         <div id="forge-variants" class="forge-variants" aria-label="디자인 시안 선택"></div>
         <label for="forge-instruction">시안 부분 개선 (지원: 다크, 밝게, 청록, 여백, 제목:문구)</label>
         <input id="forge-instruction" type="text" maxlength="300" placeholder="예: 여백을 더 넓게" />
