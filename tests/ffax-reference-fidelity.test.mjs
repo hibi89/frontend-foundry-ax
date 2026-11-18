@@ -11,7 +11,7 @@ async function fixture(t) {
   const dir=await mkdtemp(join(tmpdir(),'ffax-fidelity-'));
   const fs=await import('node:fs/promises');t.after(()=>fs.rm(dir,{recursive:true,force:true}));
   const reference=join(dir,'reference.png'),render=join(dir,'render.png'),engineEntry=join(dir,'mock-engine.mjs'),out=join(dir,'results');
-  await Promise.all([writeFile(reference,tiny),writeFile(render,tiny),writeFile(engineEntry,`import {writeFileSync} from 'node:fs';if(process.argv[2]==='compare'){writeFileSync('heatmap.png',Buffer.from('png'));console.log(JSON.stringify({pixelDifference:0,issues:[]}));}else if(process.argv[2]==='suggest-fixes'){console.log(JSON.stringify({cssSuggestions:[]}));}else{process.exit(17);}`)]);
+  await Promise.all([writeFile(reference,tiny),writeFile(render,tiny),writeFile(engineEntry,`import {writeFileSync} from 'node:fs';if(process.argv[2]==='compare'){writeFileSync('heatmap.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==','base64'));console.log(JSON.stringify({summary:{mismatchRatio:0},pixelDifference:0,issues:[]}));}else if(process.argv[2]==='suggest-fixes'){console.log(JSON.stringify({cssSuggestions:[]}));}else{process.exit(17);}`)]);
   return {reference,render,out,engineEntry};
 }
 test('reference comparison creates local JSON and diff evidence', async t=>{

@@ -1,0 +1,44 @@
+name: FFAX P2 real pinned one-shot-ui
+on:
+  push:
+    branches:
+      - feature/ffax-reference-fidelity-20261118
+    paths:
+      - .github/workflows/ffax-p2-one-shot-ui-real.yml
+      - scripts/ffax_reference_fidelity.mjs
+      - scripts/p2_upstream_one_shot_probe.mjs
+      - tests/ffax-reference-fidelity.test.mjs
+permissions:
+  contents: read
+jobs:
+  real-upstream-cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned MIT upstream only in temporary runner directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FFAX_ONE_SHOT_DIR="$RUNNER_TEMP/ffax-p2-one-shot"
+          mkdir -p "$FFAX_ONE_SHOT_DIR"
+          npm install --prefix "$FFAX_ONE_SHOT_DIR" --ignore-scripts --no-audit --no-fund --no-package-lock --save=false -- one-shot-ui@0.12.0
+          node --input-type=module -e '
+          import {readFileSync} from "node:fs";
+          const p=JSON.parse(readFileSync(process.env.FFAX_ONE_SHOT_DIR+"/node_modules/one-shot-ui/package.json","utf8"));
+          if(p.name!=="one-shot-ui"||p.version!=="0.12.0"||p.license!=="MIT"||p.bin?.["one-shot-ui"]!=="dist/cli.mjs")process.exit(1);
+          console.log("UPSTREAM_PIN_METADATA_PASS",p.name,p.version,p.license);
+          '
+      - name: Validate genuine comparison and suggestions with generated noncustomer PNGs
+        shell: bash
+        env:
+          NO_COLOR: '1'
+        run: |
+          set -euo pipefail
+          export FFAX_ONE_SHOT_CLI="$RUNNER_TEMP/ffax-p2-one-shot/node_modules/one-shot-ui/dist/cli.mjs"
+          node scripts/p2_upstream_one_shot_probe.mjs

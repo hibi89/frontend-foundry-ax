@@ -68,8 +68,20 @@ export async function compareReference({reference,render,out,engineEntry=join(PR
   await mkdir(target,{recursive:true});
   const existing=await readdir(target);
   if(existing.length) throw new FidelityError('OUTPUT_NOT_EMPTY','Use an empty, dedicated report directory so previous evidence is not overwritten');
-  const comparison = await invokeEngine(engineEntry,'compare',[ref.path,impl.path,'--json','--heatmap','heatmap.png'],target);
-  const suggestions = suggest ? await invokeEngine(engineEntry,'suggest-fixes',[ref.path,impl.path,'--json'],target) : null;
+  const comparison = await invokeEngine(engineEntry,'compare',[ref.path,impl.path,'--json','--no-ocr','--heatmap','heatmap.png'],target);
+  const suggestions = suggest ? await invokeEngine(engineEntry,'suggest-fixes',[ref.path,impl.path,'--json','--no-ocr'],target) : null;
+  // A successful external process is not proof of an actual comparison.
+  const ratio=comparison?.summary?.mismatchRatio;
+  if(typeof ratio!=='number'||!Number.isFinite(ratio)||ratio<0||ratio>1||
+     !Array.isArray(comparison.issues))
+    throw new FidelityError('ENGINE_REPORT_INVALID','Upstream comparison JSON must contain a finite mismatchRatio and issues');
+  if(suggest&&(!suggestions||typeof suggestions!=='object'||Array.isArray(suggestions)))
+    throw new FidelityError('ENGINE_SUGGESTIONS_INVALID','Upstream suggestions JSON invalid');
+  let heat;
+  try{heat=await inspectPng(join(target,'heatmap.png'));}
+  catch{throw new FidelityError('ENGINE_HEATMAP_INVALID','Upstream did not create a valid PNG heatmap');}
+  if(heat.width!==ref.width||heat.height!==ref.height)
+    throw new FidelityError('ENGINE_HEATMAP_DIMENSIONS','Upstream heatmap does not match reference dimensions');
   const report = {schema:'ffax.reference-fidelity.v1',status:'MEASURED_NOT_APPROVED',engine:'one-shot-ui',reference:ref,render:impl,viewport:{width:ref.width,height:ref.height},comparison,suggestions,outputs:{heatmap:'heatmap.png'},notes:['Reference and render must match in pixel dimensions and device scale.','Pixel metrics and CSS suggestions do not prove functional correctness or user acceptance.','No source code, remote repository or production deployment was modified by this command.']};
   await writeFile(join(target,'report.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
   return {directory:target,report};
