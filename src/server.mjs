@@ -14,6 +14,7 @@ const publicAssets = new Map([
   ['/src/design-forge.mjs', 'text/javascript; charset=utf-8'],
   ['/src/reference-analysis.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge-ui.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/forge-compare-ui.mjs', 'text/javascript; charset=utf-8'],
   ['/src/core.mjs', 'text/javascript; charset=utf-8'],
   ['/src/local-repo-intake.mjs', 'text/javascript; charset=utf-8'],
   ['/src/github-readonly-intake.mjs', 'text/javascript; charset=utf-8'],
