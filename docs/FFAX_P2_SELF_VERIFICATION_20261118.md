@@ -57,3 +57,14 @@
 - **보존:** 원본/source/client files, main, Production, 외부 업로드, 권한·유료 API, 릴리스 변경 없음. 이 코드는 사용자 장비에서의 실기기 재검증도, 별도 Codex/Astra 독립 감사도 아님.
 - **완료율/게이트:** P1 코드 SWU 25/25 (100% 후보); 고정 AC-01..12 공식 검증완료율 **UNASSESSED**; 실제 Windows11/GTX1050Ti/Ollama·권리 있는 외부 참고 이미지/one-shot-ui·실고객 인증/라우팅/API·독립 기술/보안·UI 감사·사용자 최종 수락 **NOT_RUN**. RG-06 미충족, **RELEASE HOLD**.
 
+## 7. 2026-11-18 KST — 한국어 청크 분할 UTF-8 입력 오류 수정과 전체 재검증
+
+- **기능 SHA:** `01eed9e05343fd269711abb956dee9e4f43c2758` (`feature/ffax-reference-fidelity-20261118`).
+- **원인:** Node의 `Buffer#toString('utf8')`을 HTTP 요청 청크별로 호출해 3바이트 한국어 글자 중간에 청크 경계가 생기면 `U+FFFD`로 대체됨. `/api/design/brief|variants|refine|...`과 `/api/local-model`의 텍스트 의미·민감정보 거부 정확성에 영향을 줄 수 있었음.
+- **수정:** `src/http-body.mjs`의 bounded `TextDecoder('utf-8',{fatal:true})` 스트리밍 디코드 경로를 `src/forge-api.mjs`, `src/server.mjs`에 함께 연결. 요청 원본을 로깅하지 않고, 원래 본문 상한과 local Origin/CSRF·동의/민감정보 차단을 보존함. UTF-8 손상은 즉시 거부. `FORGE_UTF8_INVALID` 진단 코드가 `[A-Z_]` 정규식에 막히던 오류 응답 계약은 `[A-Z0-9_]`로 바로 수정.
+- **테스트:** `tests/forge-api.test.mjs`, `tests/server-security.test.mjs`에 한국어 3바이트 청크 분할+원문 유지, invalid UTF-8/초과 요청 거부, 기존 주민등록번호 민감 문자열 거부 확인(실 Ollama 호출 0).
+- **실패·원인·수정 이력 보존:** 최초 코드 [`db0ea733`](https://github.com/hibi89/frontend-foundry-ax/commit/db0ea733a998e286ecda6ba18c5a0342391caa7b)에서 source smoke [#44321935789](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44321935789) **FAIL 47/48**: 제품의 의도한 안전 거부는 작동했으나 오류코드 `FORGE_UTF8_INVALID`가 `FORGE_OPERATION_FAILED`로 변환. 오류 응답 필터 수정 [`01eed9e05343fd269711abb956dee9e4f43c2758`](https://github.com/hibi89/frontend-foundry-ax/commit/01eed9e05343fd269711abb956dee9e4f43c2758) 이후 PASS. 실패를 지우거나 처음부터 성공한 것으로 취급하지 않음.
+- **수정 후 실제 검증:** [P2 전체 Actions #44322075360](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44322075360) `completed/success`, **4/4 job SUCCESS**. Ubuntu/Windows Node **각 214/214 PASS, 0 FAIL**. Chromium UX·컴포넌트·접근성(axe serious/critical=0)·D1~D5/cleanroom 및 Windows review ZIP 회귀 통과. [별도 Forge 브라우저 #44322075363](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44322075363), [소스 스모크 #44322075354](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44322075354), [Windows review package #44322075357](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44322075357), [blueprint gate #44322076199](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44322076199) 모두 SUCCESS.
+- **P2 남은 필수 게이트:** 사용자 실제 Windows 11 GTX1050 Ti·RAM16GB/Ollama 라이브 요청(OWNER 환경), 권리 확인된 외부 이미지+실 one-shot-ui 충실도 수락, 실고객 React auth/API/routes/적용·rollback, Codex 기술·보안/독립 Astra UI UX 감사, 사용자 최종 디자인·기능 GO **NOT_RUN**. 독립 감사나 실사용을 자체 CI로 대체하지 않음.
+- **공식 진척/보존:** 25/25 P1 SWU 소스 구현 후보 =100%; 고정 12 AC 총 100 가중치 공식 P2 검증완료율 = **UNASSESSED**. `RELEASE HOLD`, main/Production/고객 원본/비밀/유료/권한/상품 등록 변경 없음.
+
