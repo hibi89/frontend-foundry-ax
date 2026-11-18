@@ -1,6 +1,6 @@
 /* FFAX Design Forge interface: local HTML/React-source variants; no remote requests. */
-import {renderMarkup,validateProjectImport} from './core.mjs';
-import {verifyForgeBundle} from './design-forge.mjs';
+import {renderMarkup,validateProjectImport,parseModelDesign} from './core.mjs';
+import {verifyForgeBundle,adoptLocalModelDesign} from './design-forge.mjs';
 const $=id=>document.getElementById(id);
 const status=$('forge-status');
 const report=(message,failed=false)=>{status.textContent=message;status.dataset.failed=String(failed);};
@@ -31,6 +31,39 @@ async function forgePost(endpoint,payload){
  }
  return res.json();
 }
+
+
+let stagedLocalModel=null;
+$('forge-local-request').addEventListener('click',async()=>{
+ const button=$('forge-local-request');
+ try{
+  if(!$('forge-local-consent').checked)throw Error('FORGE_LOCAL_MODEL_CONSENT_REQUIRED');
+  const chosen=active();
+  const brief=$('forge-brief').value.trim();
+  if(brief.length<8||brief.length>2000)throw Error('FORGE_LOCAL_BRIEF_INVALID');
+  button.disabled=true;stagedLocalModel=null;$('forge-local-response').value='';$('forge-local-adopt').disabled=true;
+  const result=await fetch('/api/local-model',{method:'POST',credentials:'omit',redirect:'error',cache:'no-store',headers:{'content-type':'application/json'},body:JSON.stringify({model:'qwen3:4b-instruct',prompt:brief,consent:'APPROVE_LOCAL_MODEL_PROMPT_ONLY'})});
+  const data=await result.json();
+  if(!result.ok)throw Error(data.error||'FORGE_LOCAL_MODEL_UNAVAILABLE');
+  const parsed=parseModelDesign(data.output,{ownerBrief:brief,approval:'APPROVE_DESIGN_PREVIEW'});
+  validateProjectImport(parsed.document);
+  stagedLocalModel={id:chosen.id,model:data.model,sha256:data.sha256,document:parsed.document,output:data.output};
+  $('forge-local-response').value=data.output;$('forge-local-adopt').disabled=false;
+  report('로컬 Qwen 구조 JSON을 수신했습니다. 내용을 검토하고 별도 승인한 경우에만 '+chosen.id+' 시안에 반영합니다.');
+ }catch(e){report('로컬 Qwen: '+e.message,true);}
+ finally{button.disabled=false;$('forge-local-consent').checked=false;}
+});
+$('forge-local-adopt').addEventListener('click',()=>{
+ try{
+  if(!$('forge-local-review').checked)throw Error('FORGE_MODEL_REVIEW_APPROVAL_REQUIRED');
+  if(!stagedLocalModel||stagedLocalModel.id!==selectedId)throw Error('FORGE_MODEL_PROPOSAL_STALE');
+  const updated=adoptLocalModelDesign(active(),stagedLocalModel.document,{model:stagedLocalModel.model,sha256:stagedLocalModel.sha256,approval:'APPROVE_LOCAL_DESIGN_VARIANT'});
+  variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;stagedLocalModel=null;
+  $('forge-local-response').value='';$('forge-local-adopt').disabled=true;renderCards();
+  report('로컬 모델의 검토된 UI 컴포넌트 제안을 '+updated.id+' v'+updated.revision+'에 반영. 원본 소스/아트워크는 자동 교체하지 않았습니다.');
+ }catch(e){report('모델 제안 거부: '+e.message,true);}
+ finally{$('forge-local-review').checked=false;}
+});
 
 function active(){const found=variants.find(v=>v.id===selectedId);if(!found)throw Error('FORGE_SELECT_VARIANT_FIRST');return found;}
 function renderCards(){
