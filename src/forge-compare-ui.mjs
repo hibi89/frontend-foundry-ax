@@ -48,6 +48,14 @@ async function compare(){
   setStatus('픽셀 비교 완료 · 불일치 기준 픽셀 '+different+'/'+(width*height)+'개 · 평균 RGB 차이 '+current.diagnostic.meanAbsoluteChannelError+'. 텍스트·레이아웃·기능·권리는 별도 검토하십시오.');
  }finally{a?.bitmap.close();b?.bitmap.close();}
 }
+// A file change invalidates the previous pixel evidence and any owner's approval.
+for(const key of ['forge-compare-reference','forge-compare-render']){
+ byId(key).addEventListener('change',()=>{
+  clearPreview();current=null;
+  for(const id of ['forge-reference-image','forge-render-image','forge-heat-image'])byId(id).removeAttribute('src');
+  setStatus('비교 입력이 변경되어 이전 시각 승인·점수는 무효입니다. 다시 계산하세요.');
+ });
+}
 byId('forge-compare-run').addEventListener('click',()=>compare().catch(e=>{clearPreview();current=null;setStatus('비교 실패: '+e.message,true);}));
 byId('forge-compare-download').addEventListener('click',()=>{
  if(!current)return;
