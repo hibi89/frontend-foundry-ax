@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeForgeBrief,generateForgeVariants} from '../src/design-forge.mjs';
 import {planLocalTrials,runBoundedConvergence} from '../src/forge-convergence.mjs';
+import {validateConvergenceOutputDestination} from '../scripts/forge_converge.mjs';
+import {join,resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {tmpdir} from 'node:os';
+import {mkdtemp,symlink,rm} from 'node:fs/promises';
 
 function original(){return generateForgeVariants(makeForgeBrief({prompt:'역학달력 오늘의 운세를 보여주는 고품질 화면을 디자인해줘'}))[0];}
 function measure(reference='a'.repeat(64)){
@@ -44,4 +49,20 @@ test('RF-06: changed reference SHA or invalid result stops iteration without acc
  await assert.rejects(runBoundedConvergence({variant:candidate,plan,measure:changed,approval:'APPROVE_LOCAL_CANDIDATE_CONVERGENCE'}),/FORGE_LOOP_REFERENCE_CHANGED/);
  const invalid=async()=>({meanAbsoluteChannelError:NaN,referenceSha256:'a'.repeat(64),renderSha256:'b'.repeat(64)});
  await assert.rejects(runBoundedConvergence({variant:candidate,plan,measure:invalid,approval:'APPROVE_LOCAL_CANDIDATE_CONVERGENCE'}),/FORGE_LOOP_METRIC_UNTRUSTED/);
+});
+
+test('P2: convergence output cannot follow an outside symlink into project',async()=>{
+ const projectRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+ await assert.rejects(validateConvergenceOutputDestination(join(projectRoot,'new-report')),
+  /FORGE_CONVERGE_OUTPUT_MUST_BE_OUTSIDE_SOURCE/);
+ const outside=join(tmpdir(),'ffax-convergence-safe-new-output');
+ assert.equal(await validateConvergenceOutputDestination(outside),resolve(outside));
+ if(process.platform!=='win32'){
+  const temp=await mkdtemp(join(tmpdir(),'ffax-convergence-guard-'));
+  try{
+   await symlink(projectRoot,join(temp,'alias'),'dir');
+   await assert.rejects(validateConvergenceOutputDestination(join(temp,'alias','new-report')),
+    /FORGE_CONVERGE_OUTPUT_MUST_BE_OUTSIDE_SOURCE/);
+  }finally{await rm(temp,{recursive:true,force:true});}
+ }
 });

@@ -4,7 +4,7 @@
  * Never executes imported JSX, installs tools, or touches an owner project.
  */
 import {readFile,writeFile,realpath,stat,mkdir} from 'node:fs/promises';
-import {resolve,join,dirname,sep} from 'node:path';
+import {resolve,join,dirname,basename,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 import {freezeForgeVariant,verifyForgeBundle} from '../src/design-forge.mjs';
@@ -52,6 +52,18 @@ async function metric(reference,render){
   });
  });
 }
+/** Reject output that would enter the FFAX repository, including via parent
+ * symlinks. Only a new directory with an existing outside parent is accepted.
+ */
+export async function validateConvergenceOutputDestination(out){
+ if(typeof out!=='string'||!out.trim())throw Error('FORGE_CONVERGE_OUTPUT_MUST_BE_OUTSIDE_SOURCE');
+ const destination=resolve(out);
+ const [sourceRoot,parent]=await Promise.all([realpath(root),realpath(dirname(destination))]);
+ const canonicalTarget=resolve(parent,basename(destination));
+ if(canonicalTarget===sourceRoot||canonicalTarget.startsWith(sourceRoot+sep))
+  throw Error('FORGE_CONVERGE_OUTPUT_MUST_BE_OUTSIDE_SOURCE');
+ return destination;
+}
 export async function converge({bundle,reference,out,width=1440,height=900,dpr=1,maxPasses=5,plan,engineEntry}){
  const source=await readJSON(bundle);
  const project=await verifyForgeBundle(source);
@@ -61,8 +73,8 @@ export async function converge({bundle,reference,out,width=1440,height=900,dpr=1
    parentVariantId:null,document:project,brief:{},recommendation:{},previewStatus:'SOURCE_READY_RENDER_NOT_VERIFIED'};
  const referencePath=await realpath(resolve(reference)),referenceStat=await stat(referencePath);
  if(!referenceStat.isFile()||referenceStat.size>8*1024*1024)throw Error('FORGE_CONVERGE_REFERENCE_INVALID');
- const destination=resolve(out);
- if(destination===source||destination===referencePath||destination===root||destination.startsWith(root+sep))throw Error('FORGE_CONVERGE_OUTPUT_MUST_BE_OUTSIDE_SOURCE');
+ const destination=await validateConvergenceOutputDestination(out);
+ if(destination===referencePath)throw Error('FORGE_CONVERGE_OUTPUT_MUST_BE_OUTSIDE_SOURCE');
  // mkdir without recursive mode ensures a new isolated output; never overwrite reports.
  await mkdir(destination,{recursive:false,mode:0o700});
  const approvedPlan=plan?await readJSON(plan):planLocalTrials(variant,{maxPasses});
