@@ -12,6 +12,7 @@ on:
       - 'src/server.mjs'
       - 'scripts/forge_capture.mjs'
       - 'tests/design-forge.test.mjs'
+      - 'tests/forge-api.test.mjs'
       - 'tests/ffax-reference-fidelity.test.mjs'
 permissions:
   contents: read
@@ -37,4 +38,4 @@ jobs:
           node --check scripts/forge_capture.mjs
           python -m py_compile scripts/forge_capture.py
       - name: Local deterministic core source contract smoke (no model/network)
-        run: node --test tests/design-forge.test.mjs tests/ffax-reference-fidelity.test.mjs
+        run: node --test tests/design-forge.test.mjs tests/forge-api.test.mjs tests/ffax-reference-fidelity.test.mjs
