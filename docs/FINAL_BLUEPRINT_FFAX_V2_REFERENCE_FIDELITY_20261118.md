@@ -139,13 +139,14 @@ DF-01 Brief+design dials+provenance validation
 **기존 FFAX 단일 제품/단일 저장소 유지**. 별도 GitHub 저장소 또는 별도 상용 서비스로 분리하지 않는다. 기존 FFAX는 자연어 UI 제작, 17종 컴포넌트, 편집·Undo/Redo, 구조화된 React 코드 출력, 로컬 체크포인트, 안전한 프로젝트 검토 기능을 유지한다. 외부 프로젝트는 이미지 정밀 복원/검증의 **교체 가능한 모듈**로만 채용한다. 목적은 완전한 제품을 스크린샷 비교 CLI로 축소하는 것이 아니라, FFAX의 약한 **'확정 디자인 → 실제 사용 화면' 충실도**를 보완하는 것이다.
 
 새 사용 모드:
+- **Design Forge (V2.1 신규 P0):** 사용자 brief/보유 이미지 → 오프라인 추천·A/B/C 실제 코드·렌더 시안 → 개선/혼합 → 원본 source/자산/사양/PNG SHA 승인 잠금 → FFAX 구현에 직접 전달.
 - **Create / Improve (기존):** brief→2안→컴포넌트/코드→편집/QA→승인된 diff/PR.
 - **Reference Fidelity (신규, P0):** 이미지 고정→구조·자산 분석→초기 코드 생성→Playwright 실화면 캡처→one-shot-ui 분석/교정→반복→사람 검수→선택적 통합.
 - **Agent/Provider (선택):** 기존 FFAX 로컬 Qwen/수동 모델 어댑터 유지. 타사 image-to-code 계열로 전체 제품을 대체하지 않는다.
 
 UI 디자인의 1차 레퍼런스는 사용자가 업로드한 'FFAX에 적용할 최적 조합' 흐름도이며, 정본은 그에 대한 *아키텍처*이지 화면 색채/배치를 그대로 복제하라는 지시가 아니다. 실제 역학달력 랜딩 화면은 별도 참조 이미지/자산으로 잠근다.
 
-## 1. 채택한 아키텍처 (사용자 흐름도 보완)
+## 1. 채택한 아키텍처 (외부 PNG/사진 입력 전용 경로; FFAX 내부 Design Forge 경로는 §0A 우선)
 
 ```text
 [1 Reference Intake] PNG + source/rights + SHA256 + width/height/DPR + required elements
@@ -189,7 +190,7 @@ Inputs: `reference.png`, `provenance` (owner-generated / licensed / external), `
 
 Reject changed SHA, unsupported file, oversized image, missing reference, path traversal, symlink escape, or unauthorized workspace scope. Images must not be committed to public GitHub if proprietary/customer content or rights are uncertain.
 
-### 3.2 Layer/asset stage (hard before the first visual-generation pass)
+### 3.2 Layer/asset stage (외부 평면 레퍼런스 역설계용; Forge-native는 이미 잠긴 source/asset manifest를 검증 후 재사용)
 
 Create `design-spec.json` and `asset-manifest.json`:
 - section rectangles, stacking/order, spacing, grid, borders/radii/shadows, palette and text copy;
