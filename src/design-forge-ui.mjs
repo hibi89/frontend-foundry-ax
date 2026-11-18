@@ -8,7 +8,7 @@ const download=(name,content,type='application/json')=>{
  const url=URL.createObjectURL(new Blob([content],{type}));
  const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 };
-let variants=[],selectedId=null,frozen=null,ownerBrief=null;
+let variants=[],selectedId=null,frozen=null,ownerBrief=null,variantHistory=new Map();
 let capturedPng=null,captureUrl=null,captureId=null,captureBundleSha=null;
 
 let forgeCsrf=null;
@@ -59,13 +59,17 @@ $('forge-local-adopt').addEventListener('click',()=>{
   if(!$('forge-local-review').checked)throw Error('FORGE_MODEL_REVIEW_APPROVAL_REQUIRED');
   if(!stagedLocalModel||stagedLocalModel.id!==selectedId||stagedLocalModel.revision!==active().revision)throw Error('FORGE_MODEL_PROPOSAL_STALE');
   const updated=adoptLocalModelDesign(active(),stagedLocalModel.document,{model:stagedLocalModel.model,sha256:stagedLocalModel.sha256,approval:'APPROVE_LOCAL_DESIGN_VARIANT'});
-  variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;stagedLocalModel=null;
+  rememberRevision(active());variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;stagedLocalModel=null;
   $('forge-local-response').value='';$('forge-local-adopt').disabled=true;renderCards();
   report('로컬 모델의 검토된 UI 컴포넌트 제안을 '+updated.id+' v'+updated.revision+'에 반영. 원본 소스/아트워크는 자동 교체하지 않았습니다.');
  }catch(e){report('모델 제안 거부: '+e.message,true);}
  finally{$('forge-local-review').checked=false;}
 });
 
+function rememberRevision(variant){
+ const prior=variantHistory.get(variant.id)||[];
+ prior.push(structuredClone(variant));if(prior.length>30)prior.shift();variantHistory.set(variant.id,prior);
+}
 function active(){const found=variants.find(v=>v.id===selectedId);if(!found)throw Error('FORGE_SELECT_VARIANT_FIRST');return found;}
 function renderCards(){
  const target=$('forge-variants');target.replaceChildren();
@@ -80,6 +84,7 @@ function renderCards(){
  }
  $('forge-freeze').disabled=!selectedId;
  $('forge-refine').disabled=!selectedId;
+ $('forge-undo').disabled=!selectedId || !(variantHistory.get(selectedId)||[]).length;
  $('forge-mix').disabled=!selectedId;
  $('forge-apply').disabled=!frozen;
  $('forge-export').disabled=!frozen;
@@ -91,9 +96,20 @@ $('forge-generate').addEventListener('click',async()=>{
  try{
   const result=await forgePost('variants',{brief:{prompt:$('forge-brief').value,audience:$('forge-audience').value,mood:$('forge-mood').value,mustHave:$('forge-musthave').value,avoid:$('forge-avoid').value}});
   if(result.schema!=='ffax.design-variants-result.v1'||!Array.isArray(result.variants)||result.variants.length!==3)throw Error('FORGE_VARIANTS_INVALID');
-  ownerBrief=result.brief;variants=result.variants;selectedId=null;frozen=null;renderCards();
+  ownerBrief=result.brief;variants=result.variants;variantHistory=new Map();selectedId=null;frozen=null;renderCards();
   report('A/B/C 시안 3개를 실제 FFAX 구조화 코드에서 생성했습니다. 이미지나 모델 호출 없이 로컬 처리합니다. 선택·개선 후 확정하세요.');
  }catch(err){report(err.message,true);}
+});
+$('forge-undo').addEventListener('click',()=>{
+ try{
+  const current=active();
+  const queue=variantHistory.get(current.id)||[];
+  if(!queue.length)throw Error('FORGE_REVISION_HISTORY_EMPTY');
+  const previous=queue.pop();
+  variants=variants.map(v=>v.id===current.id?previous:v);
+  frozen=null;stagedLocalModel=null;$('forge-local-response').value='';$('forge-local-adopt').disabled=true;
+  renderCards();report(current.id+' 시안의 직전 소스 버전 v'+previous.revision+'을 복구했습니다. 확정하려면 다시 승인하세요.');
+ }catch(err){report('버전 복구 거절: '+err.message,true);}
 });
 $('forge-refine').addEventListener('click',async()=>{
  try{
@@ -112,7 +128,7 @@ $('forge-refine').addEventListener('click',async()=>{
   } else throw Error('FORGE_INSTRUCTION_UNSUPPORTED: 다크/밝게/청록/여백/제목:문구를 지원합니다.');
   const result=await forgePost('refine',{variant,command:change});const updated=result.variant;
   if(result.schema!=='ffax.design-refine-result.v1'||updated?.id!==variant.id)throw Error('FORGE_REFINEMENT_INVALID');
-  variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;renderCards();
+  rememberRevision(variant);variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;renderCards();
   report(updated.id+' 시안 v'+updated.revision+'에 요청한 부분만 반영. 기존 시안을 덮어쓴 것은 아니며 새 버전입니다.');
  }catch(err){report(err.message,true);}
 });
@@ -123,7 +139,7 @@ $('forge-mix').addEventListener('click',async()=>{
   const response=await forgePost('mix',{primary:base,secondary:other,options:{takeTheme:true,takeLayout:$('forge-mix-layout').checked}});
   if(response.schema!=='ffax.design-mix-result.v1'||response.variant?.id!==base.id)throw Error('FORGE_MIX_INVALID');
   const updated=response.variant;
-  variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;renderCards();
+  rememberRevision(base);variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;renderCards();
   report(base.id+' 시안에 '+other.id+' 시안의 색채'+($('forge-mix-layout').checked?'·배치':'')+'를 반영했습니다.');
  }catch(err){report(err.message,true);}
 });
@@ -210,7 +226,7 @@ $('forge-import').addEventListener('change',async()=>{
   const raw=await file.text();const parsed=JSON.parse(raw);const doc=await verifyForgeBundle(parsed);
   const recommendation={name:'복구된 확정 시안',rationale:'SHA 검증된 로컬 소스 번들'};
   frozen=parsed;variants=[{schema:'ffax.design-variant.v1',id:parsed.manifest.variantId,styleId:parsed.manifest.styleId,revision:parsed.manifest.revision,parentVariantId:null,brief:{},document:doc,recommendation,previewStatus:'BUNDLE_REOPENED'}];
-  selectedId=parsed.manifest.variantId;renderCards();report('레퍼런스 번들 SHA256 검증 PASS · 로컬에서 복구했습니다.');
+  selectedId=parsed.manifest.variantId;variantHistory=new Map();renderCards();report('레퍼런스 번들 SHA256 검증 PASS · 로컬에서 복구했습니다.');
  }catch(err){report('복구 거절: '+err.message,true);}finally{$('forge-import').value='';}
 });
 report('Design Forge 준비 · 무료 오프라인 규칙·기존 FFAX 컴포넌트로 시안을 생성합니다.');
