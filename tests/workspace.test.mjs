@@ -122,3 +122,46 @@ test('AC10 review plan blocks unchecked statuses, invalid repo, and direct main 
  assert.throws(()=>createReviewPlan({...args,repo:'../../etc'}),/INVALID_GIT_REVIEW_INPUT/);
  assert.throws(()=>createReviewPlan({...args,receipt:{...receipt,productionDeploy:true}}),/GIT_REVIEW_NOT_READY/);
 });
+
+test('P2 AC01: destination symlink to customer source cannot receive copied files',async t=>{
+ const temp=await makeTemp();
+ try{
+  const source=join(temp,'customer'),alias=join(temp,'dest-alias');
+  await mkdir(join(source,'src'),{recursive:true});
+  await writeFile(join(source,'package.json'),JSON.stringify({dependencies:{react:'19'}}));
+  const original='export default function App(){return <main>Owned app</main>}';
+  await writeFile(join(source,'src','App.tsx'),original);
+  try{await symlink(source,alias,'junction');}
+  catch(e){if(['EPERM','EACCES','ENOTSUP'].includes(e?.code)){t.skip('symlink creation unavailable');return;}throw e;}
+  await assert.rejects(importReactProject({source,dest:alias,id:'review-unsafe'}),/DESTINATION_SYMLINK_OR_SPECIAL_PATH|DESTINATION_MUST_BE_ISOLATED/);
+  await assert.rejects(stat(join(source,'review-unsafe')),{code:'ENOENT'});
+  assert.equal(await readFile(join(source,'src','App.tsx'),'utf8'),original);
+ }finally{await rm(temp,{recursive:true,force:true});}
+});
+test('P2 AC01: destination symlink ancestor cannot evade isolated-copy rule',async t=>{
+ const temp=await makeTemp();
+ try{
+  const source=join(temp,'customer'),alias=join(temp,'alias-parent');
+  await mkdir(join(source,'src'),{recursive:true});
+  await writeFile(join(source,'package.json'),JSON.stringify({dependencies:{react:'19'}}));
+  await writeFile(join(source,'src','App.tsx'),'export default function App(){return <main/>}');
+  try{await symlink(source,alias,'junction');}
+  catch(e){if(['EPERM','EACCES','ENOTSUP'].includes(e?.code)){t.skip('symlink creation unavailable');return;}throw e;}
+  await assert.rejects(importReactProject({source,dest:join(alias,'src'),id:'review-unsafe'}),/DESTINATION_SYMLINK_OR_SPECIAL_PATH|DESTINATION_MUST_BE_ISOLATED/);
+  await assert.rejects(stat(join(source,'src','review-unsafe')),{code:'ENOENT'});
+ }finally{await rm(temp,{recursive:true,force:true});}
+});
+test('P2 AC01: valid sibling destination still imports and retains original SHA',async()=>{
+ const temp=await makeTemp();
+ try{
+  const source=join(temp,'customer'),dest=join(temp,'review');
+  await mkdir(join(source,'src'),{recursive:true});await mkdir(dest);
+  await writeFile(join(source,'package.json'),JSON.stringify({dependencies:{react:'19'}}));
+  await writeFile(join(source,'src','App.tsx'),'export default function App(){return <main/>}');
+  const before=await inspectReactProject(source);
+  const imported=await importReactProject({source,dest,id:'review-safe'});
+  assert.equal(imported.manifest.digest,before.digest);
+  assert.equal((await inspectReactProject(source)).digest,before.digest);
+  assert.equal((await inspectReactProject(imported.sourceDir)).digest,before.digest);
+ }finally{await rm(temp,{recursive:true,force:true});}
+});

@@ -1,7 +1,7 @@
 /** FFAX local-only read -> snapshot -> review -> explicit approved UI patch pipeline.
  * No project code is executed by this module, no GitHub token or network is used.
  */
-import { lstat, readFile, readdir, mkdir, writeFile, rm, stat, open, rename } from 'node:fs/promises';
+import { lstat, readFile, readdir, mkdir, writeFile, rm, stat, open, rename, realpath } from 'node:fs/promises';
 import { resolve, relative, join, dirname, sep, posix, basename } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 
@@ -67,15 +67,46 @@ export async function inspectReactProject(dir) {
   return { source:o.root, files:o.files.map(({content,...meta})=>meta), digest:o.digest, count:o.files.length };
 }
 
+function within(candidate,base){
+  const a=process.platform==='win32'?candidate.toLowerCase():candidate;
+  const b=process.platform==='win32'?base.toLowerCase():base;
+  return a===b||a.startsWith(b+sep);
+}
+async function isolatedDestination(sourceRoot,dest){
+  const out=resolve(dest);
+  // Junctions and symlinked ancestors can otherwise redirect clone writes
+  // into the immutable customer source, bypassing lexical path comparisons.
+  let cursor=out;
+  while(true){
+    let details;
+    try{details=await lstat(cursor);}
+    catch{throw Error('DESTINATION_UNAVAILABLE');}
+    if(!details.isDirectory()||details.isSymbolicLink())
+      throw Error('DESTINATION_SYMLINK_OR_SPECIAL_PATH');
+    const parent=dirname(cursor);
+    if(parent===cursor)break;
+    cursor=parent;
+  }
+  const [sourceCanonical,destCanonical]=await Promise.all([realpath(sourceRoot),realpath(out)]);
+  if(within(destCanonical,sourceCanonical)||within(sourceCanonical,destCanonical))
+    throw Error('DESTINATION_MUST_BE_ISOLATED');
+  return {out,canonical:destCanonical,sourceCanonical};
+}
 export async function importReactProject({ source, dest, id }) {
   if (!id || !/^[A-Za-z0-9-]{3,64}$/.test(id)) throw new Error('INVALID_PROJECT_ID');
   const original=await collect(source);
-  const out=resolve(dest);
-  if (out === original.root || out.startsWith(original.root + sep) || original.root.startsWith(out+sep)) throw new Error('DESTINATION_MUST_BE_ISOLATED');
+  const location=await isolatedDestination(original.root,dest);
+  const out=location.out;
   const workDir=join(out,id);
   let created=false;
   try {
     await mkdir(workDir, { recursive:false }); created=true;
+    // Recheck the canonical child before the first file write. Existing
+    // destinations are never reused; this gate is not a substitute for OS
+    // directory-handle protection against a concurrent local attacker.
+    const actualWork=await realpath(workDir);
+    if(actualWork!==join(location.canonical,id)||within(actualWork,location.sourceCanonical))
+      throw Error('DESTINATION_REDIRECTED');
     await mkdir(join(workDir,'source'));
     for (const f of original.files) {
       const to=join(workDir,'source',f.path);
