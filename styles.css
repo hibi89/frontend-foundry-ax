@@ -63,3 +63,14 @@
 
 /* Forge-only motif, retaining the original FFAX hero gradient for non-Forge projects. */
 .ff-canvas[style*="--ff-hero-art"] .ff-hero{background-image:var(--ff-hero-art);background-color:var(--surface);background-size:cover;background-position:center}
+
+
+/* Side-by-side local visual evidence; never use a screenshot as a substitute for working controls. */
+.forge-compare-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.forge-compare-board figure{margin:0;min-width:0;border:1px solid #334155;border-radius:8px;overflow:hidden;background:#0b1220}
+.forge-compare-board figcaption{font-size:11px;color:#cbd5e1;padding:8px}
+.forge-compare-board img{display:block;width:100%;height:auto;object-fit:contain;min-height:80px}
+.forge-compare-panel input{max-width:100%}
+.forge-compare-panel #forge-compare-status{white-space:pre-wrap;max-height:180px;overflow:auto}
+.forge-compare-panel #forge-compare-status[data-failed="true"]{color:#fecaca}
+@media(max-width:760px){.forge-compare-board{grid-template-columns:1fr}}
