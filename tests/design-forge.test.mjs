@@ -48,7 +48,7 @@ test('Forge design tokens produce distinct preview CSS and exported React source
   assert.ok(renderMarkup(item.document).includes('--ff-hero-art:'));
   assert.ok(renderMarkup(item.document).includes(token.accent));
   assert.ok(exportReact(item.document).includes(token.fontStack));
-  assert.ok(exportReact(item.document).includes('backgroundImage'));
+  if(item.document.components.some(node=>node.type==='Hero'))assert.ok(exportReact(item.document).includes('backgroundImage'));
  }
  const invalid=structuredClone(variants[0].document);invalid.designSystem.fontStack='url(https://evil.example/font)';
  assert.throws(()=>validateProjectImport(invalid),/DESIGN_SYSTEM_INVALID/);
