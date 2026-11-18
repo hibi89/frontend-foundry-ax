@@ -90,13 +90,14 @@ export function newDocument(brief = buildBrief(DEFAULT_PROMPT), approach = 'A') 
 }
 const FORGE_FONTS=['system-ui, sans-serif','Georgia, serif','Arial, sans-serif',"\'Malgun Gothic\', system-ui, sans-serif"];
 const FORGE_DENSITIES={airy:24,balanced:15,compact:10};
+const FORGE_HERO_ART={none:'none',celestial:'radial-gradient(circle at 78% 18%,rgba(245,198,111,.25),transparent 35%),radial-gradient(circle at 16% 85%,rgba(99,102,241,.22),transparent 55%)',grid:'linear-gradient(90deg,rgba(148,163,184,.13) 1px,transparent 1px),linear-gradient(0deg,rgba(148,163,184,.13) 1px,transparent 1px)',waves:'radial-gradient(ellipse at 75% 125%,rgba(34,211,238,.25),transparent 62%),radial-gradient(ellipse at 15% 0%,rgba(45,212,191,.2),transparent 55%)'};
 function validateDesignSystem(tokens){
  if(tokens===undefined)return true;
  if(!tokens||Object.getPrototypeOf(tokens)!==Object.prototype ||
-    JSON.stringify(Object.keys(tokens).sort())!==JSON.stringify(['accent','density','fontStack','ink','muted','name','radius','surface'].sort()) ||
+    JSON.stringify(Object.keys(tokens).sort())!==JSON.stringify(['accent','density','fontStack','heroArt','ink','muted','name','radius','surface'].sort()) ||
     !/^[#][0-9a-fA-F]{6}$/.test(tokens.surface) || !/^[#][0-9a-fA-F]{6}$/.test(tokens.accent) ||
     !/^[#][0-9a-fA-F]{6}$/.test(tokens.ink) || !/^[#][0-9a-fA-F]{6}$/.test(tokens.muted) ||
-    !FORGE_FONTS.includes(tokens.fontStack)|| !Object.hasOwn(FORGE_DENSITIES,tokens.density) ||
+    !FORGE_FONTS.includes(tokens.fontStack)|| !Object.hasOwn(FORGE_DENSITIES,tokens.density) || !Object.hasOwn(FORGE_HERO_ART,tokens.heroArt) ||
     ![6,12,18,24].includes(tokens.radius) ||
     typeof tokens.name!=='string'||tokens.name.length<1||tokens.name.length>60||/[\u0000-\u001f\u007f]/.test(tokens.name))
    throw new Error('DESIGN_SYSTEM_INVALID');
@@ -244,7 +245,7 @@ export function renderMarkup(doc) {
   assertDocument(doc);
   const t=doc.designSystem?{...THEME_OPTIONS[doc.theme],...doc.designSystem}:THEME_OPTIONS[doc.theme];
   const accent=doc.reference?.reviewed && doc.reference.selectedColor ? doc.reference.selectedColor : t.accent;
-  const cssVars=`--surface:${t.surface};--accent:${accent};--ink:${t.ink};--muted:${t.muted};--ff-radius:${t.radius||14}px;--ff-gap:${FORGE_DENSITIES[t.density]||15}px;--ff-font:${t.fontStack||'system-ui, sans-serif'};`;
+  const cssVars=`--surface:${t.surface};--accent:${accent};--ink:${t.ink};--muted:${t.muted};--ff-radius:${t.radius||14}px;--ff-gap:${FORGE_DENSITIES[t.density]||15}px;--ff-font:${t.fontStack||'system-ui, sans-serif'};--ff-hero-art:${FORGE_HERO_ART[t.heroArt]||'none'};`;
   return `<main class="ff-canvas theme-${doc.theme} layout-${doc.layout}" data-theme="${doc.theme}" style="${cssVars}" aria-label="프론트엔드 미리보기">${doc.components.map(renderNode).join('')}</main>`;
 }
 export function exportReact(doc){
@@ -265,7 +266,8 @@ export function exportReact(doc){
     const ink=button?'#ffffff':t.ink;
     const surface=button?`color-mix(in srgb, ${accent} 60%, #0b1026)`:`color-mix(in srgb, ${t.surface} 83%, ${t.ink} 17%)`;
     const stroke=n.color==='neutral'?t.muted:`color-mix(in srgb, ${t.muted} 30%, transparent)`;
-    const s=`style={{ padding: ${n.spacing}, alignSelf: ${JSON.stringify(n.align)}, color: ${JSON.stringify(ink)},minWidth:0,maxWidth:'100%',boxSizing:'border-box',overflowWrap:'anywhere',borderRadius:${t.radius||12},backgroundColor:${JSON.stringify(surface)},border:${JSON.stringify(button?'0':`1px solid ${stroke}`)},lineHeight:1.45${button?',fontWeight:700,cursor:\'pointer\'':''}${gridSpan} }}`;
+    const heroBackground=n.type==='Hero'?',backgroundImage:'+JSON.stringify(FORGE_HERO_ART[t.heroArt]||'none'):'';
+    const s=`style={{ padding: ${n.spacing}, alignSelf: ${JSON.stringify(n.align)}, color: ${JSON.stringify(ink)},minWidth:0,maxWidth:'100%',boxSizing:'border-box',overflowWrap:'anywhere',borderRadius:${t.radius||12},backgroundColor:${JSON.stringify(surface)},border:${JSON.stringify(button?'0':`1px solid ${stroke}`)},lineHeight:1.45${heroBackground}${button?',fontWeight:700,cursor:\'pointer\'':''}${gridSpan} }}`;
     const inputStyle=`style={{display:'block',width:'100%',boxSizing:'border-box',marginTop:8,padding:9,borderRadius:6,backgroundColor:${JSON.stringify(t.surface)},color:${JSON.stringify(t.ink)},border:${JSON.stringify(`1px solid ${t.muted}`)}}}`;
     switch(n.type){
       case 'Button':return `<button type="button" ${s}>${text}</button>`;
