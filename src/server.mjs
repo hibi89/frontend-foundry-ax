@@ -13,7 +13,6 @@ const publicAssets = new Map([
   ['/src/app.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge-ui.mjs', 'text/javascript; charset=utf-8'],
-  ['/src/forge-api.mjs', 'text/javascript; charset=utf-8'],
   ['/src/core.mjs', 'text/javascript; charset=utf-8'],
   ['/src/local-repo-intake.mjs', 'text/javascript; charset=utf-8'],
   ['/src/github-readonly-intake.mjs', 'text/javascript; charset=utf-8'],
