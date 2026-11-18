@@ -1,0 +1,35 @@
+name: FFAX P2 dependency security audit
+on:
+  push:
+    branches:
+      - feature/ffax-reference-fidelity-20261118
+    paths:
+      - '.github/workflows/ffax-p2-dependency-security.yml'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production-dependencies:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact public dependency versions
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const p=JSON.parse(readFileSync('package.json','utf8'));
+          for(const [name,v] of Object.entries({...p.dependencies,...p.devDependencies})){
+            if(!/^\d+\.\d+\.\d+$/.test(v))throw Error('DEPENDENCY_UNPINNED '+name);
+          }
+          console.log('FFAX_DEPENDENCY_VERSION_PIN_PASS');
+          NODE
+      - name: Resolve only public npm package metadata, never customer source
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Fail on high or critical production dependency advisories
+        run: npm audit --omit=dev --audit-level=high
