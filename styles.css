@@ -56,3 +56,7 @@
 .forge-panel #forge-status[data-failed="true"]{color:#fecaca}
 .forge-panel #forge-status{max-height:155px;overflow:auto;white-space:pre-wrap}
 @media(max-width:720px){.forge-live-preview .ff-canvas{transform:scale(.4)}}
+
+/* Forge tokens are optional and never alter legacy project files. */
+.ff-canvas{font-family:var(--ff-font,system-ui,sans-serif);gap:var(--ff-gap,15px);border-radius:var(--ff-radius,14px)}
+.ff-canvas .ff-component{border-radius:var(--ff-radius,12px)}
