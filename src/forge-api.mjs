@@ -4,6 +4,7 @@ import {homedir} from 'node:os';
 import {join} from 'node:path';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,verifyForgeBundle} from './design-forge.mjs';
+import {proposeTypedVisualFixes,applyBoundedVisualPatches} from './forge-correction.mjs';
 const MAX_BYTES=150000,MAX_RESPONSE=350000;
 const storeRoot=join(homedir(),'.ffax','forge-bundles');
 function reply(res,status,value){
@@ -70,6 +71,10 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
      assertKeys(body,['variant','command']);value={schema:'ffax.design-refine-result.v1',variant:refineForgeVariant(body.variant,body.command)};break;
     case '/api/design/mix':
      assertKeys(body,['primary','secondary','options']);value={schema:'ffax.design-mix-result.v1',variant:mixForgeVariants(body.primary,body.secondary,body.options)};break;
+    case '/api/design/visual-propose':
+     assertKeys(body,['issues','variant']);value={schema:'ffax.design-visual-proposal-result.v1',plan:proposeTypedVisualFixes(body.issues,body.variant)};break;
+    case '/api/design/visual-apply':
+     assertKeys(body,['variant','plan','approval','maxPasses']);value={schema:'ffax.design-visual-apply-result.v1',result:applyBoundedVisualPatches(body.variant,body.plan,{approval:body.approval,maxPasses:body.maxPasses})};break;
     case '/api/design/freeze':{
      assertKeys(body,['variant','approval','persist','persistConsent']);
      const bundle=await freezeForgeVariant(body.variant,{approval:body.approval});
