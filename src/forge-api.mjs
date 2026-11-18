@@ -44,7 +44,10 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
    reply(res,200,{schema:'ffax.forge-session.v1',csrf,origin,storage:'OWNER_OPT_IN_ONLY'});return true;
   }
   if(req.headers['x-ffax-csrf']!==csrf){reply(res,403,{error:'FORGE_CSRF_FORBIDDEN'});return true;}
-  if(path.startsWith('/api/design/runner/'))return await runner.handle(req,res,path);
+  if(path.startsWith('/api/design/runner/')){
+   if(req.method==='POST' && requestOrigin!==origin){reply(res,403,{error:'FORGE_LOCAL_POST_ONLY'});return true;}
+   return await runner.handle(req,res,path);
+  }
   if(req.method==='GET'&&/^\/api\/design\/captures\/[a-f0-9]{32}\.png$/.test(path)){
    const id=path.split('/').at(-1).slice(0,-4),saved=captures.get(id);
    if(!saved){reply(res,404,{error:'FORGE_CAPTURE_NOT_FOUND'});return true;}
