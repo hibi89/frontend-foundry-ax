@@ -1,0 +1,40 @@
+name: FFAX V2 Design Forge P1 source smoke
+on:
+  push:
+    branches:
+      - feature/ffax-reference-fidelity-20261118
+    paths:
+      - '.github/workflows/ffax-design-forge-p1.yml'
+      - 'src/core.mjs'
+      - 'src/design-forge.mjs'
+      - 'src/design-forge-ui.mjs'
+      - 'src/forge-api.mjs'
+      - 'src/server.mjs'
+      - 'scripts/forge_capture.mjs'
+      - 'tests/design-forge.test.mjs'
+      - 'tests/ffax-reference-fidelity.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: ffax-forge-p1-\${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check of new code and attached core
+        run: |
+          node --check src/core.mjs
+          node --check src/design-forge.mjs
+          node --check src/design-forge-ui.mjs
+          node --check src/forge-api.mjs
+          node --check src/server.mjs
+          node --check scripts/forge_capture.mjs
+          python -m py_compile scripts/forge_capture.py
+      - name: Local deterministic core source contract smoke (no model/network)
+        run: node --test tests/design-forge.test.mjs tests/ffax-reference-fidelity.test.mjs
