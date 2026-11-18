@@ -7,7 +7,7 @@ import { resolve, join, delimiter } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 const root=resolve(import.meta.dirname,'..');
-const files=['package.json','index.html','styles.css','src','tests','scripts','fixtures'];
+const files=['package.json','index.html','styles.css','assets','src','tests','scripts','fixtures'];
 const digest=x=>createHash('sha256').update(x).digest('hex');
 const depsEnv={...process.env,PATH:join(root,'node_modules','.bin')+delimiter+(process.env.PATH||''),NODE_PATH:join(root,'node_modules')};
 const clean=await mkdtemp(join(tmpdir(),'ffax-cleanroom-'));
@@ -23,6 +23,12 @@ const steps=[
 const result=[];
 try {
  for(const path of files)await cp(join(root,path),join(clean,path),{recursive:true});
+ // Browser loads the real FFAX module graph and favicon. The isolated copy
+ // must include exactly the shipped public assets, not omit them or mock 404s.
+ const favicon='ffax-favicon.svg';
+ const sourceAssetDigest=digest(await readFile(join(root,'assets',favicon)));
+ const copiedAssetDigest=digest(await readFile(join(clean,'assets',favicon)));
+ if(sourceAssetDigest!==copiedAssetDigest)throw Error('FFAX_CLEANROOM_PUBLIC_ASSET_MISMATCH');
  // Omit the original workbench's excluded QA output, use fresh generated data only.
  await rm(join(clean,'scripts','__pycache__'),{recursive:true,force:true});
  await mkdir(join(clean,'artifacts','qa'),{recursive:true});
@@ -37,9 +43,10 @@ try {
  const cleanPackage=await readFile(join(clean,'package.json'));
  const sourcePackage=await readFile(join(root,'package.json'));
  const manifest={schema:'ffax-cleanroom-gate.v1',isolated:true,sourcePreserved:digest(cleanPackage)===digest(sourcePackage),
+   publicAssetShaPreserved:sourceAssetDigest===copiedAssetDigest,
    externalNetwork:false,dependencySource:'preinstalled parent node_modules (shared read-only for offline code checks)',actualProvider:false,realWindows:false,axe:false,githubCI:false,
    steps:result,passed:result.filter(x=>x.status==='PASS').length,total:steps.length};
  await mkdir(join(root,'artifacts','qa'),{recursive:true});
  await writeFile(join(root,'artifacts','qa','cleanroom-report.json'),JSON.stringify(manifest,null,2));
- if(!manifest.sourcePreserved || manifest.passed!==steps.length)process.exitCode=1;
+ if(!manifest.sourcePreserved||!manifest.publicAssetShaPreserved||manifest.passed!==steps.length)process.exitCode=1;
 }finally{await rm(clean,{recursive:true,force:true});}
