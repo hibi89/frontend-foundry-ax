@@ -9,10 +9,13 @@ on:
       - 'src/design-forge.mjs'
       - 'src/design-forge-ui.mjs'
       - 'src/forge-api.mjs'
+      - 'src/forge-correction.mjs'
+      - 'src/reference-analysis.mjs'
       - 'src/server.mjs'
       - 'scripts/forge_capture.mjs'
       - 'tests/design-forge.test.mjs'
       - 'tests/forge-api.test.mjs'
+      - 'tests/forge-correction.test.mjs'
       - 'tests/ffax-reference-fidelity.test.mjs'
 permissions:
   contents: read
@@ -34,8 +37,10 @@ jobs:
           node --check src/design-forge.mjs
           node --check src/design-forge-ui.mjs
           node --check src/forge-api.mjs
+          node --check src/forge-correction.mjs
+          node --check src/reference-analysis.mjs
           node --check src/server.mjs
           node --check scripts/forge_capture.mjs
           python -m py_compile scripts/forge_capture.py
       - name: Local deterministic core source contract smoke (no model/network)
-        run: node --test tests/design-forge.test.mjs tests/forge-api.test.mjs tests/ffax-reference-fidelity.test.mjs
+        run: node --test tests/design-forge.test.mjs tests/forge-api.test.mjs tests/forge-correction.test.mjs tests/ffax-reference-fidelity.test.mjs
