@@ -11,6 +11,11 @@ test('DF-01/02/03: real three distinct local React source variants',()=>{
  assert.equal(new Set(variants.map(v=>v.document.theme)).size,3);
  for(const item of variants){assert.equal(validateProjectImport(item.document),true);assert.ok(exportReact(item.document).includes('React'));assert.ok(item.document.components.length>=8);}
 });
+test('DF-02: a request to display a date is not mistaken for a data table',()=>{
+ const brief=makeForgeBrief({prompt:'전통 역학달력을 현대적으로 만들고 오늘의 날짜를 표시해줘'});
+ assert.equal(recommendForgeStyles(brief)[0].styleId,'expressive');
+ assert.ok(generateForgeVariants(brief)[0].document.components.some(x=>x.type==='Hero'));
+});
 test('DF-04: targeted refinement and mix only mutate a new revision',()=>{
  const [a,b]=generateForgeVariants(makeForgeBrief({prompt:'전통 역학달력을 현대적으로 만들고 오늘의 날짜를 표시해줘'}));
  const original=JSON.stringify(a);

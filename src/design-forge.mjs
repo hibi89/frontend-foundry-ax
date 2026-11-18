@@ -27,7 +27,7 @@ export function makeForgeBrief({prompt,audience='',mood='',mustHave='',avoid=''}
 }
 export function recommendForgeStyles(brief){
  if(brief?.schema!=='ffax.design-brief.v2')throw Error('FORGE_BRIEF_REQUIRED');
- const density=/표|관리|대시보드|데이터|admin|통계|금융/i.test(brief.prompt+' '+brief.mustHave);
+ const density=/테이블|표(?:\s|$|[:·,./]|데이터)|관리|대시보드|데이터|admin|통계|금융/i.test(brief.prompt+' '+brief.mustHave);
  const expressive=/문화|달력|역학|예술|브랜드|hero|감성/i.test(brief.prompt+' '+brief.mood);
  const sorted=density?[styles[1],styles[0],styles[2]]:expressive?[styles[2],styles[0],styles[1]]:[...styles];
  return sorted.map((s,i)=>({styleId:s.id,name:s.name,rationale:s.rationale,rank:i+1,theme:s.theme,layout:s.layout,source:s.origin==='FFAX_ORIGINAL'?{provider:'FFAX',kind:'builtin',license:'internal',version:'2.1'}:{provider:'UI UX Pro Max',kind:'inspired-style-taxonomy',license:'MIT',repo:'nextlevelbuilder/ui-ux-pro-max-skill',sha:'7436a6e0b6dc3add7c12d5b6ef1ccd3d410dd7fd',styleId:s.origin,notice:'Styles adapted by FFAX; only provenance is inherited.'},quality:'RULE_BASED_NOT_AESTHETICALLY_VERIFIED'}));
