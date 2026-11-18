@@ -267,7 +267,7 @@ export function exportReact(doc){
     const surface=button?`color-mix(in srgb, ${accent} 60%, #0b1026)`:`color-mix(in srgb, ${t.surface} 83%, ${t.ink} 17%)`;
     const stroke=n.color==='neutral'?t.muted:`color-mix(in srgb, ${t.muted} 30%, transparent)`;
     const heroBackground=n.type==='Hero'?',backgroundImage:'+JSON.stringify(FORGE_HERO_ART[t.heroArt]||'none'):'';
-    const s=`style={{ padding: ${n.spacing}, alignSelf: ${JSON.stringify(n.align)}, color: ${JSON.stringify(ink)},minWidth:0,maxWidth:'100%',boxSizing:'border-box',overflowWrap:'anywhere',borderRadius:${t.radius||12},backgroundColor:${JSON.stringify(surface)},border:${JSON.stringify(button?'0':`1px solid ${stroke}`)},lineHeight:1.45${heroBackground}${button?',fontWeight:700,cursor:\'pointer\'':''}${gridSpan} }}`;
+    const s=`style={{ padding: ${n.spacing}, alignSelf: ${JSON.stringify(n.align)}, color: ${JSON.stringify(ink)},minWidth:0,maxWidth:'100%',boxSizing:'border-box',overflowWrap:'anywhere',borderRadius:${t.radius||14},backgroundColor:${JSON.stringify(surface)},border:${JSON.stringify(button?'0':`1px solid ${stroke}`)},lineHeight:1.45${heroBackground}${button?',fontWeight:700,cursor:\'pointer\'':''}${gridSpan} }}`;
     const inputStyle=`style={{display:'block',width:'100%',boxSizing:'border-box',marginTop:8,padding:9,borderRadius:6,backgroundColor:${JSON.stringify(t.surface)},color:${JSON.stringify(t.ink)},border:${JSON.stringify(`1px solid ${t.muted}`)}}}`;
     switch(n.type){
       case 'Button':return `<button type="button" ${s}>${text}</button>`;

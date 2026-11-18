@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildBrief,newDocument,applyCommand,exportReact,THEME_OPTIONS,approveReference,createReference} from '../src/core.mjs';
+import {buildBrief,newDocument,applyCommand,exportReact,renderMarkup,THEME_OPTIONS,approveReference,createReference} from '../src/core.mjs';
 
 const brief=buildBrief('매출 분석 테이블과 사용자 검색 UI를 갖춘 관리자 대시보드');
 test('standalone React export embeds component visual tokens with zero external CSS dependency',()=>{
@@ -9,7 +9,8 @@ test('standalone React export embeds component visual tokens with zero external 
   doc=applyCommand(doc,{kind:'theme',value:theme});
   const src=exportReact(doc),palette=THEME_OPTIONS[theme];
   assert.match(src,/color-mix\(in srgb/);assert.match(src,/backgroundColor:/);
-  assert.match(src,/borderRadius:12/);assert.match(src,/boxSizing:'border-box'/);
+  assert.match(src,/borderRadius:14/);
+  assert.match(renderMarkup(doc),/--ff-radius:14px;/);assert.match(src,/boxSizing:'border-box'/);
   assert.match(src,/gap:15,padding:20/);
   assert.match(src,/fontSize:22/);assert.match(src,/fontSize:11/);
   assert.match(src,/borderCollapse:'collapse'/);assert.match(src,/type="search"/);
