@@ -55,7 +55,15 @@ export function refineForgeVariant(variant,{kind,id,prop,value}={}){
  else if(kind==='move' && typeof id==='string' && Number.isInteger(value))command={kind:'move',id,index:value};
  else if(kind==='insert' && typeof value==='string')command={kind:'insert',type:value};
  else if(kind==='remove' && typeof id==='string')command={kind:'remove',id};
- else throw Error('FORGE_REFINEMENT_UNSUPPORTED');
+ else if(kind==='token' && typeof prop==='string' && typeof value!=='undefined'){
+  const valid={
+   radius:[6,12,18,24],density:['airy','balanced','compact'],
+   fontStack:['system-ui, sans-serif','Georgia, serif','Arial, sans-serif',"'Malgun Gothic', system-ui, sans-serif"],
+   heroArt:['none','celestial','grid','waves']
+  };
+  if(!Object.hasOwn(valid,prop)||!valid[prop].includes(value))throw Error('FORGE_TOKEN_VALUE_UNSUPPORTED');
+  command={kind:'token',prop,value};
+ }else throw Error('FORGE_REFINEMENT_UNSUPPORTED');
  const result=clone(variant);
  if(command.kind==='theme' && variant.document.designSystem){
    const previous=variant.document.designSystem;
@@ -65,18 +73,35 @@ export function refineForgeVariant(variant,{kind,id,prop,value}={}){
    result.document.designSystem={...previous,
      surface:palette.surface,accent:palette.accent,ink:palette.ink,muted:palette.muted};
    result.document.version++;
+ }else if(command.kind==='token'){
+   if(!variant.document.designSystem)throw Error('FORGE_TOKEN_SYSTEM_MISSING');
+   result.document=clone(variant.document);
+   result.document.designSystem[command.prop]=command.value;
+   result.document.version++;
  }else result.document=applyCommand(variant.document,command);
  result.parentVariantId=variant.id+':'+variant.revision;result.revision++;
  result.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(result);return result;
 }
-export function mixForgeVariants(primary,secondary,{takeTheme=true,takeLayout=false}={}){
+export function mixForgeVariants(primary,secondary,{takeTheme=true,takeLayout=false,takeTypography=false,takeDecorations=false,takeComponentStyles=false}={}){
  checkVariant(primary);checkVariant(secondary);
  const next=clone(primary);next.parentVariantId=primary.id+':'+primary.revision;next.revision++;
+ const tokens=next.document.designSystem,other=secondary.document.designSystem;
  if(takeTheme){
   next.document.theme=secondary.document.theme;
-  if(next.document.designSystem&&secondary.document.designSystem){for(const color of ['surface','accent','ink','muted'])next.document.designSystem[color]=secondary.document.designSystem[color];}
+  if(tokens&&other){for(const color of ['surface','accent','ink','muted'])tokens[color]=other[color];}
  }
  if(takeLayout)next.document.layout=secondary.document.layout;
+ if(takeTypography&&tokens&&other){tokens.fontStack=other.fontStack;tokens.density=other.density;}
+ if(takeDecorations&&tokens&&other){tokens.radius=other.radius;tokens.heroArt=other.heroArt;}
+ if(takeComponentStyles){
+  const firstByType=new Map();
+  for(const node of secondary.document.components)if(!firstByType.has(node.type))firstByType.set(node.type,node);
+  next.document.components=next.document.components.map(node=>{
+   const candidate=firstByType.get(node.type);
+   // Only visual properties: retain original text, type, ids, and action contracts.
+   return candidate?{...node,spacing:candidate.spacing,align:candidate.align,color:candidate.color}:node;
+  });
+ }
  next.document.version++;next.previewStatus='SOURCE_READY_RENDER_NOT_VERIFIED';checkVariant(next);return next;
 }
 export function adoptLocalModelDesign(variant,document,{approval,model,sha256:outputSha256}={}){

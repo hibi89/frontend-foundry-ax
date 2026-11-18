@@ -74,3 +74,21 @@ test('DF-06/RF: freeze real local capture SHA in child bundle; mismatch/replay r
  await assert.rejects(finalizeForgeBundleWithCapture(final,receipt,{approval:'APPROVE_FINAL_REFERENCE_PNG'}),/FORGE_REFERENCE_IMAGE_ALREADY_LOCKED/);
  await assert.rejects(finalizeForgeBundleWithCapture(original,{...receipt,bundleSha256:'0'.repeat(64)},{approval:'APPROVE_FINAL_REFERENCE_PNG'}),/FORGE_CAPTURE_RECEIPT_INVALID/);
 });
+
+test('DF-04: owner typed editing of fonts, components and selective visual mixing preserves text and history',()=>{
+ const [a,b]=generateForgeVariants(makeForgeBrief({prompt:'역학달력 사용자 메뉴와 헤더를 표시해줘'}));
+ const start=JSON.stringify(a),node=a.document.components[0];
+ const withFont=refineForgeVariant(a,{kind:'token',prop:'fontStack',value:'Arial, sans-serif'});
+ assert.equal(withFont.document.designSystem.fontStack,'Arial, sans-serif');
+ const added=refineForgeVariant(withFont,{kind:'insert',value:'Button'});
+ assert.ok(added.document.components.length===a.document.components.length+1);
+ const moved=refineForgeVariant(added,{kind:'move',id:node.id,value:1});
+ assert.equal(moved.document.components[1].id,node.id);
+ const merged=mixForgeVariants(moved,b,{takeTheme:false,takeTypography:true,takeDecorations:true,takeComponentStyles:true});
+ assert.equal(merged.document.designSystem.fontStack,b.document.designSystem.fontStack);
+ assert.equal(merged.document.designSystem.heroArt,b.document.designSystem.heroArt);
+ assert.equal(merged.document.components.find(x=>x.id===node.id).text,node.text);
+ assert.equal(JSON.stringify(a),start);
+ assert.equal(validateProjectImport(merged.document),true);
+ assert.throws(()=>refineForgeVariant(a,{kind:'token',prop:'fontStack',value:'url(https://bad.example/font)'}),/FORGE_TOKEN_VALUE_UNSUPPORTED/);
+});

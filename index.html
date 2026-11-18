@@ -48,10 +48,37 @@
         <label for="forge-instruction">시안 부분 개선 (지원: 다크, 밝게, 청록, 여백, 제목:문구)</label>
         <input id="forge-instruction" type="text" maxlength="300" placeholder="예: 여백을 더 넓게" />
         <button id="forge-refine" type="button" class="ghost-btn" disabled>선택한 시안 개선</button>
+        <p class="subheading">컴포넌트 직접 편집 (선택 시안의 복사본만 변경)</p>
+        <label for="forge-edit-target">편집할 컴포넌트</label><select id="forge-edit-target"></select>
+        <label for="forge-edit-field">변경 종류</label><select id="forge-edit-field">
+          <option value="text">텍스트</option><option value="spacing">간격 (8·16·24·32)</option>
+          <option value="align">정렬 (start·center·end)</option><option value="color">강조색 (accent·neutral)</option>
+          <option value="type">컴포넌트 유형</option><option value="move">이동 순서 (0부터)</option>
+          <option value="insert">컴포넌트 추가 (유형 입력)</option><option value="remove">컴포넌트 삭제</option>
+        </select>
+        <label for="forge-edit-value">새 값</label><input id="forge-edit-value" type="text" maxlength="180" placeholder="예: 새 제목 / Card / 24" />
+        <button id="forge-edit-apply" type="button" class="ghost-btn" disabled>컴포넌트 변경 적용</button>
+        <label for="forge-token-choice">타이포·밀도·모서리·장식</label>
+        <select id="forge-token-choice">
+          <option value="fontStack|system-ui, sans-serif">기본 시스템 폰트</option>
+          <option value="fontStack|Georgia, serif">Georgia 세리프</option>
+          <option value="fontStack|Arial, sans-serif">Arial 산세리프</option>
+          <option value="fontStack|'Malgun Gothic', system-ui, sans-serif">맑은 고딕</option>
+          <option value="density|airy">넓은 여백</option><option value="density|balanced">균형 간격</option>
+          <option value="density|compact">좁은 간격</option><option value="radius|6">모서리 6</option>
+          <option value="radius|12">모서리 12</option><option value="radius|18">모서리 18</option>
+          <option value="radius|24">모서리 24</option><option value="heroArt|none">배경 장식 없음</option>
+          <option value="heroArt|celestial">은은한 빛</option><option value="heroArt|grid">그리드</option>
+          <option value="heroArt|waves">파동 장식</option>
+        </select>
+        <button id="forge-token-apply" type="button" class="ghost-btn" disabled>디자인 토큰 변경</button>
         <button id="forge-undo" type="button" class="ghost-btn" disabled>선택 시안의 직전 버전 복구 (Undo)</button>
         <label for="forge-mix-from">다른 시안과 색채·배치 혼합</label>
         <select id="forge-mix-from"><option value="A">A 시안</option><option value="B">B 시안</option><option value="C">C 시안</option></select>
         <label class="check"><input id="forge-mix-layout" type="checkbox" /> 색채 외에 배치도 혼합</label>
+        <label class="check"><input id="forge-mix-typography" type="checkbox" /> 타이포와 밀도도 혼합</label>
+        <label class="check"><input id="forge-mix-decoration" type="checkbox" /> 모서리·배경 장식도 혼합</label>
+        <label class="check"><input id="forge-mix-components" type="checkbox" /> 같은 종류 컴포넌트의 시각 속성만 혼합 (문구·동작은 보존)</label>
         <button id="forge-mix" type="button" class="ghost-btn" disabled>선택 시안에 혼합</button>
         <label class="check"><input id="forge-approval" type="checkbox" /> 선택 시안을 레퍼런스로 확정합니다. 새로운 버전의 재확정 없이는 바꾸지 않습니다.</label>
         <button id="forge-freeze" type="button" class="primary-btn" disabled>선택 레퍼런스 확정 · SHA 잠금</button>

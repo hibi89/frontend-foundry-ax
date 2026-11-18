@@ -84,6 +84,17 @@ function renderCards(){
  }
  $('forge-freeze').disabled=!selectedId;
  $('forge-refine').disabled=!selectedId;
+ $('forge-edit-apply').disabled=!selectedId;
+ $('forge-token-apply').disabled=!selectedId;
+ const chosen=variants.find(v=>v.id===selectedId);
+ const targetSelect=$('forge-edit-target'),previousTarget=targetSelect.value;
+ targetSelect.replaceChildren();
+ if(chosen)for(const node of chosen.document.components){
+  const option=document.createElement('option');option.value=node.id;
+  option.textContent=node.id+' · '+node.type+' · '+node.text.slice(0,35);
+  targetSelect.append(option);
+ }
+ if(chosen?.document.components.some(x=>x.id===previousTarget))targetSelect.value=previousTarget;
  $('forge-undo').disabled=!selectedId || !(variantHistory.get(selectedId)||[]).length;
  $('forge-mix').disabled=!selectedId;
  $('forge-apply').disabled=!frozen;
@@ -132,11 +143,46 @@ $('forge-refine').addEventListener('click',async()=>{
   report(updated.id+' 시안 v'+updated.revision+'에 요청한 부분만 반영. 기존 시안을 덮어쓴 것은 아니며 새 버전입니다.');
  }catch(err){report(err.message,true);}
 });
+$('forge-edit-apply').addEventListener('click',async()=>{
+ try{
+  const variant=active(),field=$('forge-edit-field').value,id=$('forge-edit-target').value;
+  const raw=$('forge-edit-value').value.trim();
+  let command;
+  if(field==='insert')command={kind:'insert',value:raw};
+  else if(field==='remove')command={kind:'remove',id};
+  else if(field==='move')command={kind:'move',id,value:Number(raw)};
+  else if(['text','spacing','align','color','type'].includes(field))
+   command={kind:'update',id,prop:field,value:field==='spacing'?Number(raw):raw};
+  else throw Error('FORGE_DIRECT_EDIT_INVALID');
+  if(field!=='remove'&&!raw)throw Error('FORGE_DIRECT_EDIT_VALUE_REQUIRED');
+  const response=await forgePost('refine',{variant,command});
+  if(response.schema!=='ffax.design-refine-result.v1'||response.variant?.id!==variant.id)
+   throw Error('FORGE_DIRECT_EDIT_RESULT_INVALID');
+  rememberRevision(variant);variants=variants.map(v=>v.id===variant.id?response.variant:v);frozen=null;renderCards();
+  report('컴포넌트 변경을 '+variant.id+' 시안의 새 버전에 반영했습니다. Undo 가능.');
+ }catch(err){report('컴포넌트 변경 실패: '+err.message,true);}
+});
+$('forge-token-apply').addEventListener('click',async()=>{
+ try{
+  const variant=active(),entry=$('forge-token-choice').value,split=entry.indexOf('|');
+  if(split<=0)throw Error('FORGE_TOKEN_SELECTOR_INVALID');
+  const prop=entry.slice(0,split),raw=entry.slice(split+1);
+  const response=await forgePost('refine',{variant,command:{kind:'token',prop,value:prop==='radius'?Number(raw):raw}});
+  if(response.schema!=='ffax.design-refine-result.v1'||response.variant?.id!==variant.id)
+   throw Error('FORGE_TOKEN_RESULT_INVALID');
+  rememberRevision(variant);variants=variants.map(v=>v.id===variant.id?response.variant:v);frozen=null;renderCards();
+  report('타이포·디자인 토큰을 새 버전에 적용했습니다. 소스 내보내기와 프리뷰가 동일 토큰을 사용합니다.');
+ }catch(err){report('디자인 토큰 변경 실패: '+err.message,true);}
+});
 $('forge-mix').addEventListener('click',async()=>{
  try{
   const base=active(),other=variants.find(v=>v.id===$('forge-mix-from').value);
   if(!other||other.id===base.id)throw Error('FORGE_MIX_REQUIRES_DIFFERENT_VARIANT');
-  const response=await forgePost('mix',{primary:base,secondary:other,options:{takeTheme:true,takeLayout:$('forge-mix-layout').checked}});
+  const response=await forgePost('mix',{primary:base,secondary:other,options:{
+   takeTheme:true,takeLayout:$('forge-mix-layout').checked,
+   takeTypography:$('forge-mix-typography').checked,takeDecorations:$('forge-mix-decoration').checked,
+   takeComponentStyles:$('forge-mix-components').checked
+  }});
   if(response.schema!=='ffax.design-mix-result.v1'||response.variant?.id!==base.id)throw Error('FORGE_MIX_INVALID');
   const updated=response.variant;
   rememberRevision(base);variants=variants.map(v=>v.id===updated.id?updated:v);frozen=null;renderCards();
