@@ -7,9 +7,14 @@ test('SWU: full FFAX legacy + DF + RF source candidate denominator and P2 separa
  const queue=JSON.parse(await readFile(path,'utf8'));
  const result=computeSourceCandidateRate(queue);
  assert.equal(result.total,25);
- assert.equal(result.sourceCandidateCompleted,19);
- assert.equal(result.partial,6);
- assert.equal(result.sourceCandidatePercent,76);
+ const sourceCount=queue.units.filter(u=>u.status==='SOURCE_COMPLETE_P2_PENDING').length;
+ const partialCount=queue.units.filter(u=>u.status==='PARTIAL_SOURCE').length;
+ assert.equal(result.sourceCandidateCompleted,sourceCount);
+ assert.equal(result.partial,partialCount);
+ assert.equal(result.sourceCandidateCompleted+result.partial,result.total);
+ assert.equal(result.sourceCandidateCompleted,queue.snapshotSummary.candidate);
+ assert.equal(result.partial,queue.snapshotSummary.partial);
+ assert.equal(result.sourceCandidatePercent,Number((100*sourceCount/result.total).toFixed(1)));
  assert.equal(result.officialFullBlueprintImplementation,'UNASSESSED');
  assert.equal(result.officialVerification,'UNASSESSED');
  const req=new Set(queue.units.flatMap(x=>x.req_ids));
