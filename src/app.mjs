@@ -74,19 +74,24 @@ function renderCanvas(){
 function updateAll(updateBrief=true){if(updateBrief)renderBrief();renderCanvas();renderInspector();renderReference();}
 function run(command){try{history.exec(command);updateAll();el('qa-report').textContent='수정 이후 다시 검증해야 합니다.';el('qa-report').className='qa-result';}catch(e){log(e.message,true);}}
 function edit(prop,value){if(!selected)return;run({kind:'update',id:selected,prop,value});}
-function updateReference(){const f=el('reference-file').files?.[0];if(!f){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
-  if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
-  if(!['image/png','image/jpeg','image/webp'].includes(f.type)||f.size>4*1024*1024){el('reference-result').textContent='PNG/JPEG/WebP, 4MiB 이하만 지원합니다.';return;}
-  (async()=>{let bitmap;
-    try{bitmap=await createImageBitmap(f);const c=document.createElement('canvas');c.width=40;c.height=20;const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(bitmap,0,0,40,20);const pixels=cx.getImageData(0,0,40,20).data;
-      const average=(start,end)=>{let r=0,g=0,b=0,cnt=0;for(let y=0;y<20;y++)for(let x=start;x<end;x++){const i=(y*40+x)*4;if(pixels[i+3]<180)continue;r+=pixels[i];g+=pixels[i+1];b+=pixels[i+2];cnt++;}return cnt?[r,g,b].map(c=>Math.round(c/cnt).toString(16).padStart(2,'0')).join(''):'64748b'};
-      const colorA='#'+average(0,20),colorB='#'+average(20,40);
-      const bits=await crypto.subtle.digest('SHA-256',await f.arrayBuffer());
-      const sha256=[...new Uint8Array(bits)].map(x=>x.toString(16).padStart(2,'0')).join('');
-      const d=createReference(history.present,f.name,true,[colorA,colorB],'user-provided',{sha256,width:bitmap.width,height:bitmap.height});history.past.push(history.present);history.present=d;history.future=[];
-      el('reference-result').textContent=`${f.name}: ${bitmap.width}×${bitmap.height} · SHA256 ${sha256.slice(0,16)}… · ${colorA} / ${colorB} · 후보 A/B · 사용자 승인 전`;updateAll();
-    }catch(e){el('reference-result').textContent=`참고 이미지 분석 실패: ${e.message}`;}finally{bitmap?.close();}
-  })();
+let latestReferenceInventory=null;
+function updateReference(){
+ const file=el('reference-file').files?.[0];
+ if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
+ if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
+ (async()=>{
+  el('export-reference-inventory').disabled=true;latestReferenceInventory=null;
+  try{
+   const {analyzeUserReference}=await import('./reference-analysis.mjs');
+   const inventory=await analyzeUserReference(file,{rightsConfirmed:true});
+   const colors=[inventory.paletteHints[0],inventory.paletteHints[2]];
+   const next=createReference(history.present,file.name,true,colors,'user-provided',{sha256:inventory.sha256,width:inventory.width,height:inventory.height});
+   history.past.push(history.present);history.present=next;history.future=[];latestReferenceInventory=inventory;
+   el('export-reference-inventory').disabled=false;
+   el('reference-result').textContent=file.name+': '+inventory.width+'×'+inventory.height+' · SHA256 '+inventory.sha256.slice(0,16)+'… · 색상 힌트 '+colors.join('/')+' · 폰트/숨겨진 이미지 자산은 아직 미확인';
+   updateAll();
+  }catch(err){el('reference-result').textContent='참고 이미지 분석 실패: '+err.message;}
+ })();
 }
 async function checkQA(){
   const report=[];let failed=false; const priorWidth=viewport;
@@ -284,6 +289,7 @@ el('manual-apply-response').addEventListener('click',()=>{
   }catch(e){el('manual-review-status').textContent=`거부: ${e.message}`;}
 });
 el('apply-reference').addEventListener('click',updateReference);
+el('export-reference-inventory').addEventListener('click',()=>{if(latestReferenceInventory)save('FFAX-external-reference-inventory.json',JSON.stringify(latestReferenceInventory,null,2),'application/json');});
 el('export-react').addEventListener('click',()=>save('GeneratedScreen.tsx',exportReact(history.present),'text/plain'));
 el('export-json').addEventListener('click',()=>{
   try { save('FFAX-project.json',exportLocalProject(history.present),'application/json'); el('project-import-status').textContent='프로젝트 저장본을 로컬로 내려받았습니다. 자동 클라우드 저장은 하지 않습니다.';}
