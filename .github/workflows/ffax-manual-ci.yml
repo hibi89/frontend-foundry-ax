@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/ffax-workbench-p85-20261112
+      - feature/ffax-reference-fidelity-20261118
     paths:
       - '.github/workflows/ffax-manual-ci.yml'
       - 'package.json'
@@ -125,6 +126,7 @@ jobs:
           python scripts/component_insertion_browser_probe.py
           python scripts/demo_interactions_browser_probe.py
           python scripts/axe_offline_audit.py
+          python scripts/forge_p2_browser_probe.py
       - name: Local end-to-end rehearsal
         run: node scripts/local_acceptance_gate.mjs
       - name: Offline fresh-copy cleanroom regression
@@ -156,8 +158,8 @@ jobs:
             Copy-Item -LiteralPath $name -Destination $out -Recurse -Force
           }
           New-Item -ItemType Directory -Path (Join-Path $out "scripts") -Force | Out-Null
-          Copy-Item -LiteralPath "scripts/react_real_probe.mjs" -Destination (Join-Path $out "scripts/react_real_probe.mjs") -Force
-          foreach($p in @("package.json","scripts/react_real_probe.mjs","RUN-LIVE-MODEL-CHECK.cmd")) { if(-not (Test-Path -LiteralPath (Join-Path $out $p))) { throw "OWNER_LIVE_PROBE_PACKAGING_INCOMPLETE $p" } }
+          Copy-Item -LiteralPath "scripts" -Destination $out -Recurse -Force
+          foreach($p in @("package.json","scripts/react_real_probe.mjs","scripts/forge_capture.mjs","scripts/forge_capture.py","scripts/forge_converge.mjs","scripts/ffax_reference_fidelity.mjs","RUN-LIVE-MODEL-CHECK.cmd")) { if(-not (Test-Path -LiteralPath (Join-Path $out $p))) { throw "OWNER_LIVE_PROBE_PACKAGING_INCOMPLETE $p" } }
           Set-Content -LiteralPath (Join-Path $out "SOURCE_SHA.txt") -Value "${{ github.sha }}" -Encoding ascii
           $zip = Join-Path $PWD "FFAX-OWNER-REVIEW.zip"
           Compress-Archive -Path $out -DestinationPath $zip -CompressionLevel Optimal
