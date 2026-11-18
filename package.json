@@ -26,7 +26,9 @@
     "test:react-real": "node scripts/react_real_probe.mjs",
     "test:react-local": "node scripts/react_real_probe.mjs --local --approve-local --model=qwen3:4b-instruct",
     "reference:compare": "node scripts/ffax_reference_fidelity.mjs compare",
-    "forge:capture": "node scripts/forge_capture.mjs capture"
+    "forge:capture": "node scripts/forge_capture.mjs capture",
+    "forge:export": "node scripts/forge_export.mjs",
+    "forge:compare": "node scripts/forge_reconstruct.mjs run"
   },
   "engines": {
     "node": ">=20"
