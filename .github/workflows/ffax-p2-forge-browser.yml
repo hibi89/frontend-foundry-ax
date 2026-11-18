@@ -35,6 +35,19 @@ jobs:
           CHROME_PATH="$(python -c 'from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
           test -x "$CHROME_PATH"
           sudo ln -sfn "$CHROME_PATH" /usr/bin/chromium
+      - name: Real direct Chromium capture from frozen typed FFAX source (isolate subprocess)
+        run: |
+          mkdir -p /tmp/ffax-p2-direct
+          node --input-type=module <<'NODE'
+          import {writeFile} from 'node:fs/promises';
+          import {makeForgeBrief,generateForgeVariants,freezeForgeVariant} from './src/design-forge.mjs';
+          const b=await freezeForgeVariant(
+            generateForgeVariants(makeForgeBrief({prompt:'Design a local synthetic financial dashboard'}))[0],
+            {approval:'APPROVE_FORGE_REFERENCE'});
+          await writeFile('/tmp/ffax-p2-direct/bundle.json',JSON.stringify(b),{flag:'wx'});
+          NODE
+          node scripts/forge_capture.mjs capture --bundle /tmp/ffax-p2-direct/bundle.json --out /tmp/ffax-p2-direct/capture --width 375 --height 600 --dpr 1
+          test -s /tmp/ffax-p2-direct/capture/render.png
       - name: P2 live loopback UI revision, SHA render, pixel comparison and blocked original asset
         run: python scripts/forge_p2_browser_probe.py
       - name: Retain synthetic-only browser evidence for defect analysis

@@ -64,7 +64,7 @@ function parse(argv){
  if(!Number.isInteger(width)||width<320||width>2560||!Number.isInteger(height)||height<320||height>2200||![1,2].includes(dpr))throw Error('FORGE_VIEWPORT_UNSUPPORTED');
  return {bundle:a['--bundle'],out:a['--out'],width,height,dpr};
 }
-function runPython(args,timeoutMs=100000){
+function runPython(args,timeoutMs=65000){
  return new Promise((ok,fail)=>{
   // Python executable comes from the owner's own PATH; fixed trusted repository script only.
   const executable=process.platform==='win32'?'python':'python3';
