@@ -88,6 +88,7 @@ function updateReference(){
    const next=createReference(history.present,file.name,true,colors,'user-provided',{sha256:inventory.sha256,width:inventory.width,height:inventory.height});
    history.past.push(history.present);history.present=next;history.future=[];latestReferenceInventory=inventory;
    el('export-reference-inventory').disabled=false;
+   el('reference-owner-map').disabled=false;
    el('reference-result').textContent=file.name+': '+inventory.width+'×'+inventory.height+' · SHA256 '+inventory.sha256.slice(0,16)+'… · 색상 힌트 '+colors.join('/')+' · 폰트/숨겨진 이미지 자산은 아직 미확인';
    updateAll();
   }catch(err){el('reference-result').textContent='참고 이미지 분석 실패: '+err.message;}
@@ -290,6 +291,36 @@ el('manual-apply-response').addEventListener('click',()=>{
 });
 el('apply-reference').addEventListener('click',updateReference);
 el('export-reference-inventory').addEventListener('click',()=>{if(latestReferenceInventory)save('FFAX-external-reference-inventory.json',JSON.stringify(latestReferenceInventory,null,2),'application/json');});
+
+el('reference-owner-map').addEventListener('click',async()=>{
+ const button=el('reference-owner-map'),status=el('reference-owner-map-status');
+ try{
+  if(!latestReferenceInventory)throw Error('EXTERNAL_REFERENCE_ANALYSIS_REQUIRED');
+  if(!el('reference-owner-labels-approval').checked)throw Error('EXTERNAL_REFERENCE_OWNER_APPROVAL_REQUIRED');
+  if(!el('rights').checked)throw Error('REFERENCE_RIGHTS_REQUIRED');
+  const rows=el('reference-owner-labels').value.trim().split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if(rows.length<1||rows.length>3)throw Error('EXTERNAL_REFERENCE_NEEDS_1_TO_3_REGIONS');
+  const annotations=rows.map((row,i)=>{
+   const idx=row.indexOf('|');
+   if(idx<1||idx===row.length-1)throw Error('EXTERNAL_REFERENCE_USE_TYPE_PIPE_TEXT');
+   return {regionId:latestReferenceInventory.regions[i]?.id,type:row.slice(0,idx).trim(),text:row.slice(idx+1).trim()};
+  });
+  button.disabled=true;
+  const {approveMappedReference}=await import('./external-reference-to-forge.mjs');
+  const result=await approveMappedReference(latestReferenceInventory,annotations,
+   {prompt:promptEl.value,approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true});
+  save('FFAX-External-Mapped-Reference.json',JSON.stringify(result.bundle,null,2),'application/json');
+  save('FFAX-External-Region-Evidence.json',JSON.stringify(result.evidence,null,2),'application/json');
+  // This is an explicitly reviewed local FFAX type-safe candidate, not an automatic push or deployment.
+  window.dispatchEvent(new CustomEvent('ffax:forge-apply',{detail:{
+   document:result.variant.document,referenceSha256:result.bundle.sha256,approval:'APPROVE_FORGE_REFERENCE'
+  }}));
+  status.textContent='영역 '+annotations.length+'개 → 구조화 React 시안 생성 · SHA '+result.bundle.sha256.slice(0,16)+
+    '… · FFAX 편집기로 전달. 원본 그림·폰트/숨은 UI는 자동 복원하지 않음.';
+ }catch(err){status.textContent='외부 이미지 시안 생성 거부: '+(err?.message||'UNKNOWN');}
+ finally{button.disabled=!latestReferenceInventory;el('reference-owner-labels-approval').checked=false;}
+});
+
 el('export-react').addEventListener('click',()=>save('GeneratedScreen.tsx',exportReact(history.present),'text/plain'));
 el('export-json').addEventListener('click',()=>{
   try { save('FFAX-project.json',exportLocalProject(history.present),'application/json'); el('project-import-status').textContent='프로젝트 저장본을 로컬로 내려받았습니다. 자동 클라우드 저장은 하지 않습니다.';}
