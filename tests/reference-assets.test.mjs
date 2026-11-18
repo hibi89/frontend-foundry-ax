@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createReferenceAssetManifest} from '../src/reference-assets.mjs';
+import {createReferenceAssetManifest,evaluateReferenceAssetGate} from '../src/reference-assets.mjs';
 
 const inventory=()=>({
  schema:'ffax.external-reference-inventory.v1',name:'sample.png',mime:'image/png',
@@ -27,4 +27,19 @@ test('RF-01/02: no silent rights grant or forged geometry',()=>{
  assert.throws(()=>createReferenceAssetManifest(inventory(),[{...labels[0],regionId:'unknown'}],{approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING'}),/ANNOTATION_INVALID/);
  const broken=inventory();broken.regions[0].bounds.width=601;
  assert.throws(()=>createReferenceAssetManifest(broken,labels,{approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING'}),/REGION_INVALID/);
+});
+
+test('RF-02: image asset gate is explicit READY typed fallback vs BLOCKED_ASSET',()=>{
+ const manifest=createReferenceAssetManifest(inventory(),labels,{approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING'});
+ const blocked=evaluateReferenceAssetGate(manifest,{decision:'REQUIRE_ORIGINAL_ASSETS',requiredAssetKinds:['logo']});
+ assert.equal(blocked.state,'BLOCKED_ASSET');
+ assert.equal(blocked.assetGate.automaticallyExtracted,false);
+ assert.throws(()=>evaluateReferenceAssetGate(manifest,{decision:'APPROVE_TYPED_FALLBACK'}),/FALLBACK_APPROVAL_REQUIRED/);
+ const ready=evaluateReferenceAssetGate(manifest,{decision:'APPROVE_TYPED_FALLBACK',fallbackApproval:true});
+ assert.equal(ready.state,'ASSETS_READY_TYPED_FALLBACK_ONLY');
+ assert.equal(ready.originalAppearanceEquivalent,false);
+ assert.equal(ready.assetGate.originalArtworkIncluded,false);
+ assert.equal(manifest.state,'STRUCTURE_OWNER_REVIEWED_ASSETS_INCOMPLETE');
+ assert.equal(evaluateReferenceAssetGate(manifest,{decision:'APPROVE_TYPED_FALLBACK',
+   fallbackApproval:true,requiredAssetKinds:['hero-photo']}).state,'BLOCKED_ASSET');
 });

@@ -12,9 +12,9 @@
   "requestedOwnerApprovalForFinalNumericalRubric": false,
   "snapshotSummary": {
     "total": 25,
-    "candidate": 21,
-    "partial": 4,
-    "sourceCandidatePercent": 84,
+    "candidate": 23,
+    "partial": 2,
+    "sourceCandidatePercent": 92,
     "p2Verification": "NOT_RUN"
   },
   "units": [
@@ -654,15 +654,19 @@
         "REQ-06"
       ],
       "goal": "Raster region and usable asset inventory",
-      "status": "PARTIAL_SOURCE",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
       "dependency_swu_ids": [
         "FFAX-SWU-RF-01"
       ],
       "allowed_paths": [
         "src/reference-assets.mjs",
-        "src/reference-analysis.mjs"
+        "src/reference-analysis.mjs",
+        "src/external-reference-to-forge.mjs",
+        "src/app.mjs",
+        "index.html",
+        "tests/reference-assets.test.mjs"
       ],
-      "acceptance": "external image → observed/inferred/unknown layer/asset manifest, owner-approved usable assets or BLOCKED_ASSET",
+      "acceptance": "External image observed region color/geometry + owner labels and rights → hash-linked asset manifest and hard BLOCKED_ASSET for required original logos/photos/fonts; explicit user approved CSS-component fallback yields ASSETS_READY_TYPED_FALLBACK_ONLY; no fake layer recovery",
       "complexity": {
         "S": 1,
         "C": 1,
@@ -672,13 +676,13 @@
         "total": 3,
         "assumption": "Code-only scope; P2 and independent owner gate separate"
       },
-      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
-      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
+      "p1_check": "GITHUB_WORKFLOW_PENDING",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
     },
     {
       "swu_id": "FFAX-SWU-RF-03",
@@ -688,15 +692,19 @@
         "REQ-07"
       ],
       "goal": "External raster reconstruction to React candidate",
-      "status": "PARTIAL_SOURCE",
+      "status": "SOURCE_COMPLETE_P2_PENDING",
       "dependency_swu_ids": [
         "FFAX-SWU-RF-02"
       ],
       "allowed_paths": [
         "src/external-reference-to-forge.mjs",
-        "src/core.mjs"
+        "src/core.mjs",
+        "src/reference-assets.mjs",
+        "src/app.mjs",
+        "index.html",
+        "tests/external-reference-to-forge.test.mjs"
       ],
-      "acceptance": "source-checked asset manifest → valid generation adapter with fallback/unknown labels, no fake layer inference",
+      "acceptance": "User-approved typed fallback asset gate → exact reference SHA + region labels → deterministic real React TSX and signed source bundle for isolated local download/editor handoff; unapproved original assets or malicious component types rejected",
       "complexity": {
         "S": 1,
         "C": 1,
@@ -706,13 +714,13 @@
         "total": 3,
         "assumption": "Code-only scope; P2 and independent owner gate separate"
       },
-      "source_evidence_sha": "938495a4b5b0efc4fe405581341134e0d5871dde",
-      "p1_check": "SOURCE_PRESENT_AND_RELATED_LOCAL_SMOKE; NOT_P2_VALIDATED",
+      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
+      "p1_check": "GITHUB_WORKFLOW_PENDING",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
     },
     {
       "swu_id": "FFAX-SWU-RF-04",
@@ -892,5 +900,5 @@
       "implementation_scope_status": "REMAINING_FUNCTIONAL_GAP"
     }
   ],
-  "lastUpdatedStatus": "DF-05 PASS; RF-01 SOURCE_CANDIDATE_CI_PENDING"
+  "lastUpdatedStatus": "DF-05, RF-01 PASS; RF-02/RF-03 SOURCE_CANDIDATE_CI_PENDING"
 }

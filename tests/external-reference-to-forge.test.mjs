@@ -15,7 +15,7 @@ const annotations=[
  {regionId:'band-3',type:'Form',text:'생년월일시 입력'}
 ];
 test('RF-02/03: explicit annotated screenshot yields real valid FFAX React source and SHA bundle',async()=>{
- const options={prompt:'역학달력 날짜 조회와 사주 입력을 포함한 프론트엔드를 제작해줘',approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true};
+ const options={prompt:'역학달력 날짜 조회와 사주 입력을 포함한 프론트엔드를 제작해줘',approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true,assetDecision:'APPROVE_TYPED_FALLBACK',fallbackApproval:true};
  const result=await approveMappedReference(inventory,annotations,options);
  assert.equal(validateProjectImport(result.variant.document),true);
  assert.deepEqual(result.variant.document.components.map(x=>x.type),['Navbar','Hero','Form']);
@@ -25,11 +25,23 @@ test('RF-02/03: explicit annotated screenshot yields real valid FFAX React sourc
  assert.deepEqual(await verifyForgeBundle(result.bundle),result.variant.document);
  assert.equal(result.evidence.automaticLayerRecovery,false);
  assert.equal(result.evidence.assetManifest.reference.sha256,inventory.sha256);
- assert.equal(result.bundle.manifest.externalAssetManifest.state,'STRUCTURE_OWNER_REVIEWED_ASSETS_INCOMPLETE');
+ assert.equal(result.bundle.manifest.externalAssetManifest.state,'ASSETS_READY_TYPED_FALLBACK_ONLY');
+ assert.equal(result.variant.sourceEvidence.missingAssets,'OWNER_APPROVED_TYPED_FALLBACK_NOT_ORIGINAL_ART');
 });
 test('RF-02/03: missing owner approval, unsupported components, or invalid inventory are blocked',()=>{
- const options={prompt:'역학달력 날짜 조회와 사주 입력을 포함한 프론트엔드를 제작해줘',approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true};
+ const options={prompt:'역학달력 날짜 조회와 사주 입력을 포함한 프론트엔드를 제작해줘',approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true,assetDecision:'APPROVE_TYPED_FALLBACK',fallbackApproval:true};
  assert.throws(()=>mapReferenceToSource(inventory,annotations,{...options,rightsConfirmed:false}),/EXTERNAL_REFERENCE_OWNER_APPROVAL_REQUIRED/);
  assert.throws(()=>mapReferenceToSource(inventory,[{regionId:'band-1',type:'Script',text:'bad'}],options),/EXTERNAL_REFERENCE_REGION_MAPPING_INVALID/);
  assert.throws(()=>mapReferenceToSource({...inventory,sha256:'short'},annotations,options),/EXTERNAL_REFERENCE_INVENTORY_INVALID/);
+});
+
+test('RF-02/03: original asset requirements fail closed before React generation',()=>{
+ const options={prompt:'역학달력 원본 이미지와 폰트 보존한 UI를 제작해줘',
+  approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true};
+ assert.throws(()=>mapReferenceToSource(inventory,annotations,options),/ASSET_GATE_BLOCKED/);
+ assert.throws(()=>mapReferenceToSource(inventory,annotations,
+  {...options,assetDecision:'APPROVE_TYPED_FALLBACK',fallbackApproval:false}),/FALLBACK_APPROVAL_REQUIRED/);
+ assert.throws(()=>mapReferenceToSource(inventory,annotations,
+  {...options,assetDecision:'APPROVE_TYPED_FALLBACK',fallbackApproval:true,
+   requiredAssetKinds:['logo']}),/ASSET_GATE_BLOCKED/);
 });

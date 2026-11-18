@@ -55,3 +55,43 @@ export function createReferenceAssetManifest(inventory,annotations,{approval,rig
   publishGate:'VERIFY_ORIGINAL_RIGHTS_AND_IMPORT_REQUIRED_ASSETS'
  };
 }
+
+
+/** Owner-reviewed asset readiness. Unknown raster layers are never invented.
+ * CSS/typed reconstruction is a new design, not a faithful extraction. */
+export function evaluateReferenceAssetGate(manifest,{decision='REQUIRE_ORIGINAL_ASSETS',fallbackApproval=false,requiredAssetKinds=[]}={}){
+ if(manifest?.schema!=='ffax.external-asset-manifest.v1'||!SHA.test(manifest.reference?.sha256||'')||
+    manifest.rights?.status!=='OWNER_ASSERTED_UNVERIFIED'||
+    !Array.isArray(manifest.ownerLabels)||!manifest.ownerLabels.length||
+    manifest.state!=='STRUCTURE_OWNER_REVIEWED_ASSETS_INCOMPLETE')
+  throw Error('REFERENCE_ASSET_GATE_INVALID_MANIFEST');
+ const allowed=new Set(['logo','hero-photo','illustration','brand-font','icon']);
+ if(!Array.isArray(requiredAssetKinds)||requiredAssetKinds.length>12||
+    requiredAssetKinds.some(x=>!allowed.has(x))||
+    new Set(requiredAssetKinds).size!==requiredAssetKinds.length)
+  throw Error('REFERENCE_ASSET_REQUIREMENTS_INVALID');
+ if(!['REQUIRE_ORIGINAL_ASSETS','APPROVE_TYPED_FALLBACK'].includes(decision))
+  throw Error('REFERENCE_ASSET_DECISION_INVALID');
+ const next=structuredClone(manifest);
+ next.requiredAssetKinds=[...requiredAssetKinds];
+ next.ownerAssetDecision=decision;
+ next.verifiedOriginalRasterAssets=0;
+ next.originalAppearanceEquivalent=false;
+ if(decision==='REQUIRE_ORIGINAL_ASSETS'||requiredAssetKinds.length>0){
+  next.state='BLOCKED_ASSET';
+  next.assetGate={state:'BLOCKED_ASSET',
+   reason:'Original logo, artwork or font assets must be separately imported, verified and approved.',
+   required:requiredAssetKinds.length?requiredAssetKinds:['UNSPECIFIED_ORIGINAL_ASSETS'],
+   automaticallyExtracted:false};
+  next.publishGate='BLOCKED_REQUIRED_ORIGINAL_ASSETS';
+  return next;
+ }
+ if(fallbackApproval!==true)throw Error('REFERENCE_ASSET_FALLBACK_APPROVAL_REQUIRED');
+ next.state='ASSETS_READY_TYPED_FALLBACK_ONLY';
+ next.assetGate={state:next.state,source:'OWNER_APPROVED_TYPED_COMPONENT_RECONSTRUCTION',
+  renderAs:'LOCAL_FFAX_COMPONENTS_AND_CSS_ONLY',
+  originalArtworkIncluded:false,originalFontsIncluded:false,
+  mayClaimPixelParity:false,ownerApproved:true};
+ next.publishGate='REQUIRES_RENDER_COMPARE_RIGHTS_AND_OWNER_VISUAL_ACCEPTANCE';
+ return next;
+}

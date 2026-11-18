@@ -308,8 +308,11 @@ el('reference-owner-map').addEventListener('click',async()=>{
   button.disabled=true;
   const {approveMappedReference}=await import('./external-reference-to-forge.mjs');
   const result=await approveMappedReference(latestReferenceInventory,annotations,
-   {prompt:promptEl.value,approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true});
+   {prompt:promptEl.value,approval:'APPROVE_EXTERNAL_REFERENCE_MAPPING',rightsConfirmed:true,
+    assetDecision:el('reference-asset-decision').value,
+    fallbackApproval:el('reference-asset-fallback-approval').checked});
   save('FFAX-External-Mapped-Reference.json',JSON.stringify(result.bundle,null,2),'application/json');
+  save('FFAX-External-GeneratedScreen.tsx',result.reactSource,'text/plain');
   save('FFAX-External-Region-Evidence.json',JSON.stringify(result.evidence,null,2),'application/json');
   save('FFAX-External-Asset-Manifest.json',JSON.stringify(result.evidence.assetManifest,null,2),'application/json');
   // This is an explicitly reviewed local FFAX type-safe candidate, not an automatic push or deployment.
@@ -317,9 +320,9 @@ el('reference-owner-map').addEventListener('click',async()=>{
    document:result.variant.document,referenceSha256:result.bundle.sha256,approval:'APPROVE_FORGE_REFERENCE'
   }}));
   status.textContent='영역 '+annotations.length+'개 → 구조화 React 시안 생성 · SHA '+result.bundle.sha256.slice(0,16)+
-    '… · FFAX 편집기로 전달. 원본 그림·폰트/숨은 UI는 자동 복원하지 않음.';
+    '… · FFAX 편집기로 전달. 원본 사진/로고/폰트를 복원하지 않은 대체 시안이며 독립 시각 비교 필요.';
  }catch(err){status.textContent='외부 이미지 시안 생성 거부: '+(err?.message||'UNKNOWN');}
- finally{button.disabled=!latestReferenceInventory;el('reference-owner-labels-approval').checked=false;}
+ finally{button.disabled=!latestReferenceInventory;el('reference-owner-labels-approval').checked=false;el('reference-asset-fallback-approval').checked=false;}
 });
 
 el('export-react').addEventListener('click',()=>save('GeneratedScreen.tsx',exportReact(history.present),'text/plain'));

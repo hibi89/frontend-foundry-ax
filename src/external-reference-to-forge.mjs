@@ -4,9 +4,9 @@
  */
 import {buildBrief,newDocument,createReference,approveReference,makeComponent,REGISTRY,validateProjectImport,exportReact} from './core.mjs';
 import {freezeForgeVariant} from './design-forge.mjs';
-import {createReferenceAssetManifest} from './reference-assets.mjs';
+import {createReferenceAssetManifest,evaluateReferenceAssetGate} from './reference-assets.mjs';
 const hex=/^#[a-f0-9]{6}$/i;
-export function mapReferenceToSource(inventory,annotations,{prompt,approval,rightsConfirmed=false}={}){
+export function mapReferenceToSource(inventory,annotations,{prompt,approval,rightsConfirmed=false,assetDecision='REQUIRE_ORIGINAL_ASSETS',fallbackApproval=false,requiredAssetKinds=[]}={}){
  if(approval!=='APPROVE_EXTERNAL_REFERENCE_MAPPING'||rightsConfirmed!==true)throw Error('EXTERNAL_REFERENCE_OWNER_APPROVAL_REQUIRED');
  if(!inventory||inventory.schema!=='ffax.external-reference-inventory.v1'||
     inventory.rightsConfirmed!==true||!/^[a-f0-9]{64}$/.test(inventory.sha256||'')||
@@ -25,7 +25,11 @@ export function mapReferenceToSource(inventory,annotations,{prompt,approval,righ
     /[\u0000-\u001f\u007f]/.test(entry.text))throw Error('EXTERNAL_REFERENCE_REGION_MAPPING_INVALID');
   components.push(makeComponent(entry.type,'node-'+(components.length+1),entry.text.trim()));
  }
- const assetManifest=createReferenceAssetManifest(inventory,annotations,{approval});
+ const assetManifest=evaluateReferenceAssetGate(
+  createReferenceAssetManifest(inventory,annotations,{approval}),
+  {decision:assetDecision,fallbackApproval,requiredAssetKinds});
+ if(assetManifest.state!=='ASSETS_READY_TYPED_FALLBACK_ONLY')
+  throw Error('EXTERNAL_REFERENCE_ASSET_GATE_BLOCKED');
  const brief=buildBrief(prompt);
  const blank=newDocument(brief,'A');
  const named=typeof inventory.name==='string'&&inventory.name.trim()?inventory.name:'external-reference.png';
@@ -38,9 +42,9 @@ export function mapReferenceToSource(inventory,annotations,{prompt,approval,righ
  return {schema:'ffax.design-variant.v1',id:'A',styleId:'editorial',revision:1,parentVariantId:null,
    document:project,brief:{prompt},recommendation:{name:'Owner-labeled external image',rationale:'직접 확인한 영역만 코드로 변환'},
    sourceEvidence:{externalImageSha256:inventory.sha256,assetManifest,regions:annotations.map(x=>({...x})),
-     missingAssets:'REQUIRES_OWNER_ASSET_IMPORT',fonts:'UNKNOWN',text:'OWNER_SUPPLIED',
+     missingAssets:'OWNER_APPROVED_TYPED_FALLBACK_NOT_ORIGINAL_ART',fonts:'UNKNOWN',text:'OWNER_SUPPLIED',
      visualFidelity:'UNASSESSED',network:false,automaticLayerRecovery:false},
-   previewStatus:'MANUAL_REGION_SOURCE_READY_VISUAL_UNVERIFIED'};
+   previewStatus:'OWNER_TYPED_FALLBACK_READY_VISUAL_UNVERIFIED'};
 }
 export async function approveMappedReference(inventory,annotations,options){
  const variant=mapReferenceToSource(inventory,annotations,options);

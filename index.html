@@ -169,6 +169,12 @@
       <textarea id="reference-owner-labels" rows="3" maxlength="700" placeholder="Navbar|역학달력
 Hero|오늘의 역학 날짜
 Card|날짜 선택 · 사주 정보"></textarea>
+      <label for="reference-asset-decision">원본 이미지 자산 처리 (미확인 로고·사진·폰트)</label>
+      <select id="reference-asset-decision">
+        <option value="REQUIRE_ORIGINAL_ASSETS" selected>원본 자산 필요 — 자산 확보 전 코드 생성을 차단</option>
+        <option value="APPROVE_TYPED_FALLBACK">원본 자산 없이 FFAX 컴포넌트·CSS 대체 시안 생성</option>
+      </select>
+      <label class="check"><input id="reference-asset-fallback-approval" type="checkbox" /> 실제 원본 이미지·폰트·로고가 복원되지 않음을 이해했고 텍스트/색상/컴포넌트 기반 재구성을 별도 시안으로 승인합니다.</label>
       <label class="check"><input id="reference-owner-labels-approval" type="checkbox" /> 원본 사용권과 입력한 컴포넌트 종류·텍스트를 검토했으며, 이 구조로 FFAX 코드 시안을 생성합니다.</label>
       <button id="reference-owner-map" type="button" class="ghost-btn" disabled>확인한 이미지 영역 → React 시안 생성 · 소스 번들 저장</button>
       <p id="reference-owner-map-status" class="helper" role="status">이미지 분석 및 사용자 영역 지정 후 실행할 수 있습니다.</p>
