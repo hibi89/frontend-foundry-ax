@@ -1,3 +1,5 @@
+> **FFAX V2.1 최신 안내 (2026-11-18):** [형 최소 확인·독립 감사 인계](docs/FFAX_P2_OWNER_READY_20261118.md)를 먼저 보십시오. [최신 CI #44331129465](https://github.com/hibi89/frontend-foundry-ax/actions/runs/44331129465) `ffax-owner-review-unreleased` ZIP을 받고 내부 ZIP을 다시 풀어 `SOURCE_SHA.txt=6f58dfaeac8facdd49f9ecb87124c7a794e631b0` 확인. Node/Ollama가 이미 있으면 재설치 불필요. 새 Design Forge 순서: **A/B/C 실제 UI 시안 만들기 → 선택·개선/혼합/Undo/Redo → 선택 레퍼런스 확정 · SHA 잠금 → 확정 시안의 동일 코드를 FFAX 편집기로 전달**. 실제 Windows11·Qwen/시각 품질·독립 검수·최종 승인 NOT_RUN, RELEASE HOLD.
+
 # FFAX Windows 소유자 검수용 (2026-11-14 KST)
 
 **정식 판매/릴리스 아님 · RELEASE HOLD · 공식 최종설계 100점 재산정 대기**
