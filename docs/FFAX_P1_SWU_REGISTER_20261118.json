@@ -423,13 +423,14 @@
         "total": 2,
         "assumption": "Code-only scope; P2 and independent owner gate separate"
       },
-      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
-      "p1_check": "GITHUB_WORKFLOW_PENDING",
+      "source_evidence_sha": "780b4cc416dedb6013470e1b11b7f8105e644978",
+      "p1_check": "PASS_GITHUB_SOURCE_SMOKE",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY",
+      "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44292749024"
     },
     {
       "swu_id": "FFAX-SWU-DF-03",
@@ -495,13 +496,14 @@
         "total": 4,
         "assumption": "GUI/API typed language parser + revision history; externally supplied raster logos or fonts stay separately owner-gated"
       },
-      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
-      "p1_check": "GITHUB_WORKFLOW_PENDING",
+      "source_evidence_sha": "cac4bc09cbf6508db4cdf12366d45bbcfda6d1f2",
+      "p1_check": "PASS_GITHUB_SOURCE_SMOKE",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY",
+      "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44292030912"
     },
     {
       "swu_id": "FFAX-SWU-DF-05",
@@ -531,13 +533,14 @@
         "total": 4,
         "assumption": "Crosses script/API and existing GUI warning display; all static preflight + smoke code-only, actual font availability is not independently proven"
       },
-      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
-      "p1_check": "GITHUB_WORKFLOW_PENDING",
+      "source_evidence_sha": "10a2732f6704fe089a9e8c9552b6685ed4a434ac",
+      "p1_check": "PASS_GITHUB_SOURCE_SMOKE",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY",
+      "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44290444435"
     },
     {
       "swu_id": "FFAX-SWU-DF-06",
@@ -639,15 +642,17 @@
         "D": 2,
         "U": 0,
         "total": 6,
-        "assumption": "Original data safety D=2 / multi-MIME parser reviewed only as P1 code candidate; local browser decode and permission gate mandatory, OS real test P2"
+        "assumption": "Original data safety D=2 / multi-MIME parser reviewed only as P1 code candidate; local browser decode and permission gate mandatory, OS real test P2",
+        "exception": "HIGH_REVIEWED_CODE_ONLY_COMPLEX_EXCEPTION; no owner/customer original writes or runtime GO; P2 integration and security still pending"
       },
-      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
-      "p1_check": "GITHUB_WORKFLOW_PENDING",
+      "source_evidence_sha": "0c5ba66245dc67d6e52c9ce883d426a9c9d9a1eb",
+      "p1_check": "PASS_GITHUB_SOURCE_SMOKE",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY",
+      "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44291143372"
     },
     {
       "swu_id": "FFAX-SWU-RF-02",
@@ -679,13 +684,14 @@
         "total": 3,
         "assumption": "Code-only scope; P2 and independent owner gate separate"
       },
-      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
-      "p1_check": "GITHUB_WORKFLOW_PENDING",
+      "source_evidence_sha": "5e2e0e8dd34f622e82b9ab8cb9ece025ed07ecc0",
+      "p1_check": "PASS_GITHUB_SOURCE_SMOKE",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY",
+      "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44291497570"
     },
     {
       "swu_id": "FFAX-SWU-RF-03",
@@ -717,13 +723,14 @@
         "total": 3,
         "assumption": "Code-only scope; P2 and independent owner gate separate"
       },
-      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
-      "p1_check": "GITHUB_WORKFLOW_PENDING",
+      "source_evidence_sha": "5e2e0e8dd34f622e82b9ab8cb9ece025ed07ecc0",
+      "p1_check": "PASS_GITHUB_SOURCE_SMOKE",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY",
+      "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44291497570"
     },
     {
       "swu_id": "FFAX-SWU-RF-04",
@@ -893,16 +900,21 @@
         "D": 2,
         "U": 0,
         "total": 6,
-        "assumption": "High-reviewed risk D=2; source-byte parity and optional draft-PR adapter are P1 implementation only, runtime auth/API/event compatibility remains P2; production/main/user GO unchanged"
+        "assumption": "High-reviewed risk D=2; source-byte parity and optional draft-PR adapter are P1 implementation only, runtime auth/API/event compatibility remains P2; production/main/user GO unchanged",
+        "exception": "HIGH_REVIEWED_CODE_ONLY_COMPLEX_EXCEPTION; no owner/customer original writes or runtime GO; P2 integration and security still pending"
       },
-      "source_evidence_sha": "PENDING_NEW_COMMIT_SHA",
-      "p1_check": "GITHUB_WORKFLOW_PENDING",
+      "source_evidence_sha": "1d5b06fe07de711ad17c3e3fb83ce8241406c9b5",
+      "p1_check": "PASS_GITHUB_SOURCE_SMOKE",
       "retry_stage": "NOT_TRIGGERED",
       "failed_attempt_count": "UNASSESSED_NO_VERIFIED_FAILURE_HISTORY",
       "p2_status": "NOT_RUN",
       "owner_original_write_allowed": false,
-      "implementation_scope_status": "CODE_CANDIDATE_ONLY"
+      "implementation_scope_status": "CODE_CANDIDATE_ONLY",
+      "evidence_url": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44292450144"
     }
   ],
-  "lastUpdatedStatus": "P1 implementation 25/25; repaired missing browser module allowlist; LOCAL_HTTP_CI_PENDING"
+  "lastUpdatedStatus": "ALL_25_SWU_SOURCE_CANDIDATE_WITH_LOCAL_SMOKE_PASS; P2_NOT_RUN; RELEASE_HOLD",
+  "lastSourceHead": "780b4cc416dedb6013470e1b11b7f8105e644978",
+  "lastEvidenceRun": "https://github.com/hibi89/frontend-foundry-ax/actions/runs/44292749024",
+  "officialAC100Verification": "UNASSESSED"
 }
