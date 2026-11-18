@@ -8,6 +8,7 @@ import {join,resolve} from 'node:path';
 import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
 import {verifyForgeBundle} from './design-forge.mjs';
 import {converge} from '../scripts/forge_converge.mjs';
+import {saveLocalReference,loadLocalReference} from './reference-vault.mjs';
 const MAX_PNG=6*1024*1024;
 const pngSig=Buffer.from([137,80,78,71,13,10,26,10]);
 const json=(res,status,value)=>res.writeHead(status,{'Content-Type':'application/json; charset=utf-8',
@@ -32,6 +33,17 @@ export function createForgeRunner(){
  async function handle(req,res,path){
   if(!path.startsWith('/api/design/runner/'))return false;
   if(req.method==='GET'){
+   const receiptMatch=/^\/api\/design\/runner\/archive\/([a-f0-9]{64})$/.exec(path);
+   const pngMatch=/^\/api\/design\/runner\/archive\/png\/([a-f0-9]{64})$/.exec(path);
+   if(receiptMatch||pngMatch){
+    try{
+     const saved=await loadLocalReference({sha256:(receiptMatch||pngMatch)[1]});
+     if(receiptMatch)json(res,200,{schema:'ffax.runner-archive-receipt.v1',receipt:saved.receipt});
+     else res.writeHead(200,{'Content-Type':'image/png','Content-Length':saved.bytes.length,
+       'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}).end(saved.bytes);
+    }catch(e){refuse(res,404,/^REFERENCE_VAULT_/.test(e?.message||'')?e.message:'REFERENCE_VAULT_UNAVAILABLE');}
+    return true;
+   }
    const id=path.split('/').at(-1);
    if(!/^[a-f0-9]{32}$/.test(id))return refuse(res,404,'FORGE_RUNNER_UNKNOWN_RESULT'),true;
    const saved=results.get(id);
@@ -59,6 +71,30 @@ export function createForgeRunner(){
     references.set(id,{bytes,meta});
     while(references.size>2)references.delete(references.keys().next().value);
     json(res,200,{schema:'ffax.runner-reference.v1',id,...meta,scope:'LOCAL_MEMORY_ONLY'});
+   }else if(path==='/api/design/runner/archive'||path==='/api/design/runner/restore'){
+    if(req.headers['content-type']!=='application/json')throw Error('FORGE_RUNNER_JSON_REQUIRED');
+    const raw=await readBounded(req,5000);
+    let body;try{body=JSON.parse(raw.toString('utf8'));}catch{throw Error('FORGE_RUNNER_JSON_INVALID');}
+    if(!body||Array.isArray(body)||typeof body!=='object')throw Error('FORGE_RUNNER_ARCHIVE_FIELDS_INVALID');
+    if(path.endsWith('/archive')){
+     if(Object.keys(body).sort().join(',')!=='approval,referenceId,rightsConfirmed,sha256')
+      throw Error('FORGE_RUNNER_ARCHIVE_FIELDS_INVALID');
+     if(body.approval!=='APPROVE_LOCAL_REFERENCE_VAULT'||body.rightsConfirmed!==true)
+      throw Error('FORGE_RUNNER_ARCHIVE_APPROVAL_REQUIRED');
+     const ref=references.get(body.referenceId);
+     if(!ref||body.sha256!==ref.meta.sha256)throw Error('FORGE_RUNNER_REFERENCE_CHANGED');
+     const receipt=await saveLocalReference({bytes:ref.bytes,sha256:body.sha256,
+       rightsConfirmed:true,approval:body.approval});
+     json(res,200,{schema:'ffax.runner-archive-receipt.v1',receipt});
+    }else{
+     if(Object.keys(body).sort().join(',')!=='approval,sha256'||
+       body.approval!=='APPROVE_LOCAL_REFERENCE_RESTORE')throw Error('FORGE_RUNNER_RESTORE_APPROVAL_REQUIRED');
+     const saved=await loadLocalReference({sha256:body.sha256});
+     const id=randomBytes(16).toString('hex');
+     references.set(id,{bytes:saved.bytes,meta:inspectPNG(saved.bytes)});
+     while(references.size>2)references.delete(references.keys().next().value);
+     json(res,200,{schema:'ffax.runner-reference.v1',id,...inspectPNG(saved.bytes),scope:'LOCAL_VERIFIED_RELOAD'});
+    }
    }else if(path==='/api/design/runner/start'){
     if(req.headers['content-type']!=='application/json')throw Error('FORGE_RUNNER_JSON_REQUIRED');
     const raw=await readBounded(req,200000);

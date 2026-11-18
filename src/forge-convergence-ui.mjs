@@ -6,6 +6,61 @@ import {validateProjectImport} from './core.mjs';
 const $=id=>document.getElementById(id);
 const write=(message,bad=false)=>{const status=$('forge-convergence-status');status.textContent=message;status.dataset.failed=String(bad);};
 let finished=null,runActive=false;
+const vaultStatus=(message)=>{$('forge-vault-status').textContent=message;};
+async function registerVaultReference(file,token){
+ const res=await fetch('/api/design/runner/reference',{method:'POST',body:file,
+  cache:'no-store',credentials:'omit',redirect:'error',
+  headers:{'content-type':'image/png','x-ffax-csrf':token,
+    'x-ffax-owner-consent':'APPROVE_LOCAL_PNG_ANALYSIS'}});
+ const data=await res.json();
+ if(!res.ok||data.schema!=='ffax.runner-reference.v1')throw Error(data.error||'FORGE_VAULT_REGISTER_FAILED');
+ return data;
+}
+$('forge-vault-save').addEventListener('click',async()=>{
+ const button=$('forge-vault-save');
+ try{
+  const file=$('forge-compare-reference').files?.[0];
+  if(!$('forge-vault-consent').checked)throw Error('FORGE_VAULT_EXPLICIT_CONSENT_REQUIRED');
+  if(!file||file.type!=='image/png'||file.size<33||file.size>6*1024*1024)
+   throw Error('FORGE_VAULT_PNG_REQUIRED');
+  button.disabled=true;
+  const token=await getForgeSessionToken();
+  const registered=await registerVaultReference(file,token);
+  const saved=await postForgeReview('runner/archive',{referenceId:registered.id,
+    sha256:registered.sha256,rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'});
+  if(saved.schema!=='ffax.runner-archive-receipt.v1'||
+     saved.receipt?.sha256!==registered.sha256)throw Error('FORGE_VAULT_RECEIPT_MISMATCH');
+  $('forge-vault-sha').value=saved.receipt.sha256;
+  vaultStatus('로컬 불변 보관 완료 · SHA256 '+saved.receipt.sha256+
+   ' · 권리 판단은 사용자 확인 주장, 자동 라이선스 검증이 아닙니다.');
+ }catch(e){vaultStatus('로컬 보관 실패: '+(e?.message||'FORGE_VAULT_FAILED'));}
+ finally{button.disabled=false;$('forge-vault-consent').checked=false;}
+});
+$('forge-vault-reload').addEventListener('click',async()=>{
+ const button=$('forge-vault-reload');
+ try{
+  const sha=$('forge-vault-sha').value.trim().toLowerCase();
+  if(!/^[a-f0-9]{64}$/.test(sha))throw Error('FORGE_VAULT_SHA_INVALID');
+  button.disabled=true;
+  const token=await getForgeSessionToken();
+  const restored=await postForgeReview('runner/restore',{sha256:sha,approval:'APPROVE_LOCAL_REFERENCE_RESTORE'});
+  if(restored.schema!=='ffax.runner-reference.v1'||restored.sha256!==sha)throw Error('FORGE_VAULT_RESTORE_MISMATCH');
+  const res=await fetch('/api/design/runner/archive/png/'+sha,{method:'GET',cache:'no-store',
+    credentials:'omit',redirect:'error',headers:{'x-ffax-csrf':token}});
+  if(!res.ok||res.headers.get('content-type')!=='image/png')throw Error('FORGE_VAULT_FILE_UNAVAILABLE');
+  const blob=await res.blob();
+  const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))]
+    .map(v=>v.toString(16).padStart(2,'0')).join('');
+  if(digest!==sha)throw Error('FORGE_VAULT_BROWSER_HASH_MISMATCH');
+  const transfer=new DataTransfer();
+  transfer.items.add(new File([blob],'FFAX-verified-reference.png',{type:'image/png'}));
+  $('forge-compare-reference').files=transfer.files;
+  $('forge-compare-reference').dispatchEvent(new Event('change',{bubbles:true}));
+  vaultStatus('로컬 PNG 원본 SHA 검증 및 선택 완료 · '+sha);
+ }catch(e){vaultStatus('로컬 복구 실패: '+(e?.message||'FORGE_VAULT_RESTORE_FAILED'));}
+ finally{button.disabled=false;}
+});
+
 const clear=()=>{
  finished=null;$('forge-convergence-report').disabled=true;$('forge-convergence-apply').disabled=true;
  $('forge-convergence-apply-consent').checked=false;
