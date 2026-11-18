@@ -116,9 +116,16 @@ jobs:
         run: |
           python -m pip install 'playwright==1.56.0' 'Pillow==11.3.0'
           python -m playwright install chromium
-          # Keep a font-aware browser run but fail deterministically on mirror stalls.
-          timeout 120s sudo apt-get -o Acquire::Retries=1 update -qq
-          timeout 180s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq fonts-noto-cjk
+          # Prefer already-installed CJK fonts and cached apt indexes.
+          # Never bypass the required Korean glyph gate on a missing-font runner.
+          if ! fc-list :lang=ko | grep -q .; then
+            echo "KOREAN_FONT_INSTALL_REQUIRED"
+            if ! timeout 75s sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends fonts-noto-cjk; then
+              echo "APT_CACHED_INSTALL_FAILED; TRYING_ONE_BOUNDED_REFRESH"
+              timeout 75s sudo apt-get -o Acquire::Retries=0 update -qq
+              timeout 75s sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends fonts-noto-cjk
+            fi
+          fi
           fc-cache -f >/dev/null
           fc-list :lang=ko | grep -q . || { echo KOREAN_FONT_NOT_AVAILABLE; exit 1; }
           # Ubuntu chromium-browser is a Snap wrapper; avoid network-bound Snap assertions.
