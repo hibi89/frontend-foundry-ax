@@ -1,15 +1,35 @@
-/* DF-02: deterministic offline recommendation rule pack.
- * FFAX-authored industry intent mappings; UI UX Pro Max MIT style taxonomy is
- * attribution/context, not copied fonts, CSS, data or a beauty-quality score.
+/* DF-02: deterministic offline recommendation.
+ * FFAX-authored local industry weights + reviewed, pinned subset of MIT
+ * UI UX Pro Max style metadata; no fonts, CSS, code or remote data runtime.
  */
 const STYLE_IDS=['editorial','structured','expressive'];
 const source=Object.freeze({
  kind:'OFFLINE_FFAX_AUTHORED_RULES',version:'ffax-2.1-rules-1',
  research:{project:'nextlevelbuilder/ui-ux-pro-max-skill',
   repositorySha:'7436a6e0b6dc3add7c12d5b6ef1ccd3d410dd7fd',
-  license:'MIT',use:'STYLE_TAXONOMY_REFERENCE_ONLY'},
+  license:'MIT',stylesBlobSha:'7ed18d6ef06557b9a6f2285b87b458fd71e4722f',
+  includedRows:[1,7,8],use:'REVIEWED_CSV_STYLE_FIT_METADATA_ONLY'},
  noRemoteRequests:true,licenseClaim:'NO_EXTERNAL_FONTS_OR_ASSETS_INCLUDED'
 });
+// Hand-reviewed subset of actual src/ui-ux-pro-max/data/styles.csv at the
+// pinned commit. Source blob 7ed18d6ef06557b9a6f2285b87b458fd71e4722f.
+// Only fit/avoid/accessibility descriptors are adapted; no design assets copied.
+export const VERIFIED_STYLE_ROWS=Object.freeze([
+ {row:1,styleId:'minimalism-and-swiss-style',
+  suitable:'enterprise dashboards documentation SaaS',avoid:'creative playful entertainment',
+  fit:'structured',risk:'contrast and visible focus still require measurement'},
+ {row:7,styleId:'dark-mode-oled',
+  suitable:'night mode coding entertainment',avoid:'print first color accuracy critical',
+  fit:'structured',risk:'glow must not replace legible typography'},
+ {row:8,styleId:'accessible-and-ethical',
+  suitable:'government healthcare education inclusive products',
+  avoid:'none - accessibility universal',fit:'editorial',
+  risk:'measured contrast, keyboard and screen-reader testing required'}
+]);
+const verifiedStyleTriggers=Object.freeze([
+ {row:7,signal:/야간|밤|night|oled|개발자|코딩/i,fit:'structured',weight:2},
+ {row:8,signal:/접근성|키보드|스크린리더|고령|공공|의료|inclusive|accessibility/i,fit:'editorial',weight:3}
+]);
 const profiles=Object.freeze([
  {category:'analytics',signal:/대시보드|dashboard|통계|analytics|관리자|admin|분석|finance|금융/i,weights:{editorial:0,structured:7,expressive:0},reason:'데이터 탐색과 표·필터의 정보 계층'},
  {category:'tabular',signal:/테이블|datatable|spreadsheet|표(?:\s|$|[:·,./])|grid|결과목록/i,weights:{editorial:0,structured:6,expressive:0},reason:'밀도가 높은 데이터 영역'},
@@ -44,6 +64,12 @@ export function rankOfflineForgeStyles(brief){
   for(const id of STYLE_IDS)if(rule.weights[id]){
    scores[id]+=rule.weights[id];signals[id].push({category:rule.category,reason:rule.reason});
   }
+ }
+ for(const item of verifiedStyleTriggers)if(item.signal.test(prompt+' '+mood)){
+  scores[item.fit]+=item.weight;
+  const row=VERIFIED_STYLE_ROWS.find(x=>x.row===item.row);
+  signals[item.fit].push({category:'pinned-style-row-'+item.row,
+   reason:'검토된 오프라인 스타일 분류 '+row.styleId});
  }
  for(const rule of avoidProfiles)if(rule.signal.test(avoid)){
   for(const [id,value] of Object.entries(rule.penalty))scores[id]-=value;

@@ -108,3 +108,12 @@ test('DF-02: offline industry recommendations respect user constraints with prov
  assert.equal(recommendForgeStyles(otherwise).length,3);
  assert.ok(recommendForgeStyles(otherwise).every(s=>s.quality==='RULE_BASED_NOT_AESTHETICALLY_VERIFIED'));
 });
+
+test('DF-02: pinned upstream CSV subset informs accessibility/night recommendations with no runtime fetch',()=>{
+ const p=makeForgeBrief({prompt:'고령층 접근성 키보드 내비게이션 교육 사이트 제작'});
+ const options=recommendForgeStyles(p);
+ assert.ok(options.some(x=>x.matchingRules.some(rule=>rule.category==='pinned-style-row-8')));
+ assert.equal(options[0].source.offlineRules.research.stylesBlobSha,'7ed18d6ef06557b9a6f2285b87b458fd71e4722f');
+ const night=makeForgeBrief({prompt:'야간 코딩 인터페이스와 개발자 화면을 만들어줘'});
+ assert.ok(recommendForgeStyles(night).some(x=>x.matchingRules.some(rule=>rule.category==='pinned-style-row-7')));
+});
