@@ -1,5 +1,6 @@
-"""Browser probe via injected assets because Chromium localhost navigation is admin-blocked.
-HTTP server separately tested by Python urllib; injected document exercises actual UI source.
+"""P2: real localhost HTTP Chromium UI regression across all original features.
+Loads production browser modules directly so dynamic image inventory imports work.
+No customer files, model calls, external source downloads or deployment.
 """
 from __future__ import annotations
 import json, os, pathlib, re, subprocess, time
@@ -13,11 +14,10 @@ checks=[];exceptions=[];external=[];console_errors=[];network_errors=[]
 def check(label,ok,detail=''):
     checks.append({'name':label,'passed':bool(ok),'detail':str(detail)})
     print(('PASS' if ok else 'FAIL'),label,detail if not ok else '')
-def load_fixture(page,html,css,module):
-    page.set_content(html,wait_until='load')
-    page.add_style_tag(content=css)
-    page.add_script_tag(content=module,type='module')
-    page.locator('#preview [data-node-id]').first.wait_for(timeout=8000)
+def load_fixture(page):
+    response=page.goto(BASE+'/',wait_until='networkidle',timeout=20000)
+    assert response.status==200
+    page.locator('#preview [data-node-id]').first.wait_for(timeout=10000)
 server=subprocess.Popen(['node','src/server.mjs'],cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env={**os.environ,'PORT':str(PORT)})
 try:
     http_ok=False
@@ -28,19 +28,6 @@ try:
                 break
         except Exception:time.sleep(.1)
     check('real local Node HTTP serves app',http_ok)
-    html=(ROOT/'index.html').read_text(encoding='utf-8')
-    css=(ROOT/'styles.css').read_text(encoding='utf-8')
-    core=(ROOT/'src/core.mjs').read_text(encoding='utf-8')
-    app=(ROOT/'src/app.mjs').read_text(encoding='utf-8')
-    demo=(ROOT/'src/demo-interactions.mjs').read_text(encoding='utf-8')
-    html=re.sub(r'<link rel="stylesheet"[^>]+>','',html)
-    html=re.sub(r'<script type="module"[^>]+></script>','',html)
-    core=re.sub(r'\bexport (?=(?:const|class|function)\b)','',core)
-    demo=re.sub(r'\bexport (?=(?:const|class|function)\b)','',demo)
-    # The injected test concatenates core+demo+app, so strip both static imports on independent lines.
-    app=re.sub(r'^import [^;]+;','',app,count=2,flags=re.M)
-    module=('const __injectedCSS = '+json.dumps(css)+';\n'
-            'window.fetch=async()=>({text:async()=>__injectedCSS});\n'+core+'\n'+demo+'\n'+app)
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-gpu'])
         ctx=browser.new_context(viewport={'width':1440,'height':900},accept_downloads=True)
@@ -49,8 +36,8 @@ try:
         page.on('console',lambda msg:console_errors.append(msg.text) if msg.type=='error' else None)
         page.on('requestfailed',lambda req:network_errors.append(str(req.url)))
         page.on('request',lambda r:external.append(r.url) if not r.url.startswith(BASE) else None)
-        load_fixture(page,html,css,module)
-        check('actual UI components rendered in Chromium set_content',page.locator('#preview [data-node-id]').count()==13)
+        load_fixture(page)
+        check('actual UI components rendered via real local HTTP',page.locator('#preview [data-node-id]').count()==13)
         check('document title',page.title()=='FFAX — Frontend Foundry AX')
         for width in (375,768,1440):
             page.set_viewport_size({'width':width,'height':900})
@@ -98,8 +85,10 @@ try:
         check('image reference requires consent','사용 권한 확인' in page.locator('#reference-result').inner_text())
         page.locator('#rights').check()
         page.locator('#apply-reference').click()
-        page.wait_for_timeout(400)
-        check('image palette two design hints','스타일 후보 A/B' in page.locator('#reference-result').inner_text() and page.locator('.reference-candidate').count()==2)
+        page.locator('.reference-candidate').nth(1).wait_for(timeout=10000)
+        check('image palette two design hints',
+              'SHA256' in page.locator('#reference-result').inner_text() and
+              page.locator('.reference-candidate').count()==2)
         page.locator('.reference-candidate').nth(1).click()
         check('explicit image style approved and applied', '스타일 승인됨' in page.locator('#reference-result').inner_text() and page.locator('.reference-candidate.selected').count()==1)
         page.evaluate('window.__ffaxQAFault = true')
@@ -113,7 +102,7 @@ try:
         check('no Chromium JS exceptions',not exceptions,exceptions)
         check('no Chromium console errors',not console_errors,console_errors)
         check('no network request failures',not network_errors,network_errors)
-        check('no external network requests in synthetic DOM',not external,external)
+        check('no external network requests in served Chromium',not external,external)
         browser.close()
 finally:
     server.terminate()
@@ -121,7 +110,7 @@ finally:
     except subprocess.TimeoutExpired:server.kill();server.communicate()
 
 fails=[x for x in checks if not x['passed']]
-result={'passed':len(checks)-len(fails),'failed':len(fails),'checks':checks,'environment':{'node_http':'real localhost GET','chromium':'set_content injected same sources (navigation blocked)','os':'Linux','console_js_exceptions':len(exceptions),'external_network_requests':len(external),'console_errors':len(console_errors),'request_failures':len(network_errors)}}
+result={'passed':len(checks)-len(fails),'failed':len(fails),'checks':checks,'environment':{'node_http':'real localhost GET','chromium':'served via actual localhost module graph','os':'Linux','console_js_exceptions':len(exceptions),'external_network_requests':len(external),'console_errors':len(console_errors),'request_failures':len(network_errors)}}
 (OUT/'qa-results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
 print('RESULT',result['passed'],'PASS /',result['failed'],'FAIL')
 raise SystemExit(1 if fails else 0)
