@@ -92,3 +92,19 @@ test('DF-04: owner typed editing of fonts, components and selective visual mixin
  assert.equal(validateProjectImport(merged.document),true);
  assert.throws(()=>refineForgeVariant(a,{kind:'token',prop:'fontStack',value:'url(https://bad.example/font)'}),/FORGE_TOKEN_VALUE_UNSUPPORTED/);
 });
+
+test('DF-02: offline industry recommendations respect user constraints with provenance',()=>{
+ const analytics=makeForgeBrief({prompt:'금융 데이터 대시보드와 거래 통계 테이블을 디자인해줘'});
+ const first=recommendForgeStyles(analytics);
+ assert.equal(first[0].styleId,'structured');
+ assert.ok(first[0].matchingRules.length>0);
+ assert.equal(first[0].source.offlineRules.noRemoteRequests,true);
+ assert.deepEqual(recommendForgeStyles(analytics),first);
+ const culture=makeForgeBrief({prompt:'역학 달력 전통 문화 페이지를 제작해줘'});
+ assert.equal(recommendForgeStyles(culture)[0].styleId,'expressive');
+ const editorial=makeForgeBrief({prompt:'미니멀 독립 매거진과 기사 아카이브를 제작해줘',avoid:'화려한 장식'});
+ assert.equal(recommendForgeStyles(editorial)[0].styleId,'editorial');
+ const otherwise=makeForgeBrief({prompt:'오늘의 날짜를 표시해줘'});
+ assert.equal(recommendForgeStyles(otherwise).length,3);
+ assert.ok(recommendForgeStyles(otherwise).every(s=>s.quality==='RULE_BASED_NOT_AESTHETICALLY_VERIFIED'));
+});

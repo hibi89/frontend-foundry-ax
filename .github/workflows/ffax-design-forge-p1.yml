@@ -7,6 +7,7 @@ on:
       - '.github/workflows/ffax-design-forge-p1.yml'
       - 'src/core.mjs'
       - 'src/design-forge.mjs'
+      - 'src/forge-style-intelligence.mjs'
       - 'src/design-forge-ui.mjs'
       - 'src/forge-compare-ui.mjs'
       - 'src/forge-api.mjs'
@@ -55,6 +56,7 @@ jobs:
         run: |
           node --check src/core.mjs
           node --check src/design-forge.mjs
+          node --check src/forge-style-intelligence.mjs
           node --check src/design-forge-ui.mjs
           node --check src/forge-compare-ui.mjs
           node --check src/forge-api.mjs

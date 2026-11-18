@@ -1,5 +1,6 @@
 /* FFAX Design Forge V2.1: deterministic local React variants. No network or model dependency. */
 import { buildBrief, newDocument, makeComponent, assertDocument, applyCommand, exportReact, validateProjectImport, THEME_OPTIONS } from './core.mjs';
+import {rankOfflineForgeStyles} from './forge-style-intelligence.mjs';
 
 export const FORGE_VARIANT_SCHEMA='ffax.design-variant.v1';
 export const FORGE_BUNDLE_SCHEMA='ffax.design-bundle.v1';
@@ -26,11 +27,24 @@ export function makeForgeBrief({prompt,audience='',mood='',mustHave='',avoid=''}
  return {schema:'ffax.design-brief.v2',prompt:raw,audience:clean(audience,120)||legacy.users,mood:clean(mood,150)||'균형 잡힌 전문적 디자인',mustHave:clean(mustHave,500),avoid:clean(avoid,500),scope:'LOCAL_PREVIEW_ONLY',rightsConfirmed:false,legacy};
 }
 export function recommendForgeStyles(brief){
- if(brief?.schema!=='ffax.design-brief.v2')throw Error('FORGE_BRIEF_REQUIRED');
- const density=/테이블|표(?:\s|$|[:·,./]|데이터)|관리|대시보드|데이터|admin|통계|금융/i.test(brief.prompt+' '+brief.mustHave);
- const expressive=/문화|달력|역학|예술|브랜드|hero|감성/i.test(brief.prompt+' '+brief.mood);
- const sorted=density?[styles[1],styles[0],styles[2]]:expressive?[styles[2],styles[0],styles[1]]:[...styles];
- return sorted.map((s,i)=>({styleId:s.id,name:s.name,rationale:s.rationale,rank:i+1,theme:s.theme,layout:s.layout,source:s.origin==='FFAX_ORIGINAL'?{provider:'FFAX',kind:'builtin',license:'internal',version:'2.1'}:{provider:'UI UX Pro Max',kind:'inspired-style-taxonomy',license:'MIT',repo:'nextlevelbuilder/ui-ux-pro-max-skill',sha:'7436a6e0b6dc3add7c12d5b6ef1ccd3d410dd7fd',styleId:s.origin,notice:'Styles adapted by FFAX; only provenance is inherited.'},quality:'RULE_BASED_NOT_AESTHETICALLY_VERIFIED'}));
+ const offline=rankOfflineForgeStyles(brief);
+ return offline.map(item=>{
+  const s=styles.find(x=>x.id===item.styleId);
+  return {
+   styleId:s.id,name:s.name,rationale:item.rationale+' · '+s.rationale,
+   rank:item.rank,theme:s.theme,layout:s.layout,
+   category:item.matchedCategories,antiPatterns:item.antiPatterns,
+   confidence:item.confidence,fallback:item.fallback,matchingRules:item.matchingRules,
+   source:s.origin==='FFAX_ORIGINAL'
+    ? {provider:'FFAX',kind:'builtin',license:'internal',version:'2.1',offlineRules:item.source}
+    : {provider:'UI UX Pro Max',kind:'inspired-style-taxonomy',license:'MIT',
+       repo:'nextlevelbuilder/ui-ux-pro-max-skill',
+       sha:'7436a6e0b6dc3add7c12d5b6ef1ccd3d410dd7fd',
+       styleId:s.origin,offlineRules:item.source,
+       notice:'Rule pack authored in FFAX; no upstream fonts/assets or quality certification.'},
+   quality:'RULE_BASED_NOT_AESTHETICALLY_VERIFIED'
+  };
+ });
 }
 export function generateForgeVariants(brief){
  const recommendations=recommendForgeStyles(brief);
