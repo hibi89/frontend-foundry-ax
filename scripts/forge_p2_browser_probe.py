@@ -79,6 +79,9 @@ try:
         page.on('pageerror',lambda err:REPORT['errors'].append('pageerror:'+str(err)[:220]))
         page.on('console',lambda msg:REPORT['errors'].append('console:'+msg.text[:220]) if msg.type=='error' else None)
         page.on('requestfailed',lambda req:REPORT['errors'].append('requestfailed:'+req.url[:220]))
+        page.on('response',lambda res:REPORT.setdefault('httpFailures',[]).append({
+            'status':res.status,'path':res.url.split('?')[0][:180]})
+            if res.status>=400 else None)
         page.on('request',lambda req:REPORT['requestsExternal'].append(req.url[:220])
                 if not (req.url.startswith(BASE+'/') or
                     req.url.startswith('blob:'+BASE+'/') or req.url.startswith('data:')) else None)
@@ -110,10 +113,13 @@ try:
         page.locator('#forge-capture-height').fill('600')
         page.locator('#forge-capture-consent').check()
         page.locator('#forge-capture-run').click()
-        expect(page.locator('#forge-capture-preview')).to_have_attribute('src',re.compile(r'^blob:'),timeout=100000)
-        capture_status=page.locator('#forge-status').inner_text()
-        check('forge-real-browser-png',page.locator('#forge-capture-preview').get_attribute('src').startswith('blob:'),
-              capture_status)
+        for _ in range(360):
+            capture_status=page.locator('#forge-status').inner_text()
+            capture_src=page.locator('#forge-capture-preview').get_attribute('src') or ''
+            if capture_src.startswith('blob:') or '캡처 실패' in capture_status:
+                break
+            page.wait_for_timeout(250)
+        check('forge-real-browser-png',capture_src.startswith('blob:'),capture_status)
         evidence=page.evaluate("""async () => {
           const b=await (await fetch(document.querySelector('#forge-capture-preview').src)).blob();
           const raw=await b.arrayBuffer();

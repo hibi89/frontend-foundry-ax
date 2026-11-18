@@ -58,8 +58,8 @@ jobs:
             for($i=0; $i -lt 50; $i++){
               if($proc.HasExited){throw "REVIEW_PACKAGE_SERVER_CRASHED"}
               try{
-                $home=Invoke-WebRequest "http://127.0.0.1:4178/" -TimeoutSec 3
-                if($home.StatusCode -eq 200){$ready=$true;break}
+                $webResponse=Invoke-WebRequest "http://127.0.0.1:4178/" -TimeoutSec 3
+                if($webResponse.StatusCode -eq 200){$ready=$true;break}
               }catch{Start-Sleep -Milliseconds 250}
             }
             if(-not $ready){throw "REVIEW_PACKAGE_LOCAL_SERVER_NOT_READY"}
