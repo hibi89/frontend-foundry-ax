@@ -9,7 +9,7 @@ const download=(name,content,type='application/json')=>{
  const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 };
 let variants=[],selectedId=null,frozen=null,ownerBrief=null;
-let capturedPng=null,captureUrl=null;
+let capturedPng=null,captureUrl=null,captureId=null,captureBundleSha=null;
 
 let forgeCsrf=null;
 async function forgePost(endpoint,payload){
@@ -83,8 +83,9 @@ function renderCards(){
  $('forge-mix').disabled=!selectedId;
  $('forge-apply').disabled=!frozen;
  $('forge-export').disabled=!frozen;
- $('forge-capture-run').disabled=!frozen;
- if(!frozen){capturedPng=null;if(captureUrl)URL.revokeObjectURL(captureUrl);captureUrl=null;$('forge-capture-preview').removeAttribute('src');$('forge-capture-download').disabled=true;}
+ $('forge-capture-run').disabled=!frozen || frozen.manifest?.referencePng!==null;
+ $('forge-finalize').disabled=!frozen || !captureId || captureBundleSha!==frozen.sha256 || frozen.manifest?.referencePng!==null;
+ if(!frozen){captureId=null;captureBundleSha=null;capturedPng=null;if(captureUrl)URL.revokeObjectURL(captureUrl);captureUrl=null;$('forge-capture-preview').removeAttribute('src');$('forge-capture-download').disabled=true;}
 }
 $('forge-generate').addEventListener('click',async()=>{
  try{
@@ -146,6 +147,8 @@ $('forge-capture-run').addEventListener('click',async()=>{
  const button=$('forge-capture-run');
  try{
   if(!frozen)throw Error('FORGE_CAPTURE_REQUIRES_APPROVED_BUNDLE');
+  if(frozen.manifest?.referencePng!==null)throw Error('FORGE_REFERENCE_PNG_ALREADY_LOCKED');
+  const originalFrozenSha=frozen.sha256;
   if(!$('forge-capture-consent').checked)throw Error('FORGE_CAPTURE_OWNER_CONSENT_REQUIRED');
   const width=Number($('forge-capture-width').value),height=Number($('forge-capture-height').value);
   if(!Number.isInteger(width)||!Number.isInteger(height)||height<320||height>2200)throw Error('FORGE_CAPTURE_VIEWPORT_INVALID');
@@ -159,15 +162,34 @@ $('forge-capture-run').addEventListener('click',async()=>{
   const digest=await crypto.subtle.digest('SHA-256',await png.arrayBuffer());
   const check=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
   if(check!==response.receipt.sha256)throw Error('FORGE_CAPTURE_PNG_SHA_MISMATCH');
+  if(!frozen || frozen.sha256!==originalFrozenSha)throw Error('FORGE_CAPTURE_SOURCE_CHANGED');
   if(captureUrl)URL.revokeObjectURL(captureUrl);
-  capturedPng=png;captureUrl=URL.createObjectURL(png);$('forge-capture-preview').src=captureUrl;$('forge-capture-download').disabled=false;
+  capturedPng=png;captureId=response.id;captureBundleSha=originalFrozenSha;captureUrl=URL.createObjectURL(png);$('forge-capture-preview').src=captureUrl;$('forge-capture-download').disabled=false;$('forge-finalize').disabled=false;
   try{
    const transfer=new DataTransfer();transfer.items.add(new File([png],'FFAX-real-browser.png',{type:'image/png'}));
    $('forge-compare-render').files=transfer.files;
    report('실제 Playwright PNG SHA 확인 · 비교 패널의 구현 화면 파일에 자동 지정했습니다. 원본 레퍼런스를 선택하고 비교를 실행하세요.');
   }catch{report('실제 Playwright PNG 확인 완료. 자동 파일 지정 미지원: PNG를 저장하여 비교 패널에 직접 선택하세요.');}
  }catch(err){report('캡처 실패: '+err.message,true);}
- finally{button.disabled=!frozen;$('forge-capture-consent').checked=false;}
+ finally{button.disabled=!frozen || frozen.manifest?.referencePng!==null;$('forge-capture-consent').checked=false;}
+});
+$('forge-finalize').addEventListener('click',async()=>{
+ const button=$('forge-finalize');
+ try{
+  if(!$('forge-finalize-consent').checked)throw Error('FORGE_FINAL_IMAGE_OWNER_APPROVAL_REQUIRED');
+  if(!frozen||!captureId||captureBundleSha!==frozen.sha256||!capturedPng)throw Error('FORGE_CAPTURE_RECEIPT_STALE');
+  const originalSha=frozen.sha256,actualCaptureId=captureId;
+  button.disabled=true;
+  const response=await forgePost('finalize',{bundle:frozen,captureId:actualCaptureId,approval:'APPROVE_FINAL_REFERENCE_PNG'});
+  if(response.schema!=='ffax.design-finalized-result.v1'||response.parentSha256!==originalSha||
+     response.bundle?.manifest?.referencePng?.sha256!==response.pngSha256)throw Error('FORGE_FINAL_IMAGE_RECEIPT_INVALID');
+  await verifyForgeBundle(response.bundle);
+  if(!frozen||frozen.sha256!==originalSha||captureId!==actualCaptureId)throw Error('FORGE_FINAL_IMAGE_CHANGED_DURING_APPROVAL');
+  frozen=response.bundle;captureId=null;captureBundleSha=null;
+  renderCards();
+  report('소스·자산 사양·실제 Chromium PNG 최종 잠금 PASS · bundle SHA256 '+frozen.sha256.slice(0,20)+'… · PNG SHA256 '+response.pngSha256.slice(0,20)+'… · 시각 품질/기능의 독립 PASS와는 구분됩니다.');
+ }catch(err){report('레퍼런스 최종 확정 실패: '+err.message,true);}
+ finally{$('forge-finalize-consent').checked=false;button.disabled=!frozen||!captureId||captureBundleSha!==frozen.sha256;}
 });
 $('forge-capture-download').addEventListener('click',()=>{
  if(!capturedPng)return;
