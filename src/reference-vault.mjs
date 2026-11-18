@@ -35,7 +35,7 @@ function inspectJPEG(b){
   if(size<2||i+size>b.length)throw Error('REFERENCE_VAULT_JPEG_INVALID');
   if(([0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf]).includes(marker)){
    if(size<7)throw Error('REFERENCE_VAULT_JPEG_INVALID');
-   return dimensions(b.readUInt16BE(i+3),b.readUInt16BE(i+1));
+   return dimensions(b.readUInt16BE(i+5),b.readUInt16BE(i+3));
   }
   i+=size;
  }

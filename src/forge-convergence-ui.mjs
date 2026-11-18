@@ -69,7 +69,7 @@ $('forge-vault-reload').addEventListener('click',async()=>{
   if(restored.schema==='ffax.runner-restored-file.v1'&&restored.receipt.sha256!==sha)
    throw Error('FORGE_VAULT_RESTORE_MISMATCH');
   const transfer=new DataTransfer();transfer.items.add(file);
-  if(mime==='image/png'){
+  if(mime==='image/png'&&restored.schema==='ffax.runner-reference.v1'){
    $('forge-compare-reference').files=transfer.files;
    $('forge-compare-reference').dispatchEvent(new Event('change',{bubbles:true}));
   }else{

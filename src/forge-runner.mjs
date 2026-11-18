@@ -104,7 +104,7 @@ export function createForgeRunner(){
      if(Object.keys(body).sort().join(',')!=='approval,sha256'||
        body.approval!=='APPROVE_LOCAL_REFERENCE_RESTORE')throw Error('FORGE_RUNNER_RESTORE_APPROVAL_REQUIRED');
      const saved=await loadLocalReference({sha256:body.sha256});
-     if(saved.receipt.mime==='image/png'){
+     if(saved.receipt.mime==='image/png'&&saved.receipt.width<=2560&&saved.receipt.height<=2200&&saved.receipt.width*saved.receipt.height<=2560*2200){
       const meta=inspectPNG(saved.bytes);
       const id=randomBytes(16).toString('hex');
       references.set(id,{bytes:saved.bytes,meta});

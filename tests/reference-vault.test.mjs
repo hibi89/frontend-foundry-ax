@@ -54,6 +54,7 @@ test('RF-01 stores and verifies SHA-addressed JPEG and WebP reference headers wi
    const rec=await saveLocalReference({root,bytes,sha256:hashValue,
     rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'});
    assert.equal(rec.mime,mime);assert.equal(rec.rightsScope,'REFERENCE_ONLY');
+   assert.equal(rec.width,3);assert.equal(rec.height,2);
    assert.equal(rec.verification,'HEADER_AND_SHA_ONLY_BROWSER_DECODE_REQUIRED');
    const restored=await loadLocalReference({root,sha256:hashValue});
    assert.ok(restored.bytes.equals(bytes));
