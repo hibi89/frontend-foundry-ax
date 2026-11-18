@@ -2,6 +2,7 @@
 /* FFAX source-first fidelity evidence pipeline: immutable bundle -> actual Chromium PNG -> one-shot-ui diff. */
 import {mkdir,writeFile} from 'node:fs/promises';
 import {resolve,join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {capture} from './forge_capture.mjs';
 import {compareReference} from './ffax_reference_fidelity.mjs';
 function parseArgs(args){
@@ -28,7 +29,7 @@ export async function runFidelityPipeline({bundle,reference,out,width=1440,heigh
  await writeFile(join(directory,'pipeline.json'),JSON.stringify(evidence,null,2)+'\n',{flag:'wx'});
  return evidence;
 }
-if(process.argv[1]&&resolve(process.argv[1])===resolve(new URL(import.meta.url).pathname)){
+if(process.argv[1]&&resolve(process.argv[1])===resolve(fileURLToPath(import.meta.url))){
  try{const settings=parseArgs(process.argv.slice(2));console.log(JSON.stringify({ok:true,...await runFidelityPipeline(settings)}));}
  catch(e){console.error(JSON.stringify({ok:false,error:(e?.message||'FORGE_PIPELINE_FAILED').slice(0,300)}));process.exitCode=1;}
 }
