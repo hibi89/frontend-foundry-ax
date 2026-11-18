@@ -71,3 +71,12 @@ Diff + Human Approval -> Git branch/PR -> Separate Deployment Approval
 5. 최종 UI 콘셉트 채택(참고 이미지), 실제 컬러 토큰·브랜드 로고·제품명 표기 확정.
 
 미승인 상태에서는 문서 설계 및 로컬 기술 타당성 실험만 진행하고 위험한 연결/배포/비용 지출은 하지 않는다.
+
+
+## E. 2026-11-18 최종 아키텍처 결정 — FFAX V2 Reference Fidelity Mode
+
+기존 B안(자체 FFAX 컴포넌트/토큰/편집+원본보존)을 유지하고 시각 재현 기능을 모듈로 추가한다. 별도 repo/타사 builder 전면 대체안은 **불채택**. 기존 기능을 버리는 비용과 고객 원본 승인·버전/복구 컨트롤 손실이 더 크다.
+
+실행 흐름: **reference PNG/SHA/rights lock → image-to-code 분석 절차/asset manifest → FFAX 기본 React 생성기(외부 screenshot-to-code는 선택) → Playwright 실캡처 → one-shot-ui 차이 분석(Pixelmatch 내장) → allowlist CSS proposal/격리본 보정(최대 5회) → 사용자 시각 수락 → 별도 통합 승인**. 외부 코드를 버전·라이선스·의존성 검토 없이 설치·실행하지 않는다. 기본 무료·로컬, 고객 원본/비밀 외부 전송과 유료 호출/운영 변경은 별도 GO.
+
+구체 계약·상태·검수·REQ 매핑은 [최종설계도](FINAL_BLUEPRINT_FFAX_V2_REFERENCE_FIDELITY_20261118.md)를 참조. 기존 REQ/AC 및 RELEASE HOLD 유지. 이 설계 결정은 코드 통합 완료나 실기기 검증 완료가 아니다.
