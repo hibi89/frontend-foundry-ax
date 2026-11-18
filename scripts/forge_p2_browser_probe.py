@@ -84,7 +84,7 @@ try:
             if res.status>=400 else None)
         page.on('request',lambda req:REPORT['requestsExternal'].append(req.url[:220])
                 if not (req.url.startswith(BASE+'/') or
-                    req.url.startswith('blob:'+BASE+'/') or req.url.startswith('data:')) else None)
+                    req.url.startswith('blob:') or req.url.startswith('data:')) else None)
         response=page.goto(BASE+'/',wait_until='networkidle',timeout=25000)
         check('forge-served-browser-http',response.status==200)
         page.locator('#forge-brief').fill('현대적인 금융 대시보드, 고객 메뉴와 차트, 검색 버튼을 포함한 새 디자인을 만들어줘')
@@ -120,19 +120,17 @@ try:
                 break
             page.wait_for_timeout(250)
         check('forge-real-browser-png',capture_src.startswith('blob:'),capture_status)
-        evidence=page.evaluate("""async () => {
-          const b=await (await fetch(document.querySelector('#forge-capture-preview').src)).blob();
-          const raw=await b.arrayBuffer();
-          const hex=[...new Uint8Array(await crypto.subtle.digest('SHA-256',raw))]
-            .map(x=>x.toString(16).padStart(2,'0')).join('');
-          const transfer=new DataTransfer();
-          transfer.items.add(new File([b],'owner-synthetic-reference.png',{type:'image/png'}));
-          const input=document.querySelector('#forge-compare-reference');
-          input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
-          const vault=document.querySelector('#forge-vault-source');
-          vault.files=transfer.files;vault.dispatchEvent(new Event('change',{bubbles:true}));
-          return {mime:b.type,bytes:b.size,sha256:hex};
-        }""")
+        # Exercise the real UI download action. Do not fetch blob: from page JS:
+        # FFAX CSP intentionally forbids blob under connect-src.
+        with page.expect_download(timeout=20000) as downloaded:
+            page.locator('#forge-capture-download').click()
+        png=ART/'forge-p2-captured.png'
+        downloaded.value.save_as(str(png))
+        raw=png.read_bytes()
+        evidence={'mime':'image/png' if raw[:8]==bytes([137,80,78,71,13,10,26,10]) else 'INVALID',
+                  'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        page.locator('#forge-compare-reference').set_input_files(str(png))
+        page.locator('#forge-vault-source').set_input_files(str(png))
         REPORT['capture']={'sha256':evidence['sha256'],'bytes':evidence['bytes'],'width':375,'height':600}
         check('forge-real-capture-hash',evidence['mime']=='image/png' and evidence['bytes']>1000
               and len(evidence['sha256'])==64)
