@@ -23,9 +23,9 @@ async function safeDecodeReference(file){
 $('forge-vault-save').addEventListener('click',async()=>{
  const button=$('forge-vault-save');
  try{
-  const png=$('forge-compare-reference').files?.[0];
-  const selected=$('reference-file')?.files?.[0];
-  const file=selected||png;
+  // Do not guess which of two unrelated UI selectors the user intended.
+  // Only this explicitly named file is ever stored after owner consent.
+  const file=$('forge-vault-source').files?.[0];
   if(!$('forge-vault-consent').checked)throw Error('FORGE_VAULT_EXPLICIT_CONSENT_REQUIRED');
   if(!file)throw Error('FORGE_VAULT_IMAGE_REQUIRED');
   button.disabled=true;

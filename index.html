@@ -192,9 +192,11 @@ Card|날짜 선택 · 사주 정보"></textarea>
         <p class="subheading">레퍼런스 ↔ 실제 화면 · 로컬 PNG 비교</p>
         <p class="helper">레퍼런스 원본 PNG와 Playwright 등의 실제 캡처 PNG를 선택하세요. 같은 픽셀 크기만 비교하며 폰트·기능·원본 권한은 따로 검토합니다. 파일은 서버로 업로드하지 않습니다.</p>
         <label for="forge-compare-reference">확정 레퍼런스 PNG</label><input id="forge-compare-reference" type="file" accept=".png,image/png" />
-        <label class="check"><input id="forge-vault-consent" type="checkbox" /> 선택한 원본 PNG를 이 PC에 비공개 SHA 이름으로 별도 보관하는 데 동의합니다. 이미지 사용 권한은 본인이 확인했습니다.</label>
-        <button id="forge-vault-save" type="button" class="ghost-btn">원본 PNG를 로컬 불변 보관</button>
-        <label for="forge-vault-sha">이전에 보관한 PNG SHA256</label>
+        <label for="forge-vault-source">로컬 원본 보관 파일 선택 (PNG/JPEG/WebP · 원본 비교 파일과 별도)</label>
+        <input id="forge-vault-source" type="file" accept="image/png,image/jpeg,image/webp" />
+        <label class="check"><input id="forge-vault-consent" type="checkbox" /> 바로 위에 지정한 파일을 이 PC에 비공개 SHA 이름으로 보관하고 이용 권한은 본인이 확인했습니다. 다른 이미지 선택란은 사용하지 않습니다.</label>
+        <button id="forge-vault-save" type="button" class="ghost-btn">선택한 원본 파일 로컬 불변 보관</button>
+        <label for="forge-vault-sha">이전에 보관한 이미지 SHA256</label>
         <input id="forge-vault-sha" type="text" maxlength="64" placeholder="64자리 SHA256" />
         <button id="forge-vault-reload" type="button" class="ghost-btn">보관된 PNG 검증 후 다시 불러오기</button>
         <p id="forge-vault-status" class="helper" role="status">자동 저장/외부 업로드 없음. 이미지 자체는 공개 GitHub에 올라가지 않습니다.</p>

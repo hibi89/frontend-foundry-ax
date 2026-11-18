@@ -87,7 +87,7 @@ try:
         page.locator('#forge-generate').click()
         page.locator('.forge-card').first.wait_for(timeout=16000)
         check('forge-abc-real-ui',page.locator('.forge-card').count()==3)
-        page.locator('.forge-card button').first.click()
+        page.locator('.forge-card > button').first.click()
         page.locator('#forge-instruction').fill('그리드 배치')
         page.locator('#forge-refine').click()
         page.wait_for_function("document.querySelector('.forge-card h3')?.textContent.includes('v2')",timeout=12000)
@@ -123,11 +123,21 @@ try:
           transfer.items.add(new File([b],'owner-synthetic-reference.png',{type:'image/png'}));
           const input=document.querySelector('#forge-compare-reference');
           input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));
+          const vault=document.querySelector('#forge-vault-source');
+          vault.files=transfer.files;vault.dispatchEvent(new Event('change',{bubbles:true}));
           return {mime:b.type,bytes:b.size,sha256:hex};
         }""")
         REPORT['capture']={'sha256':evidence['sha256'],'bytes':evidence['bytes'],'width':375,'height':600}
         check('forge-real-capture-hash',evidence['mime']=='image/png' and evidence['bytes']>1000
               and len(evidence['sha256'])==64)
+        page.locator('#forge-vault-consent').check()
+        page.locator('#forge-vault-save').click()
+        page.wait_for_function("document.querySelector('#forge-vault-status')?.textContent.includes('로컬 이미지 불변 보관 완료')",timeout=25000)
+        check('forge-explicit-vault-input-only',page.locator('#forge-vault-sha').input_value()==evidence['sha256'])
+        page.locator('#forge-vault-reload').click()
+        page.wait_for_function("document.querySelector('#forge-vault-status')?.textContent.includes('로컬 불러오기 완료')",timeout=25000)
+        check('forge-verified-local-restore',page.locator('#forge-compare-reference').input_value()!='' and
+             evidence['sha256'] in page.locator('#forge-vault-status').inner_text())
         page.locator('#forge-compare-run').click()
         page.wait_for_function("!document.querySelector('#forge-compare-download').disabled",timeout=45000)
         check('forge-byte-identical-local-compare',
