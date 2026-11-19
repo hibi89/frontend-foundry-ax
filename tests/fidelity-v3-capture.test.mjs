@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {inspectV3CaptureReadiness} from '../scripts/forge_capture.mjs';
-const sha='a'.repeat(64),html='<html><head><meta charset="utf-8"></head><body><main>static canvas only</main></body></html>';
+const sha='a'.repeat(64),html='<html><head><meta charset="utf-8"></head><body><main role="main" style="width:600px;height:400px;background:#ffffff">Static local canvas, no network and no scripts.</main></body></html>';
 const artifacts={schema:'ffax.fidelity-render-artifacts.v1',sourceSha256:sha,
  originalSourceModified:false,externalRequests:0,tsx:'export function F(){}',css:'.a{}',html};
 const reference={schema:'ffax.reference-bundle.v3',referenceSha256:sha,
