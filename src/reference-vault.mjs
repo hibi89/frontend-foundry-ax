@@ -21,26 +21,69 @@ function dimensions(width,height){
   throw Error('REFERENCE_VAULT_DIMENSIONS_INVALID');
  return {width,height};
 }
+// JPEG SOF dimensions are encoded *before* EXIF orientation is applied.
+// Browsers decode 90/270 degree EXIF photos at the oriented dimensions, so
+// the local vault must issue matching display-pixel width and height.
+function jpegExifOrientation(b,start,end){
+ if(end-start<6||b.toString('ascii',start,start+4)!=='Exif'||
+    b[start+4]!==0||b[start+5]!==0)return null;
+ const tiff=start+6;
+ if(tiff+8>end)throw Error('REFERENCE_VAULT_EXIF_INVALID');
+ const order=b.toString('ascii',tiff,tiff+2);
+ if(order!=='II'&&order!=='MM')throw Error('REFERENCE_VAULT_EXIF_INVALID');
+ const le=order==='II';
+ const u16=pos=>le?b.readUInt16LE(pos):b.readUInt16BE(pos);
+ const u32=pos=>le?b.readUInt32LE(pos):b.readUInt32BE(pos);
+ if(u16(tiff+2)!==42)throw Error('REFERENCE_VAULT_EXIF_INVALID');
+ const dir=tiff+u32(tiff+4);
+ if(dir<tiff+8||dir+2>end)throw Error('REFERENCE_VAULT_EXIF_INVALID');
+ const count=u16(dir),entries=dir+2;
+ if(entries+count*12+4>end)throw Error('REFERENCE_VAULT_EXIF_INVALID');
+ let orientation=null;
+ for(let n=0;n<count;n++){
+  const p=entries+n*12;
+  if(u16(p)!==0x0112)continue; // TIFF orientation tag
+  if(u16(p+2)!==3||u32(p+4)!==1)throw Error('REFERENCE_VAULT_EXIF_INVALID');
+  const value=u16(p+8);
+  if(value<1||value>8||(orientation!==null&&orientation!==value))
+   throw Error('REFERENCE_VAULT_EXIF_INVALID');
+  orientation=value;
+ }
+ return orientation;
+}
 function inspectJPEG(b){
  if(b.length<40||b[0]!==0xff||b[1]!==0xd8||b[b.length-2]!==0xff||b[b.length-1]!==0xd9)
   throw Error('REFERENCE_VAULT_JPEG_INVALID');
- let i=2;
- while(i<b.length-8){
+ let i=2,raw=null,orientation=null;
+ while(i<b.length-2){
   if(b[i++]!==0xff)throw Error('REFERENCE_VAULT_JPEG_INVALID');
   while(i<b.length&&b[i]===0xff)i++;
   const marker=b[i++];
   if(marker===0xd9||marker===0xda)break;
   if(marker===0x01||(marker>=0xd0&&marker<=0xd7))continue;
-  if(i+2>b.length)break;
+  if(i+2>b.length)throw Error('REFERENCE_VAULT_JPEG_INVALID');
   const size=b.readUInt16BE(i);
   if(size<2||i+size>b.length)throw Error('REFERENCE_VAULT_JPEG_INVALID');
+  if(marker===0xe1){
+   const next=jpegExifOrientation(b,i+2,i+size);
+   if(next!==null){
+    if(orientation!==null&&next!==orientation)
+     throw Error('REFERENCE_VAULT_EXIF_INVALID');
+    orientation=next;
+   }
+  }
   if(([0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf]).includes(marker)){
    if(size<7)throw Error('REFERENCE_VAULT_JPEG_INVALID');
-   return dimensions(b.readUInt16BE(i+5),b.readUInt16BE(i+3));
+   const dims=dimensions(b.readUInt16BE(i+5),b.readUInt16BE(i+3));
+   if(raw&&(raw.width!==dims.width||raw.height!==dims.height))
+    throw Error('REFERENCE_VAULT_JPEG_INVALID');
+   raw=dims;
   }
   i+=size;
  }
- throw Error('REFERENCE_VAULT_JPEG_DIMENSIONS_UNAVAILABLE');
+ if(!raw)throw Error('REFERENCE_VAULT_JPEG_DIMENSIONS_UNAVAILABLE');
+ return orientation!==null&&orientation>=5&&orientation<=8
+  ?dimensions(raw.height,raw.width):raw;
 }
 function inspectWEBP(b){
  if(b.length<34||b.toString('ascii',0,4)!=='RIFF'||
