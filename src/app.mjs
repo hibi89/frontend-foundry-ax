@@ -86,12 +86,34 @@ window.addEventListener('ffax:v3-reference-receipt',event=>{
  }
 });
 
+function clearV3VisualEvidence(reason){
+ latestV3ScoreResult=null;latestV3OwnerReview=null;
+ latestV3CaptureBlob=null;latestV3CaptureReceipt=null;latestFidelityPatchRollback=null;
+ for(const id of ['fidelity-score-export','fidelity-review-export','fidelity-review-accept',
+ 'fidelity-review-reject','fidelity-patch-undo'])el(id).disabled=true;
+ const regions=el('fidelity-patch-region');regions.replaceChildren();regions.disabled=true;
+ for(const id of ['fidelity-capture-image','fidelity-v3-source-view','fidelity-v3-render-view'])el(id).removeAttribute('src');
+ if(latestV3CaptureUrl){URL.revokeObjectURL(latestV3CaptureUrl);latestV3CaptureUrl=null;}
+ if(latestV3ReviewImageUrl){URL.revokeObjectURL(latestV3ReviewImageUrl);latestV3ReviewImageUrl=null;}
+ el('fidelity-review-status').textContent=reason+' · 이전 수락 영수증 무효, 재비교 필요';
+ el('fidelity-score-status').textContent='F95=UNASSESSED · 원본/후보 변경으로 이전 비교 무효';
+}
+el('reference-file').addEventListener('change',()=>{
+ clearV3VisualEvidence('기준 이미지 파일 변경');
+ latestReferenceInventory=null;latestFidelityScene=null;latestTypographyDraft=null;latestAssetManifest=null;
+ latestV3ReferenceReceipt=null;
+ for(const id of ['fidelity-region-apply','export-fidelity-scene','fidelity-text-export',
+ 'fidelity-asset-export','export-reference-inventory'])el(id).disabled=true;
+ el('fidelity-region-select').replaceChildren();el('fidelity-region-select').disabled=true;
+ el('fidelity-capture-status').textContent='새 기준 이미지를 다시 분석하고 권리·원본 영수증을 재확인하세요.';
+});
+
 function updateReference(){
  const file=el('reference-file').files?.[0];
  if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
  if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
  (async()=>{
-  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;latestV3OwnerReview=null;el('fidelity-review-export').disabled=true;el('fidelity-asset-export').disabled=true;
+  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;clearV3VisualEvidence('이미지 재분석');el('fidelity-asset-export').disabled=true;
   try{
    const {analyzeUserReference}=await import('./reference-analysis.mjs');
    const inventory=await analyzeUserReference(file,{rightsConfirmed:true});
@@ -445,6 +467,7 @@ el('fidelity-capture-run').addEventListener('click',async()=>{
    throw Error('FORGE_V3_CAPTURE_PNG_UNAVAILABLE');
   const blob=await png.blob();
   if(blob.size<33||blob.size>6*1024*1024)throw Error('FORGE_V3_CAPTURE_PNG_INVALID');
+  clearV3VisualEvidence('새 Chromium 캡처');
   const image=el('fidelity-capture-image');
   if(latestV3CaptureUrl)URL.revokeObjectURL(latestV3CaptureUrl);
   latestV3CaptureUrl=URL.createObjectURL(blob);
@@ -531,8 +554,10 @@ el('fidelity-patch-apply').addEventListener('click',async()=>{
     textId:el('fidelity-patch-text-id').value,approval:'APPROVE_LOCAL_V3_TYPED_PATCH'});
   latestFidelityPatchRollback={scene:result.rollbackScene,typography:result.rollbackTypography};
   latestFidelityScene=result.candidateScene;latestTypographyDraft=result.candidateTypography;
-  latestV3ScoreResult=null;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;
-  el('fidelity-score-export').disabled=true;el('fidelity-patch-undo').disabled=false;
+  clearV3VisualEvidence('후보 보정 적용');
+  // Keep the validated single-step undo receipt for this specific edit.
+  latestFidelityPatchRollback={scene:result.rollbackScene,typography:result.rollbackTypography};
+  el('fidelity-patch-undo').disabled=false;
   status.textContent='격리 후보만 수정. 원본 SHA 불변 · 새 브라우저 캡처 필요';
  }catch(e){status.textContent='후보 수정 거부: '+(e?.message||'FIDELITY_PATCH_FAILED');}
  finally{el('fidelity-patch-consent').checked=false;}
@@ -542,8 +567,7 @@ el('fidelity-patch-undo').addEventListener('click',()=>{
  latestFidelityScene=latestFidelityPatchRollback.scene;
  latestTypographyDraft=latestFidelityPatchRollback.typography;
  latestFidelityPatchRollback=null;el('fidelity-patch-undo').disabled=true;
- latestV3ScoreResult=null;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;
- el('fidelity-score-export').disabled=true;
+ clearV3VisualEvidence('후보 수정 취소');
  el('fidelity-patch-status').textContent='로컬 Scene 직전 수정 되돌림. 캡처/진단 재실행 필요';
 });
 
@@ -599,10 +623,8 @@ el('fidelity-snapshot-restore').addEventListener('click',async()=>{
    referenceSha256:latestReferenceInventory.sha256,
    approval:'APPROVE_LOCAL_V3_SNAPSHOT_RESTORE'});
   latestFidelityScene=restored.scene;latestTypographyDraft=restored.typography;
-  latestAssetManifest=restored.assets;latestV3OwnerReview=null;
-  latestV3ScoreResult=null;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;
-  el('fidelity-review-export').disabled=true;el('fidelity-score-export').disabled=true;
-  el('fidelity-patch-undo').disabled=true;latestFidelityPatchRollback=null;
+  latestAssetManifest=restored.assets;
+  clearV3VisualEvidence('로컬 Scene 스냅샷 복구');
   const sel=el('fidelity-region-select');sel.replaceChildren();
   for(const region of latestFidelityScene.regions.filter(x=>x.id!=='canvas')){
    const option=document.createElement('option');option.value=region.id;option.textContent=region.id;
