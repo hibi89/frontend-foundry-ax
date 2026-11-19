@@ -10,6 +10,7 @@ on:
       - 'scripts/forge_capture.py'
       - 'scripts/forge_capture.mjs'
       - 'index.html'
+      - 'scripts/fidelity_v3_p2_rehearsal.mjs'
       - 'styles.css'
 permissions:
   contents: read
@@ -52,6 +53,8 @@ jobs:
         run: |
           npm install --ignore-scripts --no-audit --no-fund
           python scripts/export_visual_token_browser_probe.py
+      - name: V3 synthetic real React19 TypeScript bridge and live localhost IAE HTTP security (P2 partial)
+        run: node scripts/fidelity_v3_p2_rehearsal.mjs
       - name: P2 live loopback UI revision, SHA render, pixel comparison and blocked original asset
         run: python scripts/forge_p2_browser_probe.py
       - name: Retain synthetic-only browser evidence for defect analysis
