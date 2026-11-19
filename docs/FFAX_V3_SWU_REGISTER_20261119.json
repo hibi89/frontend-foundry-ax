@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "1a7391edcc99c466a40e6a9d6eff3bf61f450d0a",
+  "auditSourceHead": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -569,8 +569,8 @@
       {
         "id": "P2-04",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "Real owner/customer React app authentication/API/routes/data, full build, rights, independent audits; P2 actual owner acceptance 0/8",
-        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED; FAIL #44518828926/#44519130545 and TS2550 #44518404139 fixed at f5cd3613 + c28c1d5f; PASS P2 React 17/17 #44520105942, source 86/86 #44520106002, full Linux Node 258/258 in manual run #44520105967; real customer app still NOT_RUN; full manual workflow 4/4 SUCCESS #44521069907 with hosted Windows/Linux 258/258 and 14 browser probes; real customer app auth/API/routes still NOT_RUN"
+        "remaining": "Real owner/customer React app auth/API/routes/data/full build, rights/approved reference and independent audits; P2 owner acceptance 0/8",
+        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED; FAIL #44518828926/#44519130545 and TS2550 #44518404139 fixed at f5cd3613 + c28c1d5f; PASS P2 React 17/17 #44520105942, source 86/86 #44520106002, full Linux Node 258/258 in manual run #44520105967; real customer app still NOT_RUN; full manual workflow 4/4 SUCCESS #44521069907 with hosted Windows/Linux 258/258 and 14 browser probes; real customer app auth/API/routes still NOT_RUN; 2x isolated React CSS source+CLI fix 6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6; source 97/97 #44543032440, real React19 synthetic 20/20 #44543032699, hosted Linux Node 269/269 in manual #44543032652; customer app real build/auth/routes NOT_RUN"
       },
       {
         "id": "P2-05",
@@ -1091,6 +1091,63 @@
       "ownerWindows11": "NOT_RUN",
       "independentAudit": "NOT_RUN",
       "release": "HOLD"
+    },
+    "latestP204RetinaIsolatedReact": {
+      "scope": "P2-04 isolated React source candidate CLI and static audit, not actual customer app acceptance",
+      "sourceSha": "daa7d65a1b28c1ec19b5db4d6a39f06858df24b3",
+      "cliSha": "895134f49d60007841ab5777f327906df9067676",
+      "auditCssSha": "a1fbe7484fd78d0854a54312d1861677c9248a03",
+      "testsSha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+      "change": "prepareV3FidelityIntegration accepts dpr 1/2, caller CLI prepare-v3 --dpr 2, passes to generated TSX/CSS, audited metadata records original pixel dimensions and generated CSS dimensions. Audit rejects arithmetically consistent forged DPR viewport inconsistent with the actual generated CSS; original customer files untouched, isolated rollback retained",
+      "defect": "After approved 2x screenshot, integration generated DPR1 CSS; customer React draft would display twice the intended CSS dimensions",
+      "earlierFailure": {
+        "run": 44542643888,
+        "sha": "061ea94f477c0b20a0e0ba96b3ae6ca4a198303e",
+        "reason": "Test omitted required typography JSON for its nonempty textBindings contract, legitimate validation rejection FORGE_V3_TEXT_BINDING_INVALID; fixture fixed in d86906b..."
+      },
+      "verification": {
+        "source": {
+          "run": 44543032440,
+          "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+          "result": "SUCCESS",
+          "tests": "97/97 PASS including two new CLI/retina cases and forged CSS receipt rejection"
+        },
+        "react": {
+          "run": 44543032699,
+          "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+          "result": "SUCCESS",
+          "tests": "20/20 PASS strict TSX React19 SSR and integration"
+        },
+        "linuxNode": {
+          "run": 44543032652,
+          "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+          "job": "offline-node",
+          "result": "SUCCESS",
+          "tests": "269/269 PASS"
+        },
+        "windowsNode": {
+          "run": 44543032652,
+          "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+          "job": "windows-native",
+          "result": "PENDING_AT_LEDGER_WRITE"
+        },
+        "browserQA": {
+          "run": 44543032652,
+          "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+          "job": "browser-qa",
+          "result": "PENDING_AT_LEDGER_WRITE"
+        },
+        "manual": {
+          "run": 44543032652,
+          "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+          "result": "IN_PROGRESS_AT_LEDGER_WRITE"
+        }
+      },
+      "actualCustomerApp": "NOT_RUN",
+      "realOwnerReferenceF95": "NOT_VERIFIED",
+      "independentAudit": "NOT_RUN",
+      "ownerWindows11GTX1050Ti": "NOT_RUN",
+      "release": "HOLD"
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -1122,7 +1179,7 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "1a7391edcc99c466a40e6a9d6eff3bf61f450d0a",
+  "lastSourceHead": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
   "lastEvidenceRun": {
     "id": 44541251167,
     "sha": "1a7391edcc99c466a40e6a9d6eff3bf61f450d0a",
@@ -1346,6 +1403,13 @@
       ],
       "commit": "1a7391edcc99c466a40e6a9d6eff3bf61f450d0a",
       "meaning": "Prevent in-flight analysis/capture/score from resurrecting stale reference/evidence after file change, rights revocation or scene mutation; actual Chromium 43/43 PASS and hosted Linux/Windows 267/267 PASS, owner F95 NOT_VERIFIED."
+    },
+    {
+      "units": [
+        "P2-04"
+      ],
+      "commit": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
+      "meaning": "Implemented 1x/2x DPR-aware isolated React CLI generating correct owner reference CSS dimensions, receipt and audit binding, fail-closed invalid DPR and forged contract; source 97/97 and React 20/20 PASS, hosted Linux 269/269 PASS. Real app still not tested."
     }
   ],
   "sharedVerificationPaths": [
