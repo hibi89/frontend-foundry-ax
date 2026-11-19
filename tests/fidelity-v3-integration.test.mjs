@@ -36,7 +36,7 @@ test('FID-11 approved data and intent bridge generates three real files in isola
  scene,typography,contract:contract(f.project.digest),approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'});
  const code=await readFile(join(result.sourceDir,'src','ffax','FidelityBindings.tsx'),'utf8');
  assert.match(code,/safeData\["headline"\]/);
- assert.match(code,/Object\.hasOwn\(safeData,"headline"\)/);
+ assert.match(code,/Object\.prototype\.hasOwnProperty\.call\(safeData,"headline"\)/);
  assert.match(code,/typeof safeData\["headline"\] === "string"/);
  assert.doesNotMatch(code,/\?\? ""/);
  assert.match(code,/onIntent\?\.\(intent\)/);
