@@ -146,7 +146,7 @@ try:
         capture_status=wait_for_good(page,'#fidelity-capture-status','Chromium 실제 정지 캡처 완료',75000)
         check('true-chromium-png-shown',(page.locator('#fidelity-capture-image').get_attribute('src') or '').startswith('blob:'))
         page.locator('#fidelity-score-consent').check();page.locator('#fidelity-score-run').click()
-        wait_for_good(page,'#fidelity-score-status','F95=UNASSESSED',30000)
+        wait_for_good(page,'#fidelity-score-status','색상 진단',30000)
         diagnostic=download_json(page,'#fidelity-score-export',ART/'v3-p2-diagnostic.json')
         check('region-differences-without-false-95',diagnostic['weightedF95Score'] is None
               and diagnostic['status']=='F95_UNASSESSED'
@@ -173,7 +173,7 @@ try:
         wait_for_good(page,'#fidelity-capture-status','Chromium 실제 정지 캡처 완료',75000)
         page.locator('#fidelity-score-consent').check()
         page.locator('#fidelity-score-run').click()
-        wait_for_good(page,'#fidelity-score-status','F95=UNASSESSED',30000)
+        wait_for_good(page,'#fidelity-score-status','색상 진단',30000)
         page.locator('#fidelity-patch-property').select_option('background')
         page.locator('#fidelity-patch-value').fill('#102030')
         page.locator('#fidelity-patch-consent').check();page.locator('#fidelity-patch-apply').click()
