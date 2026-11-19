@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "fce629b9c29725b5e53d3a7d4a354d11a47b9e0d",
+  "auditSourceHead": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -557,13 +557,14 @@
       {
         "id": "P2-02",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "12 real owner-rights images and Korean OCR/font/asset fidelity measurement"
+        "remaining": "12 real owner-rights images and Korean OCR/font/asset fidelity measurement",
+        "partialEvidence": "; new physical-pixel DPR2 local path SHA 307749d40c5a5c9985ac35956f0bc8afd8782d05 verified synthetic Chromium 800x800/400x400 CSS, #44537458220 SUCCESS, source 95/95 #44536954264, hosted Linux/Windows 267/267 + browser 14/14, 4/4 manual #44537458273 SUCCESS; NOT real F95"
       },
       {
         "id": "P2-03",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Rights-cleared real owner 12-image corpus, calibrated geometry/typography/assets/colors/effects F95, actual source image and owner visual acceptance",
-        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313; new viewport/DPR/preflight fail-closed owner-review receipts 0853ac664b416f70f02710705776df78f3dcaf3c; Node CI 87/87 PASS #44526072706; synthetic Chromium #44526066904 on source SHA 4392b3 PASS, real owner visual F95 still NOT_VERIFIED; restored snapshot nested SHA/scene revision/exact owner reference dimensions and missing confidence edit guard on source e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76; source 90/90 #44530558366, hosted Linux/Windows 262/262 and browser probes 14/14 in 4/4 manual #44530558342 SUCCESS; real owner F95 unverified; P2 typed Scene canvas background paint fixed 6b20f7e; pixel-level Chromium reference-color and child-color checks PASS at SHA fce629b9c29725b5e53d3a7d4a354d11a47b9e0d in #44531906273; source 91/91 #44531812116, manual 4/4 with hosted Linux/Windows 263/263 #44531906336; real owner F95 NOT_VERIFIED"
+        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313; new viewport/DPR/preflight fail-closed owner-review receipts 0853ac664b416f70f02710705776df78f3dcaf3c; Node CI 87/87 PASS #44526072706; synthetic Chromium #44526066904 on source SHA 4392b3 PASS, real owner visual F95 still NOT_VERIFIED; restored snapshot nested SHA/scene revision/exact owner reference dimensions and missing confidence edit guard on source e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76; source 90/90 #44530558366, hosted Linux/Windows 262/262 and browser probes 14/14 in 4/4 manual #44530558342 SUCCESS; real owner F95 unverified; P2 typed Scene canvas background paint fixed 6b20f7e; pixel-level Chromium reference-color and child-color checks PASS at SHA fce629b9c29725b5e53d3a7d4a354d11a47b9e0d in #44531906273; source 91/91 #44531812116, manual 4/4 with hosted Linux/Windows 263/263 #44531906336; real owner F95 NOT_VERIFIED; new physical-pixel DPR2 local path SHA 307749d40c5a5c9985ac35956f0bc8afd8782d05 verified synthetic Chromium 800x800/400x400 CSS, #44537458220 SUCCESS, source 95/95 #44536954264, hosted Linux/Windows 267/267 + browser 14/14, 4/4 manual #44537458273 SUCCESS; NOT real F95"
       },
       {
         "id": "P2-04",
@@ -967,6 +968,72 @@
       "ownerWindows11": "NOT_RUN",
       "independentAudits": "NOT_RUN",
       "release": "HOLD"
+    },
+    "latestP203RetinaDprSupport": {
+      "scope": "P2-02/P2-03 end-to-end local 1x and 2x reference capture and comparison, synthetic verification only",
+      "issue": "V3 reference receipt accepts DPR2 but capture API forced DPR1 and physical CSS viewport mismatch; therefore authorized retina screenshot could not be rendered, captured, compared or visually reviewed",
+      "changedFiles": [
+        "src/fidelity-renderer.mjs",
+        "scripts/forge_capture.mjs",
+        "src/forge-api.mjs",
+        "src/fidelity-score.mjs",
+        "src/fidelity-review.mjs",
+        "src/app.mjs",
+        "tests/fidelity-renderer.test.mjs",
+        "tests/fidelity-v3-capture.test.mjs",
+        "tests/fidelity-score.test.mjs",
+        "tests/fidelity-review.test.mjs",
+        "scripts/ffax_v3_p2_browser.py"
+      ],
+      "codeSha": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
+      "fix": "Preserve original physical Scene coordinates and SHA, render CSS widths/heights/bounds/radii/fonts/spacing divided by selected DPR, capture CSS viewport with real browser deviceScaleFactor=2, verify PNG IHDR physical size, compare unresampled original physical pixels, fail closed on mismatched preflight/reference/capture/visual acceptance; retain 1x behavior and F95=UNASSESSED.",
+      "failureEvidence": {
+        "run": 44537230580,
+        "sha": "a7368df8cd45494e525af322effa513f9306fba8",
+        "status": "FAIL",
+        "reason": "New retina browser test read prior 1x vault success immediately; awaited new SHA rather than stale label",
+        "fixedInSha": "307749d40c5a5c9985ac35956f0bc8afd8782d05"
+      },
+      "verification": {
+        "source": {
+          "run": 44536954264,
+          "sha": "b11e388f09fff84109a39f2c608e98d5ef56dd9e",
+          "result": "SUCCESS",
+          "tests": "95/95 PASS"
+        },
+        "chromium": {
+          "run": 44537458220,
+          "sha": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
+          "result": "SUCCESS",
+          "checks": "New synthetic 800x800 source -> CSS400x400 DPR2 -> actual offline Chromium 800x800 PNG -> raw physical pixel diagnostic -> owner visual candidate: 5/5 PASS, no real original and F95 UNASSESSED"
+        },
+        "manual": {
+          "run": 44537458273,
+          "sha": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
+          "result": "SUCCESS",
+          "jobs": "4/4 SUCCESS",
+          "linuxNode": "267/267 PASS",
+          "windowsNode": "267/267 PASS",
+          "browserQA": "14/14 PASS",
+          "unsignedReviewPackage": "UNRELEASED_SUCCESS"
+        },
+        "windowsPackage": {
+          "run": 44537458180,
+          "sha": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
+          "result": "SUCCESS"
+        },
+        "blueprintGate": {
+          "run": 44537459260,
+          "sha": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
+          "result": "SUCCESS"
+        }
+      },
+      "ownerReferenceCorpus": "0/12 actual rights-confirmed images",
+      "actualF95": "NOT_VERIFIED",
+      "actualCustomerApp": "NOT_RUN",
+      "ownerHardware": "NOT_RUN",
+      "independentAudit": "NOT_RUN",
+      "release": "HOLD"
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -998,16 +1065,16 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "fce629b9c29725b5e53d3a7d4a354d11a47b9e0d",
+  "lastSourceHead": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
   "lastEvidenceRun": {
-    "id": 44531906336,
-    "sha": "fce629b9c29725b5e53d3a7d4a354d11a47b9e0d",
+    "id": 44537458273,
+    "sha": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
     "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
-    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_REAL_OWNER_ACCEPTANCE",
+    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "263/263 PASS",
-    "windowsTests": "263/263 PASS",
+    "linuxTests": "267/267 PASS",
+    "windowsTests": "267/267 PASS",
     "browserProbes": "14/14 PASS",
     "package": "UNRELEASED_OWNER_REVIEW"
   },
@@ -1207,6 +1274,14 @@
       ],
       "commit": "fce629b9c29725b5e53d3a7d4a354d11a47b9e0d",
       "meaning": "Fix real canvas background emission for both React export and static Chromium; strict finite CSS, actual synthetic rendered RGB pixel checks PASS; source 91/91 and hosted Linux/Windows 263/263 PASS, manual 4/4, owner real F95 still NOT_VERIFIED."
+    },
+    {
+      "units": [
+        "P2-02",
+        "P2-03"
+      ],
+      "commit": "307749d40c5a5c9985ac35956f0bc8afd8782d05",
+      "meaning": "Fix already-approved 2x retina source through real UI, API, generated React/CSS, Chromium PNG, unscaled pixel diagnostics and owner review. Actual browser and Linux/Windows hosted CI PASS; real owner corpus and F95 not verified."
     }
   ],
   "sharedVerificationPaths": [
