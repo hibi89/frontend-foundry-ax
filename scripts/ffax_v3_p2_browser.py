@@ -330,8 +330,8 @@ try:
         # Pillow writes a valid local 800x600 JPEG with EXIF orientation=6.
         # The displayed source and physical Chromium PNG must be 600x800.
         exif_file=ART/'v3-p2-exif-portrait.jpg'
-        exif_img=Image.new('RGB',(800,600),'#375f91')
-        ImageDraw.Draw(exif_img).rectangle((20,20,780,170),fill='#edc18f')
+        exif_img=Image.new('RGB',(960,640),'#375f91')
+        ImageDraw.Draw(exif_img).rectangle((20,20,940,170),fill='#edc18f')
         exif_tags=Image.Exif()
         exif_tags[274]=6
         exif_img.save(exif_file,format='JPEG',quality=92,exif=exif_tags)
@@ -345,11 +345,11 @@ try:
             bmp.close();
             return result;
         }""")
-        check('v3-exif-jpeg-real-browser-portrait-orientation',
-              bitmap_dim=={'width':600,'height':800},bitmap_dim)
+        check('v3-exif-jpeg-real-browser-oriented-portrait',
+              bitmap_dim=={'width':640,'height':960},bitmap_dim)
         check('v3-exif-jpeg-analysis-source-sha',
               exif_sha[:16] in page.locator('#reference-result').inner_text()
-              and '600×800' in page.locator('#reference-result').inner_text())
+              and '640×960' in page.locator('#reference-result').inner_text())
         page.locator('#forge-vault-source').set_input_files(str(exif_file))
         page.locator('#forge-vault-consent').check()
         page.locator('#forge-vault-save').click()
@@ -360,10 +360,10 @@ try:
                                   ART/'v3-p2-exif-reference-receipt.json')
         check('v3-exif-jpeg-vault-and-receipt-orientation',
               exif_receipt['referenceSha256']==exif_sha
-              and exif_receipt['original']['pixelWidth']==600
-              and exif_receipt['original']['pixelHeight']==800
-              and exif_receipt['viewport']['cssWidth']==300
-              and exif_receipt['viewport']['cssHeight']==400
+              and exif_receipt['original']['pixelWidth']==640
+              and exif_receipt['original']['pixelHeight']==960
+              and exif_receipt['viewport']['cssWidth']==320
+              and exif_receipt['viewport']['cssHeight']==480
               and exif_receipt['viewport']['dpr']==2)
         page.locator('#fidelity-render-consent').check()
         page.locator('#fidelity-render-create').click()
@@ -373,7 +373,7 @@ try:
         wait_for_good(page,'#fidelity-capture-status','Chromium 실제 정지 캡처 완료',75000)
         check('v3-exif-jpeg-rotated-physical-chromium-capture',
               page.locator('#fidelity-capture-image').evaluate(
-                  '(img)=>img.naturalWidth===600 && img.naturalHeight===800'))
+                  '(img)=>img.naturalWidth===640 && img.naturalHeight===960'))
         page.locator('#fidelity-score-consent').check()
         page.locator('#fidelity-score-run').click()
         wait_for_good(page,'#fidelity-score-status','색상 진단',45000)
@@ -381,7 +381,7 @@ try:
                                 ART/'v3-p2-exif-diagnostic.json')
         check('v3-exif-jpeg-comparison-physical-portrait-not-real-f95',
               exif_diag['referenceSha256']==exif_sha
-              and exif_diag['viewport']=={'width':600,'height':800,'dpr':2}
+              and exif_diag['viewport']=={'width':640,'height':960,'dpr':2}
               and exif_diag['weightedF95Score'] is None
               and exif_diag['status']=='F95_UNASSESSED')
         # Reproduce a real async owner-source race deterministically: hold
