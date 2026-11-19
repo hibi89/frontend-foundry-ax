@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {inspectV3CaptureReadiness} from '../scripts/forge_capture.mjs';
+import {inspectV3CaptureReadiness,createV3CaptureReceipt} from '../scripts/forge_capture.mjs';
+import {createHash} from 'node:crypto';
 const sha='a'.repeat(64),html='<html><head><meta charset="utf-8"></head><body><main role="main" style="width:600px;height:400px;background:#ffffff">Static local canvas, no network and no scripts.</main></body></html>';
 const artifacts={schema:'ffax.fidelity-render-artifacts.v1',sourceSha256:sha,
  originalSourceModified:false,externalRequests:0,tsx:'export function F(){}',css:'.a{}',html};
@@ -18,4 +19,21 @@ test('FID-07 rejects unbound reference, manipulated source and unsupported DPR/v
  assert.throws(()=>inspectV3CaptureReadiness({...artifacts,originalSourceModified:true},reference,{width:600,height:400}),/ARTIFACTS_INVALID/);
  assert.throws(()=>inspectV3CaptureReadiness(artifacts,reference,{width:600,height:400,dpr:2}),/VIEWPORT_UNSUPPORTED/);
  assert.throws(()=>inspectV3CaptureReadiness(artifacts,reference,{width:200,height:400}),/VIEWPORT_UNSUPPORTED/);
+});
+
+test('FID-07/P2 capture receipt overrides raw worker V1 schema and binds canonical source digest',()=>{
+ const preflight=inspectV3CaptureReadiness(artifacts,reference,{width:600,height:400,dpr:1});
+ const response={schema:'ffax.capture.v1',sha256:'c'.repeat(64),width:600,height:400,
+  dpr:1,scriptExecution:'DISABLED',network:'ABORT_ALL'};
+ const receipt=createV3CaptureReceipt(response,artifacts,preflight);
+ assert.equal(receipt.schema,'ffax.v3.capture-receipt.v1');
+ assert.equal(receipt.referenceSha256,sha);
+ assert.equal(receipt.typedSourceSha256,
+  createHash('sha256').update(artifacts.tsx+'\n'+artifacts.css).digest('hex'));
+ assert.equal(receipt.sha256,'c'.repeat(64));
+ assert.equal(receipt.visualAcceptance,'NOT_VERIFIED');
+ assert.throws(()=>createV3CaptureReceipt({...response,network:'ALLOW_ALL'},artifacts,preflight),
+  /RECEIPT_INVALID/);
+ assert.throws(()=>createV3CaptureReceipt({...response,width:1},artifacts,preflight),
+  /RECEIPT_INVALID/);
 });

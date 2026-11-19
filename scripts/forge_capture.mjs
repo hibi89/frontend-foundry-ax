@@ -157,6 +157,27 @@ export function inspectV3CaptureReadiness(artifacts,referenceReceipt,{width,heig
   assetStatus:'ORIGINAL_RASTER_ASSETS_NOT_ATTACHED',
   visualAcceptance:'NOT_VERIFIED',dpr,viewport:{width,height}};
 }
+/** A V3 receipt must not accidentally inherit the V1 schema from the raw
+ * Chromium worker. Source and output digests are bound with canonical LF.
+ */
+export function createV3CaptureReceipt(worker,artifacts,preflight){
+ if(worker?.schema!=='ffax.capture.v1'||
+    !/^[a-f0-9]{64}$/.test(worker.sha256||'')||
+    preflight?.schema!=='ffax.v3.capture-preflight.v1'||
+    preflight.referenceSha256!==artifacts?.sourceSha256||
+    ![worker.width,worker.height,worker.dpr].every(Number.isInteger)||
+    worker.width!==preflight.viewport?.width||
+    worker.height!==preflight.viewport?.height||
+    worker.dpr!==preflight.dpr||
+    worker.scriptExecution!=='DISABLED'||worker.network!=='ABORT_ALL'||
+    typeof artifacts.tsx!=='string'||typeof artifacts.css!=='string')
+  throw Error('FORGE_V3_CAPTURE_RECEIPT_INVALID');
+ return {...worker,schema:'ffax.v3.capture-receipt.v1',
+  referenceSha256:artifacts.sourceSha256,
+  typedSourceSha256:createHash('sha256').update(artifacts.tsx+'\n'+artifacts.css).digest('hex'),
+  preflight,visualAcceptance:'NOT_VERIFIED',customerAppIntegration:'NOT_RUN'};
+}
+
 export async function captureV3FidelitySource(artifacts,referenceReceipt,{width,height,dpr=1}={}){
  const preflight=inspectV3CaptureReadiness(artifacts,referenceReceipt,{width,height,dpr});
  const scratch=await mkdtemp(join(tmpdir(),'ffax-v3-capture-'));
@@ -171,9 +192,6 @@ export async function captureV3FidelitySource(artifacts,referenceReceipt,{width,
       response.scriptExecution!=='DISABLED'||response.network!=='ABORT_ALL'||
       bytes.length<33||bytes.length>6*1024*1024)
    throw Error('FORGE_V3_CAPTURE_RECEIPT_MISMATCH');
-  return {bytes,receipt:{schema:'ffax.v3.capture-receipt.v1',...response,
-   referenceSha256:artifacts.sourceSha256,
-   typedSourceSha256:createHash('sha256').update(artifacts.tsx+'\\n'+artifacts.css).digest('hex'),
-   preflight,visualAcceptance:'NOT_VERIFIED',customerAppIntegration:'NOT_RUN'}};
+  return {bytes,receipt:createV3CaptureReceipt(response,artifacts,preflight)};
  }finally{await rm(scratch,{recursive:true,force:true});}
 }
