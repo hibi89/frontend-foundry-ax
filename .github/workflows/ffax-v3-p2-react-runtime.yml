@@ -1,0 +1,44 @@
+name: FFAX V3 P2 synthetic React runtime
+on:
+  push:
+    branches:
+      - feature/ffax-reference-fidelity-20261118
+    paths:
+      - '.github/workflows/ffax-v3-p2-react-runtime.yml'
+      - 'src/forge-safe-integration.mjs'
+      - 'src/fidelity-renderer.mjs'
+      - 'src/reference-vault.mjs'
+      - 'src/workspace.mjs'
+      - 'scripts/forge_capture.mjs'
+      - 'scripts/forge_integration_review.mjs'
+      - 'tests/fidelity-v3-react-runtime.test.mjs'
+      - 'tests/fidelity-v3-integration.test.mjs'
+      - 'tests/reference-vault.test.mjs'
+      - 'tests/forge-capture-readiness.test.mjs'
+      - 'package.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ffax-v3-p2-react-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  p2-synthetic-react:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install existing pinned public React and TypeScript dependencies (no scripts)
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+      - name: Verify current source syntax
+        run: |
+          node --check src/forge-safe-integration.mjs
+          node --check scripts/forge_integration_review.mjs
+          node --check src/reference-vault.mjs
+          node --check scripts/forge_capture.mjs
+          node --check tests/fidelity-v3-react-runtime.test.mjs
+      - name: Real TypeScript and React19 synthetic binding, P2 path and vault regression
+        run: node --test tests/fidelity-v3-react-runtime.test.mjs tests/fidelity-v3-integration.test.mjs tests/reference-vault.test.mjs tests/forge-capture-readiness.test.mjs
