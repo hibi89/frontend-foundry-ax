@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
+  "auditSourceHead": "65e254dde247cacbcaf0f872d03e1597bc48468b",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -395,8 +395,8 @@
         ],
         "implementationAcceptance": "Approved project contract → scoped isolated React bindings and diff; original remains unchanged",
         "p1Status": "IMPLEMENTED_UNVERIFIED",
-        "evidenceSha": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
-        "p1LocalCheck": "PASS: real owner-approved prepare-v3/rollback-v3 CLI roundtrip in isolated synthetic React fixture; original SHA unchanged; Node source smoke 78/78 #44503644394; production customer app auth/API/routes runtime and TSX P2 NOT_RUN",
+        "evidenceSha": "65e254dde247cacbcaf0f872d03e1597bc48468b",
+        "p1LocalCheck": "PASS: 78/78 P1 source tests #44504946619. Additional P2 SYNTHETIC: strict TSX compiler and React19 SSR/bindings/callback #44504946712 PASS, customer live app P2 NOT_RUN.",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -431,7 +431,7 @@
         "implementationAcceptance": "Local approved package → FFAX job→read-only status/receipts; unapproved execution denied",
         "p1Status": "IMPLEMENTED_UNVERIFIED",
         "evidenceSha": "e4616bb75424dfa73797c28e0f76181e0e4e2016",
-        "p1LocalCheck": "PASS: IAE package -> local approved FFAX source job -> read-only status and results via same-origin+CSRF tests; Node 78/78 #44503644394; external IAE_dev integration P2 NOT_RUN",
+        "p1LocalCheck": "PASS: 78/78 P1 source tests #44504946619. Additional P2 SYNTHETIC: real Node localhost server Vault SHA+Origin/CSRF and read-only source result #44504946712 PASS; external IAE_dev client P2 NOT_RUN.",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -459,9 +459,29 @@
     "newV3Percent": 0,
     "officialAC12Weighted": "UNASSESSED",
     "oldSelfVerifiedCI": "HISTORIC_4_OF_4_CI_SUCCESS",
-    "newV3IndependentAudit": "NOT_RUN"
+    "newV3IndependentAudit": "NOT_RUN",
+    "partialSynthetic": {
+      "status": "PASS_SYNTHETIC_ONLY_NOT_P2_ACCEPTANCE",
+      "runId": 44504946712,
+      "sourceSha": "65e254dde247cacbcaf0f872d03e1597bc48468b",
+      "scope": [
+        "Strict TypeScript NodeNext generated FidelityScene/Binding TSX: 0 type errors",
+        "Real React 19 server-side rendering: owner fallback text preserved + dynamic data text bound",
+        "Typed button action callback actually invokes owner-supplied intent",
+        "Synthetic customer React project original digest unchanged after isolated source addition",
+        "Real local HTTP Node server: Vault SHA, approved IAE job, status/results readback, hostile Origin/CSRF rejection",
+        "Offline Chromium V2.1 path separate and PASS in same workflow, not user-image F95"
+      ],
+      "ownerOriginalsUsed": false,
+      "externalIAEDevClientTested": false,
+      "realCustomerAPIAuthRoutesTested": false,
+      "realUserWindows11DeviceTested": false,
+      "realReferenceImagesUsed": 0,
+      "independentAudit": "NOT_RUN",
+      "acceptanceCounted": 0
+    }
   },
-  "f95": "NOT_RUN: real owner image F95>=95 NOT_VERIFIED",
+  "f95": "NOT_VERIFIED; synthetic reference images 0 real user images in V3 P2",
   "caveats": [
     "FID-03 owner's manual text bounding boxes only; optical character recognition NOT_IMPLEMENTED.",
     "FID-04 verifies supplied file magic/SHA and asserts owner rights; actual original font/image asset bytes are not yet bound into V3 renderer.",
@@ -475,19 +495,22 @@
     "FID-12 FFAX-local loopback IAE request/job/status/results API only; external IAE_dev client deployment and cross-repo E2E NOT_RUN. CSRF+Origin+vault SHA required, no remote/source writes.",
     "Additional V3 P2 acceptance 0/8, official weighted AC P1/P2 UNASSESSED, real 95-point visual reproduction NOT_VERIFIED, independent audit NOT_RUN.",
     "P2 must test 12 real owner-rights references, Windows 11, actual React TSX compiling, auth/API/routes, network/sandbox boundaries, and owner acceptance before any release GO.",
-    "Current source candidate evidence 78/78 Node tests PASS #44503644394 at 7420e625; real owner data/React compile/IAE side P2 NOT_RUN.",
     "CLI: node scripts/forge_integration_review.mjs prepare-v3 --source <REACT_DIR> --dest <ISOLATED_PARENT> --job <ID> --scene <SCENE_JSON> --contract <CONTRACT_JSON> --approval APPROVE_LOCAL_V3_INTEGRATION_REVIEW (optional --typography/--assets); rollback-v3 with --workdir/--approval.",
-    "P2 verification 0/8 additional V3 acceptance; owner F95>=95 unverified; release HOLD."
+    "P2 verification 0/8 additional V3 acceptance; owner F95>=95 unverified; release HOLD.",
+    "P1 37/37 remains only source candidate; 78/78 test PASS on latest code 65e254dd #44504946619.",
+    "P2 Chromium+real local IAE HTTP and strict TSX/React19 synthetic rehearsal PASS #44504946712, explicitly NOT user-owner real reference/independent 8-gate acceptance.",
+    "P2 probe early FAIL: script syntax at 3c879bc5, repaired a2db43dd; strict TSX NodeNext TS2835 at 471886d3, repaired 65e254dd; final PASS #44504946712. Failure evidence preserved.",
+    "P2 full acceptance remains 0/8; official AC weighted verifier UNASSESSED, real user 95-point F95 NOT_VERIFIED, RELEASE HOLD."
   ],
   "release": "HOLD",
-  "lastSourceHead": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
+  "lastSourceHead": "65e254dde247cacbcaf0f872d03e1597bc48468b",
   "lastEvidenceRun": {
-    "id": 44503644394,
-    "sha": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
+    "id": 44504946619,
+    "sha": "65e254dde247cacbcaf0f872d03e1597bc48468b",
     "name": "FFAX V2 Design Forge P1 source smoke",
     "status": "SUCCESS",
     "sourceTests": "78/78 PASS, 0 FAIL",
-    "scope": "P1 SOURCE/SYNTHETIC INCLUDING REAL CLI IN ISOLATED LOCAL FIXTURE; P2 CUSTOMER/IAE LIVE NOT_RUN"
+    "scope": "V3 source candidate P1, normal/error tests, synthetic fixtures only"
   },
   "lastCodeWave": [
     {
@@ -553,6 +576,13 @@
       ],
       "commit": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
       "meaning": "real CLI prepare-v3/rollback-v3 entrypoint and synthetic source-integrity test"
+    },
+    {
+      "units": [
+        "FID-11"
+      ],
+      "commit": "65e254dde247cacbcaf0f872d03e1597bc48468b",
+      "note": "P2 NodeNext import compatibility fix; executable synthetic compiler+React19+live localhost API P2 rehearsal"
     }
   ],
   "sharedVerificationPaths": [
