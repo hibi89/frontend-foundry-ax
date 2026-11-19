@@ -432,19 +432,23 @@ el('fidelity-render-create').addEventListener('click',async()=>{
   if(!el('fidelity-render-consent').checked)throw Error('FIDELITY_RENDER_OWNER_APPROVAL_REQUIRED');
   const {createFidelityArtifacts}=await import('./fidelity-renderer.mjs');
   button.disabled=true;
+  const renderDpr=latestV3ReferenceReceipt?.referenceSha256===latestFidelityScene.sourceSha256
+   ?latestV3ReferenceReceipt.viewport?.dpr:1;
   const result=createFidelityArtifacts(latestFidelityScene,{
-   typography:latestTypographyDraft,assets:latestAssetManifest,
+   typography:latestTypographyDraft,assets:latestAssetManifest,dpr:renderDpr,
    approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
   save('FidelityScene.tsx',result.tsx,'text/plain');
   save('FidelityScene.css',result.css,'text/css');
   save('FidelityScene-evidence.json',JSON.stringify({
    schema:result.schema,sourceSha256:result.sourceSha256,sceneRevision:result.sceneRevision,
+   dpr:result.dpr,pixelWidth:result.pixelWidth,pixelHeight:result.pixelHeight,
+   cssWidth:result.cssWidth,cssHeight:result.cssHeight,
    regionCount:result.regionCount,textBoxCount:result.textBoxCount,status:result.status,
    warnings:result.warnings,canPublish:false,originalSourceModified:false
   },null,2),'application/json');
   const frame=el('fidelity-render-preview');
   frame.srcdoc=result.html;
-  status.textContent='실제 계층 구조 '+result.regionCount+'개 → React TSX/CSS 생성. 정지 화면 미리보기만 제공하며 실제 앱 데이터·폰트·자산·반응형·95점 일치는 별도 검증.';
+  status.textContent='실제 계층 구조 '+result.regionCount+'개 → React TSX/CSS 생성 · 원본 '+result.pixelWidth+'×'+result.pixelHeight+'픽셀 / CSS '+result.cssWidth+'×'+result.cssHeight+' DPR '+result.dpr+'. 실제 앱 데이터·폰트·자산·반응형·95점 일치는 별도 검증.';
  }catch(e){status.textContent='React 후보 생성 거부: '+(e?.message||'FIDELITY_RENDER_FAILED');}
  finally{button.disabled=false;el('fidelity-render-consent').checked=false;}
 });
@@ -504,7 +508,9 @@ el('fidelity-score-run').addEventListener('click',async()=>{
   const [referenceSha256,renderSha256]=await Promise.all([hashed(file),hashed(latestV3CaptureBlob)]);
   if(referenceSha256!==latestReferenceInventory.sha256||
      renderSha256!==latestV3CaptureReceipt.sha256||
-     latestV3CaptureReceipt.referenceSha256!==referenceSha256)
+     latestV3CaptureReceipt.referenceSha256!==referenceSha256||
+     latestV3ReferenceReceipt?.referenceSha256!==referenceSha256||
+     latestV3CaptureReceipt.dpr!==latestV3ReferenceReceipt.viewport?.dpr)
    throw Error('FIDELITY_SCORE_SOURCE_SHA_CHANGED');
   source=await createImageBitmap(file);render=await createImageBitmap(latestV3CaptureBlob);
   const pixels=bitmap=>{
@@ -518,7 +524,8 @@ el('fidelity-score-run').addEventListener('click',async()=>{
    reference:pixels(source),render:pixels(render),scene:latestFidelityScene,
    typography:latestTypographyDraft,assets:latestAssetManifest,
    referenceSha256,renderSha256,
-   viewport:{width:source.width,height:source.height,dpr:1}});
+   viewport:{width:source.width,height:source.height,
+    dpr:latestV3CaptureReceipt.dpr}});
   el('fidelity-score-export').disabled=false;
   if(latestV3ReviewImageUrl)URL.revokeObjectURL(latestV3ReviewImageUrl);
   latestV3ReviewImageUrl=URL.createObjectURL(file);
