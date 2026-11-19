@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "b0207efe922276f2b6ebdc374e216e646b10ac85",
+  "auditSourceHead": "56822ad0c54eb880b0cfe8af95c28784e8176f23",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -13,7 +13,7 @@
   },
   "incremental": {
     "count": 12,
-    "sourceCandidate": 2,
+    "sourceCandidate": 7,
     "units": [
       {
         "swuId": "FFAX-V3-FID-01",
@@ -28,12 +28,15 @@
         "dependencies": [],
         "allowedPaths": [
           "src/reference-vault.mjs",
-          "src/forge-api.mjs"
+          "src/forge-api.mjs",
+          "src/forge-convergence-ui.mjs",
+          "index.html",
+          "tests/fidelity-reference-receipt.test.mjs"
         ],
         "implementationAcceptance": "User-provided source+rights+viewport → versioned local receipt; missing provenance denied",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "03e751ad1f1bad6cc5190a89a9542ec595922b45",
+        "p1LocalCheck": "PASS: V3 syntax + 67/67 deterministic Node source tests, run 44498706378 (commit 56822ad0); real user Windows and live-reference P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -64,7 +67,7 @@
         "implementationAcceptance": "Actual browser image intake → approximate nested image bounds visible/exportable; invalid pixels denied",
         "p1Status": "IMPLEMENTED_UNVERIFIED",
         "evidenceSha": "5ecfbe9e91bb120411cdabc673c1c9b46281d47a",
-        "p1LocalCheck": "NODE_TESTS_PASS_PER_SOURCE_SMOKE_WORKFLOW; ACTUAL_BROWSER_REGRESSION_UNDER_RECHECK",
+        "p1LocalCheck": "PASS: 67/67 deterministic Node source tests run 44498706378; real external image P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -90,12 +93,16 @@
         ],
         "allowedPaths": [
           "src/fidelity-typography.mjs",
-          "src/forge-api.mjs"
+          "src/forge-api.mjs",
+          "src/app.mjs",
+          "index.html",
+          "src/server.mjs",
+          "tests/fidelity-typography.test.mjs"
         ],
         "implementationAcceptance": "Image region → local text box + confidence + manual correction; OCR absent stays UNKNOWN",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "cfca636281155cc23de2702fe85209954bc6d0f6",
+        "p1LocalCheck": "PASS: V3 syntax + 67/67 deterministic Node source tests, run 44498706378 (commit 56822ad0); real user Windows and live-reference P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -123,12 +130,16 @@
         ],
         "allowedPaths": [
           "src/reference-assets.mjs",
-          "src/fidelity-assets.mjs"
+          "src/fidelity-assets.mjs",
+          "src/app.mjs",
+          "index.html",
+          "src/server.mjs",
+          "tests/fidelity-assets.test.mjs"
         ],
         "implementationAcceptance": "User-supplied allowed asset → SHA/rights/typed manifest; unknown source blocks publication",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "cfca636281155cc23de2702fe85209954bc6d0f6",
+        "p1LocalCheck": "PASS: V3 syntax + 67/67 deterministic Node source tests, run 44498706378 (commit 56822ad0); real user Windows and live-reference P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -161,7 +172,7 @@
         "implementationAcceptance": "Browser observed geometry → typed parent/child scene → owner edit/revision/export; invalid parent rejected",
         "p1Status": "IMPLEMENTED_UNVERIFIED",
         "evidenceSha": "daec7c6aef2d0dcff54806af6f699a03ff4f6a8c",
-        "p1LocalCheck": "NODE_TESTS_PASS_PER_SOURCE_SMOKE_WORKFLOW; ACTUAL_BROWSER_REGRESSION_UNDER_RECHECK",
+        "p1LocalCheck": "PASS: 67/67 deterministic Node source tests run 44498706378; real external image P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -189,12 +200,16 @@
         ],
         "allowedPaths": [
           "src/core.mjs",
-          "src/fidelity-renderer.mjs"
+          "src/fidelity-renderer.mjs",
+          "src/app.mjs",
+          "index.html",
+          "src/server.mjs",
+          "tests/fidelity-renderer.test.mjs"
         ],
         "implementationAcceptance": "Owner-reviewed region tree → CSS layout and interactive React source; unsafe styling refused",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "fdccdb945d7430a36a0fca46c53916e716cea6ec",
+        "p1LocalCheck": "PASS: V3 syntax + 67/67 deterministic Node source tests, run 44498706378 (commit 56822ad0); real user Windows and live-reference P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -221,12 +236,17 @@
         ],
         "allowedPaths": [
           "src/forge-runner.mjs",
-          "scripts/forge_capture.mjs"
+          "scripts/forge_capture.mjs",
+          "src/forge-api.mjs",
+          "src/forge-convergence-ui.mjs",
+          "src/app.mjs",
+          "index.html",
+          "tests/fidelity-v3-capture.test.mjs"
         ],
         "implementationAcceptance": "Scene source code → exact viewport/font-loaded PNG+receipt; timeout/missing asset refusal",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "0ba205a048a5f6c90381dc1908ed7ea30778ede6",
+        "p1LocalCheck": "PASS: V3 syntax + 67/67 deterministic Node source tests, run 44498706378 (commit 56822ad0); real user Windows and live-reference P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -409,9 +429,9 @@
   },
   "basis": "37 independent source-slice outcomes = 25 preserved baseline SWUs + 12 explicit NEW V3 deltas beyond baseline. Each V3 unit excludes its inherited baseline functionality. No test-only/document-only credits.",
   "p1": {
-    "implementedUnverified": 27,
+    "implementedUnverified": 32,
     "total": 37,
-    "percent": 72.97,
+    "percent": 86.49,
     "state": "SOURCE_CANDIDATES_NOT_OFFICIAL_WEIGHTED_AC"
   },
   "p2": {
@@ -422,11 +442,54 @@
     "oldSelfVerifiedCI": "HISTORIC_4_OF_4_CI_SUCCESS",
     "newV3IndependentAudit": "NOT_RUN"
   },
-  "f95": "NOT_RUN; 95 point user quality target NOT_VERIFIED",
+  "f95": "NOT_RUN; F95>=95 target NOT_VERIFIED",
   "caveats": [
-    "FID-02 and FID-05 structural code+Node local tests present; browser reference flow had broken module allowlist and is being rechecked after source fix b21315f7.",
-    "Official current V3 P2 verification percent based on 12 AC evidence remains UNASSESSED; 0/8 is only the additional V3 acceptance checklist.",
-    "No user-approved release or changes to main, Production, permissions, customer originals or paid AI."
+    "FID-03 manual text bounding and OCR-not-run fallback implemented; an actual OCR engine is NOT_IMPLEMENTED.",
+    "FID-04 SHA/rights-limited asset manifest implemented; original asset bytes are NOT imported into the V3 renderer.",
+    "FID-06 TSX/CSS structural candidate and sandbox static preview implemented; actual app integration/TSX typecheck and visual fidelity P2 are NOT_RUN.",
+    "FID-07 source scene -> existing offline Chromium runner and SHA-replayed vault receipt wired to GUI/API, with P1 unit preflight PASS; real V3 capture/Windows11/visual scoring NOT_RUN.",
+    "P1 67/67 source tests passed at 56822ad0; subsequent changes are register/handoff documentation, not new code.",
+    "Official 12 AC weighted implementation and verification remain UNASSESSED; no invented 95% achieved."
   ],
-  "release": "HOLD"
+  "release": "HOLD",
+  "lastSourceHead": "56822ad0c54eb880b0cfe8af95c28784e8176f23",
+  "lastEvidenceRun": {
+    "id": 44498706378,
+    "sha": "56822ad0c54eb880b0cfe8af95c28784e8176f23",
+    "name": "FFAX V2 Design Forge P1 source smoke",
+    "status": "SUCCESS",
+    "sourceTests": "67/67 PASS, 0 FAIL",
+    "scope": "P1 NODE STATIC LOCAL / NOT LIVE V3 BROWSER CAPTURE"
+  },
+  "lastCodeWave": [
+    {
+      "units": [
+        "FID-01"
+      ],
+      "commit": "03e751ad1f1bad6cc5190a89a9542ec595922b45"
+    },
+    {
+      "units": [
+        "FID-03",
+        "FID-04"
+      ],
+      "commit": "cfca636281155cc23de2702fe85209954bc6d0f6"
+    },
+    {
+      "units": [
+        "FID-06"
+      ],
+      "commit": "fdccdb945d7430a36a0fca46c53916e716cea6ec"
+    },
+    {
+      "units": [
+        "FID-07"
+      ],
+      "commit": "0ba205a048a5f6c90381dc1908ed7ea30778ede6"
+    }
+  ],
+  "sharedVerificationPaths": [
+    ".github/workflows/ffax-design-forge-p1.yml",
+    "tests/server-security.test.mjs"
+  ]
 }
