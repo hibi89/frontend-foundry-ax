@@ -386,6 +386,31 @@ el('fidelity-asset-export').addEventListener('click',async()=>{
  }catch(e){status.textContent='자산 요구조건 거부: '+e.message;}
 });
 
+
+el('fidelity-render-create').addEventListener('click',async()=>{
+ const status=el('fidelity-render-status'),button=el('fidelity-render-create');
+ try{
+  if(!latestFidelityScene)throw Error('FIDELITY_RENDER_SCENE_REQUIRED');
+  if(!el('fidelity-render-consent').checked)throw Error('FIDELITY_RENDER_OWNER_APPROVAL_REQUIRED');
+  const {createFidelityArtifacts}=await import('./fidelity-renderer.mjs');
+  button.disabled=true;
+  const result=createFidelityArtifacts(latestFidelityScene,{
+   typography:latestTypographyDraft,assets:latestAssetManifest,
+   approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
+  save('FidelityScene.tsx',result.tsx,'text/plain');
+  save('FidelityScene.css',result.css,'text/css');
+  save('FidelityScene-evidence.json',JSON.stringify({
+   schema:result.schema,sourceSha256:result.sourceSha256,sceneRevision:result.sceneRevision,
+   regionCount:result.regionCount,textBoxCount:result.textBoxCount,status:result.status,
+   warnings:result.warnings,canPublish:false,originalSourceModified:false
+  },null,2),'application/json');
+  const frame=el('fidelity-render-preview');
+  frame.srcdoc=result.html;
+  status.textContent='실제 계층 구조 '+result.regionCount+'개 → React TSX/CSS 생성. 정지 화면 미리보기만 제공하며 실제 앱 데이터·폰트·자산·반응형·95점 일치는 별도 검증.';
+ }catch(e){status.textContent='React 후보 생성 거부: '+(e?.message||'FIDELITY_RENDER_FAILED');}
+ finally{button.disabled=false;el('fidelity-render-consent').checked=false;}
+});
+
 el('reference-owner-map').addEventListener('click',async()=>{
  const button=el('reference-owner-map'),status=el('reference-owner-map-status');
  try{

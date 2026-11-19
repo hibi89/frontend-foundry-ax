@@ -216,6 +216,16 @@
          <p id="fidelity-asset-status" class="helper" role="status">원본 자산 파일은 자동으로 저장/업로드되지 않습니다. SHA 기록은 렌더링 가능한 원본 제공을 의미하지 않습니다.</p>
        </section>
 
+       <section aria-label="V3 실제 계층형 React CSS 후보">
+         <p class="subheading">V3 · 이미지 구역 → 실제 React/TSX + CSS</p>
+         <p class="helper">원본 이미지 관측 영역과 직접 보정한 텍스트를 같은 계층 구조로 생성합니다. 필수 원본 자산을 등록했지만 실제 파일 바이트를 아직 연결하지 못한 경우 안전하게 차단합니다.</p>
+         <label class="check"><input id="fidelity-render-consent" type="checkbox" /> 구조화 React/CSS 후보 내보내기와 정지 이미지 미리보기를 승인합니다.</label>
+         <button id="fidelity-render-create" type="button" class="ghost-btn">React/TSX + CSS 후보 생성·로컬 저장</button>
+         <p id="fidelity-render-status" class="helper" role="status">본 단계는 실제 CSS·DOM 코드 생성. 시각 95점·폰트·반응형·API 검증 전입니다.</p>
+         <iframe id="fidelity-render-preview" sandbox="" title="V3 정지 화면 구조 프리뷰" loading="lazy" style="width:100%;height:300px;border:1px solid var(--stroke, #444);background:#fff"></iframe>
+       </section>
+
+
 
 
       <p class="subheading">외부 이미지에서 실제 UI 코드로 (사용자 영역 지정)</p>

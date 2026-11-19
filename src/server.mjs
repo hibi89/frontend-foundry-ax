@@ -19,6 +19,7 @@ const publicAssets = new Map([
   ['/src/fidelity-scene.mjs', 'text/javascript; charset=utf-8'],
   ['/src/fidelity-typography.mjs', 'text/javascript; charset=utf-8'],
   ['/src/fidelity-assets.mjs', 'text/javascript; charset=utf-8'],
+  ['/src/fidelity-renderer.mjs', 'text/javascript; charset=utf-8'],
   ['/src/external-reference-to-forge.mjs', 'text/javascript; charset=utf-8'],
   ['/src/reference-assets.mjs', 'text/javascript; charset=utf-8'],
   ['/src/design-forge-ui.mjs', 'text/javascript; charset=utf-8'],
