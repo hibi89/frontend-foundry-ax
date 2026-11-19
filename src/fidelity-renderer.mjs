@@ -3,6 +3,15 @@
  * external assets/JS, customer source writes or fidelity score claims.
  */
 const SHA=/^[a-f0-9]{64}$/,RGB=/^#[a-f0-9]{6}$/i;
+// Fixed local font stacks only: never interpolate user-provided font/CSS/URL.
+const fontStacks=Object.freeze({
+ 'system-ui':'system-ui,sans-serif',
+ 'serif':'Georgia,"Times New Roman",serif',
+ 'korean-serif':'"Nanum Myeongjo","Batang",serif',
+ 'korean-sans':'"Malgun Gothic","Noto Sans KR",sans-serif',
+ 'monospace':'ui-monospace,monospace'
+});
+const textAlignments=new Set(['left','center','right']);
 const roles=Object.freeze({
  canvas:'main',section:'section',panel:'div',navbar:'nav',hero:'header',card:'article',
  sidebar:'aside',content:'section',footer:'footer',image:'div',text:'div',
@@ -63,6 +72,8 @@ function checked(scene,typography,assets){
     (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined&&
       (!Number.isInteger(t.fontWeight)||t.fontWeight<100||t.fontWeight>900||t.fontWeight%100!==0))||
     (t.fontColor!==undefined&&!RGB.test(t.fontColor))||
+    (t.fontFamily!==undefined&&t.fontFamily!=='UNKNOWN'&&!Object.hasOwn(fontStacks,t.fontFamily))||
+    (t.textAlign!==undefined&&!textAlignments.has(t.textAlign))||
     (t.lineHeight!==undefined&&t.lineHeight!=='UNKNOWN'&&(!Number.isFinite(t.lineHeight)||t.lineHeight<.8||t.lineHeight>2.5))||
     (t.letterSpacing!==undefined&&(!Number.isFinite(t.letterSpacing)||t.letterSpacing< -2||t.letterSpacing>8)))
     throw Error('FIDELITY_RENDER_TEXT_INVALID');
@@ -121,6 +132,8 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,dpr=1
    (t.fontSize!==undefined?" font-size:"+cssPx(t.fontSize)+"px;":"")+
    (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined?" font-weight:"+t.fontWeight+";":"")+
    (t.fontColor?" color:"+t.fontColor+";":"")+
+   (t.fontFamily!==undefined&&t.fontFamily!=='UNKNOWN'?" font-family:"+fontStacks[t.fontFamily]+";":"")+
+   (t.textAlign!==undefined?" text-align:"+t.textAlign+";":"")+
    (t.lineHeight!==undefined&&t.lineHeight!=='UNKNOWN'?" line-height:"+t.lineHeight+";":"")+
    (t.letterSpacing!==undefined?" letter-spacing:"+cssPx(t.letterSpacing)+"px;":"")+" }");
  }

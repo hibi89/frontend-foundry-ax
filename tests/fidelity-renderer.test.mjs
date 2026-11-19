@@ -89,3 +89,26 @@ test('P2-02/03 retina source scene exports identical CSS/HTML tree in CSS pixels
   dpr:2,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'
  }),/DPR_UNSUPPORTED/);
 });
+
+
+test('P2-03 renderer denies arbitrary font names, CSS injection and invalid text alignment',()=>{
+ const s=scene(),t=addOwnerTextBox(createTypographyDraft(s),s,{
+  regionId:'section-1-panel-1',text:'한글 시각 재현',bounds:{x:310,y:20,width:170,height:30},
+  approval:'APPROVE_FIDELITY_LOCAL_TEXT_LABEL'
+ });
+ const render=x=>createFidelityArtifacts(s,{typography:x,
+  approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
+ for(const [field,value] of [['fontFamily','url(http://hostile/font)'],
+  ['fontFamily','serif;position:fixed'],['fontFamily','Unverified Web Font'],
+  ['textAlign','start;display:none'],['textAlign','justify']]){
+  const invalid={...t,textBoxes:t.textBoxes.map(x=>({...x,[field]:value}))};
+  assert.throws(()=>render(invalid),/TEXT_INVALID/);
+ }
+ const allowed={...t,textBoxes:t.textBoxes.map(x=>({
+  ...x,fontFamily:'korean-sans',textAlign:'right'
+ }))};
+ const output=render(allowed);
+ assert.match(output.css,/font-family:"Malgun Gothic","Noto Sans KR",sans-serif;/);
+ assert.match(output.css,/text-align:right;/);
+ assert.equal(output.externalRequests,0);
+});

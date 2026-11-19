@@ -3,7 +3,9 @@ import {createFidelityArtifacts} from './fidelity-renderer.mjs';
 const HEX=/^#[a-f0-9]{6}$/i;
 const geometry=new Set(['x','y','width','height']);
 const visual=new Set(['background','radius','opacity']);
-const text=new Set(['fontSize','fontColor','fontWeight','lineHeight','letterSpacing']);
+const text=new Set(['fontSize','fontColor','fontWeight','lineHeight','letterSpacing','fontFamily','textAlign']);
+const fontPresets=new Set(['system-ui','serif','korean-serif','korean-sans','monospace']);
+const textAlignments=new Set(['left','center','right']);
 function number(v,min,max,int=false){
  const n=typeof v==='number'?v:Number(v);
  if(v===''||typeof v==='boolean'||typeof v==='object'||!Number.isFinite(n)||n<min||n>max||(int&&!Number.isInteger(n)))
@@ -46,6 +48,14 @@ export function applyFidelityPatch(scene,typography,assets,diag,{regionId,proper
  else{
   const t=nextText?.textBoxes?.find(x=>x.id===textId&&x.regionId===regionId);
   if(!t)throw Error('FIDELITY_PATCH_TEXT_NOT_FOUND');
+  if(property==='fontFamily'){
+   if(typeof value!=='string'||!fontPresets.has(value))throw Error('FIDELITY_PATCH_VALUE_INVALID');
+   t.fontFamily=value;
+  }
+  if(property==='textAlign'){
+   if(typeof value!=='string'||!textAlignments.has(value))throw Error('FIDELITY_PATCH_VALUE_INVALID');
+   t.textAlign=value;
+  }
   if(property==='fontSize')t.fontSize=number(value,8,96,true);
   if(property==='fontWeight'){t.fontWeight=number(value,100,900,true);if(t.fontWeight%100)throw Error('FIDELITY_PATCH_VALUE_INVALID');}
   if(property==='lineHeight')t.lineHeight=number(value,.8,2.5);

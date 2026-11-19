@@ -244,11 +244,14 @@
           <option value="fontSize">글자 크기</option><option value="fontColor">글자색</option>
           <option value="fontWeight">글자 두께</option><option value="lineHeight">행간</option>
           <option value="letterSpacing">자간</option>
+          <option value="fontFamily">글꼴 계열 (안전한 로컬 프리셋)</option>
+          <option value="textAlign">글자 정렬</option>
          </select>
          <label for="fidelity-patch-text-id">글자 속성 수정 시 Text ID</label>
          <input id="fidelity-patch-text-id" maxlength="50" placeholder="text-1" />
          <label for="fidelity-patch-value">속성 값</label>
-         <input id="fidelity-patch-value" maxlength="30" placeholder="#334455 또는 숫자" />
+         <input id="fidelity-patch-value" maxlength="30" placeholder="색상·숫자·로컬 글꼴 프리셋" />
+         <p class="helper">글꼴: system-ui / serif / korean-serif / korean-sans / monospace · 정렬: left / center / right. 설치된 글꼴이 다르면 표시가 달라질 수 있으며 F95 판정은 별도입니다.</p>
          <label class="check"><input id="fidelity-patch-consent" type="checkbox" /> 원본이 아닌 격리 후보만 수정하는 것을 승인합니다.</label>
          <button id="fidelity-patch-apply" type="button" class="ghost-btn">격리 후보만 수정</button>
          <button id="fidelity-patch-undo" type="button" class="ghost-btn" disabled>직전 수정 되돌리기</button>

@@ -40,3 +40,43 @@ test('FID-09 rejects unauthorized CSS, out-of-bounds geometry and locked propert
  assert.throws(()=>applyFidelityPatch(s,null,null,diag,{regionId:'section-1',
   property:'assetSha',value:'not-allowed',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'}),/PROPERTY_UNSUPPORTED/);
 });
+
+
+test('P2-03 local text family and alignment patches reach generated React CSS without arbitrary CSS',()=>{
+ const s=scene(),t=addOwnerTextBox(createTypographyDraft(s),s,{regionId:'section-1',
+  text:'역학달력',bounds:{x:10,y:10,width:200,height:40},approval:'APPROVE_FIDELITY_LOCAL_TEXT_LABEL'});
+ const family=applyFidelityPatch(s,t,null,diag,{
+  regionId:'section-1',property:'fontFamily',textId:'text-1',value:'korean-serif',
+  approval:'APPROVE_LOCAL_V3_TYPED_PATCH'
+ });
+ assert.equal(t.textBoxes[0].fontFamily,'UNKNOWN');
+ assert.equal(family.candidateTypography.textBoxes[0].fontFamily,'korean-serif');
+ const aligned=applyFidelityPatch(family.candidateScene,family.candidateTypography,null,
+  {...diag,sceneRevision:2},{
+   regionId:'section-1',property:'textAlign',textId:'text-1',value:'center',
+   approval:'APPROVE_LOCAL_V3_TYPED_PATCH'
+  });
+ const output=createFidelityArtifacts(aligned.candidateScene,{
+  typography:aligned.candidateTypography,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'
+ });
+ assert.match(output.css,/font-family:"Nanum Myeongjo","Batang",serif;/);
+ assert.match(output.css,/text-align:center;/);
+ assert.match(output.tsx,/역학달력/);
+ assert.match(output.html,/font-family:"Nanum Myeongjo","Batang",serif;/);
+ assert.equal(output.canPublish,false);
+ for(const [property,value] of [
+  ['fontFamily','url(https://invalid.example/font.woff)'],
+  ['fontFamily','serif;position:fixed'],
+  ['textAlign','justify; color:red'],
+  ['fontFamily','']
+ ]){
+  assert.throws(()=>applyFidelityPatch(s,t,null,diag,{
+   regionId:'section-1',property,textId:'text-1',value,
+   approval:'APPROVE_LOCAL_V3_TYPED_PATCH'
+  }),/VALUE_INVALID/);
+ }
+ assert.throws(()=>applyFidelityPatch(s,t,null,diag,{
+  regionId:'section-1',property:'fontFamily',textId:'text-99',value:'serif',
+  approval:'APPROVE_LOCAL_V3_TYPED_PATCH'
+ }),/TEXT_NOT_FOUND/);
+});
