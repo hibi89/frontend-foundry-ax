@@ -206,11 +206,13 @@ test('P2-04 2x owner original yields half-size CSS inside untouched isolated Rea
 test('P2-04 CLI --dpr 2 passes owner physical/CSS dimensions and refuses unsafe DPRs',async()=>{
  const f=await fixture();
  try{
-  const sceneFile=join(f.root,'scene.json'),contractFile=join(f.root,'contract.json');
+  const sceneFile=join(f.root,'scene.json'),contractFile=join(f.root,'contract.json'),
+   typographyFile=join(f.root,'typography.json');
   await writeFile(sceneFile,JSON.stringify(scene));
   await writeFile(contractFile,JSON.stringify(contract(f.project.digest)));
+  await writeFile(typographyFile,JSON.stringify(typography));
   const base=['prepare-v3','--source',f.source,'--dest',f.dest,
-   '--job','cli-retina','--scene',sceneFile,'--contract',contractFile,
+   '--job','cli-retina','--scene',sceneFile,'--contract',contractFile,'--typography',typographyFile,
    '--approval','APPROVE_LOCAL_V3_INTEGRATION_REVIEW'];
   for(const invalid of ['0','3','2.0','Infinity','NaN','-1'])
    await assert.rejects(integrationCli([...base,'--dpr',invalid]),/DPR_INVALID/);
