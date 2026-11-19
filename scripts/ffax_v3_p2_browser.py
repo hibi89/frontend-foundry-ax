@@ -5,6 +5,7 @@ Pass means synthetic browser-path only, never real-world 95/F95 or P2 acceptance
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import socket
 import subprocess
@@ -170,6 +171,8 @@ try:
               and not page.locator('#fidelity-capture-image').get_attribute('src'))
         page.locator('#fidelity-capture-consent').check()
         page.locator('#fidelity-capture-run').click()
+        expect(page.locator('#fidelity-capture-image')).to_have_attribute(
+            'src',re.compile(r'^blob:'),timeout=75000)
         wait_for_good(page,'#fidelity-capture-status','Chromium 실제 정지 캡처 완료',75000)
         page.locator('#fidelity-score-consent').check()
         page.locator('#fidelity-score-run').click()
@@ -230,6 +233,12 @@ try:
 except Exception as exc:
     REPORT['status']='FAIL'
     REPORT['error']=type(exc).__name__+': '+str(exc)[:750]
+    if page:
+        try:
+            REPORT['captureStatusOnFailure']=page.locator('#fidelity-capture-status').inner_text()[:350]
+            REPORT['scoreStatusOnFailure']=page.locator('#fidelity-score-status').inner_text()[:350]
+            REPORT['captureImageSrcOnFailure']=page.locator('#fidelity-capture-image').get_attribute('src') or ''
+        except Exception:pass
     if page:
         try:page.screenshot(path=str(ART/'v3-p2-failure.png'),full_page=False,timeout=7000)
         except Exception:pass
