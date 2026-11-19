@@ -473,6 +473,7 @@ el('fidelity-render-create').addEventListener('click',async()=>{
 
 el('fidelity-capture-run').addEventListener('click',async()=>{
  const status=el('fidelity-capture-status'),button=el('fidelity-capture-run');
+ let captureCurrent=null;
  try{
   if(!el('fidelity-capture-consent').checked)throw Error('FORGE_V3_CAPTURE_OWNER_APPROVAL_REQUIRED');
   if(!latestReferenceInventory||!latestFidelityScene||!latestV3ReferenceReceipt||
@@ -482,18 +483,28 @@ el('fidelity-capture-run').addEventListener('click',async()=>{
   const {postForgeReview,getForgeSessionToken}=await import('./design-forge-ui.mjs');
   button.disabled=true;
   clearV3VisualEvidence('새 Chromium 캡처 시작');
+  const captureEpoch=visualEvidenceEpoch,sourceEpoch=referenceEpoch;
+  const sourceSha=latestFidelityScene.sourceSha256,revision=latestFidelityScene.revision;
+  captureCurrent=()=>captureEpoch===visualEvidenceEpoch&&sourceEpoch===referenceEpoch&&
+   el('rights').checked&&latestFidelityScene?.sourceSha256===sourceSha&&
+   latestFidelityScene?.revision===revision&&
+   latestV3ReferenceReceipt?.referenceSha256===sourceSha;
   status.textContent='Chromium 새 캡처 실행 중 · 이전 완료 화면과 시각 승인은 무효';
   const result=await postForgeReview('v3-capture',{
    scene:latestFidelityScene,typography:latestTypographyDraft,assets:latestAssetManifest,
    referenceReceipt:latestV3ReferenceReceipt,approval:'APPROVE_FIDELITY_LOCAL_CAPTURE'});
-  if(result.schema!=='ffax.v3.capture-result.v1'||result.referenceSha256!==latestFidelityScene.sourceSha256)
+  if(!captureCurrent())throw Error('FORGE_V3_CAPTURE_STALE');
+  if(result.schema!=='ffax.v3.capture-result.v1'||result.referenceSha256!==sourceSha)
    throw Error('FORGE_V3_CAPTURE_RESULT_INVALID');
   const token=await getForgeSessionToken();
+  if(!captureCurrent())throw Error('FORGE_V3_CAPTURE_STALE');
   const png=await fetch(result.download,{headers:{'x-ffax-csrf':token},
    cache:'no-store',credentials:'omit',redirect:'error'});
+  if(!captureCurrent())throw Error('FORGE_V3_CAPTURE_STALE');
   if(!png.ok||png.headers.get('content-type')!=='image/png')
    throw Error('FORGE_V3_CAPTURE_PNG_UNAVAILABLE');
   const blob=await png.blob();
+  if(!captureCurrent())throw Error('FORGE_V3_CAPTURE_STALE');
   if(blob.size<33||blob.size>6*1024*1024)throw Error('FORGE_V3_CAPTURE_PNG_INVALID');
   const image=el('fidelity-capture-image');
   if(latestV3CaptureUrl)URL.revokeObjectURL(latestV3CaptureUrl);
@@ -505,14 +516,15 @@ el('fidelity-capture-run').addEventListener('click',async()=>{
   status.textContent='Chromium 실제 정지 캡처 완료 · '+result.receipt.width+'×'+result.receipt.height+
    ' DPR '+result.receipt.dpr+' · SHA '+result.receipt.sha256.slice(0,16)+
    '… · 기능/실원본 시각 95점 검증 및 폰트/자산 재현은 미완';
- }catch(e){status.textContent='실캡처 거부/실패: '+(e?.message||'FORGE_V3_CAPTURE_FAILED');}
+ }catch(e){if(!captureCurrent||captureCurrent())
+   status.textContent='실캡처 거부/실패: '+(e?.message||'FORGE_V3_CAPTURE_FAILED');}
  finally{button.disabled=false;el('fidelity-capture-consent').checked=false;}
 });
 
 
 el('fidelity-score-run').addEventListener('click',async()=>{
  const status=el('fidelity-score-status'),button=el('fidelity-score-run');
- let source,render;
+ let source,render,scoreCurrent=null;
  try{
   if(!el('fidelity-score-consent').checked)throw Error('FIDELITY_SCORE_OWNER_CONSENT_REQUIRED');
   const file=el('reference-file').files?.[0];
@@ -520,16 +532,24 @@ el('fidelity-score-run').addEventListener('click',async()=>{
     !latestV3CaptureBlob||!latestV3CaptureReceipt)
    throw Error('FIDELITY_SCORE_SOURCE_OR_CAPTURE_MISSING');
   button.disabled=true;
+  const scoreEpoch=visualEvidenceEpoch,sourceEpoch=referenceEpoch;
+  const capturedBlob=latestV3CaptureBlob,capturedReceipt=latestV3CaptureReceipt;
+  const sceneRevision=latestFidelityScene.revision;
+  scoreCurrent=()=>visualEvidenceEpoch===scoreEpoch&&referenceEpoch===sourceEpoch&&
+   stillCurrentReference(sourceEpoch,file)&&latestV3CaptureBlob===capturedBlob&&
+   latestV3CaptureReceipt===capturedReceipt&&latestFidelityScene?.revision===sceneRevision;
   const hashed=async(blob)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))]
    .map(x=>x.toString(16).padStart(2,'0')).join('');
-  const [referenceSha256,renderSha256]=await Promise.all([hashed(file),hashed(latestV3CaptureBlob)]);
+  const [referenceSha256,renderSha256]=await Promise.all([hashed(file),hashed(capturedBlob)]);
+  if(!scoreCurrent())throw Error('FIDELITY_SCORE_STALE');
   if(referenceSha256!==latestReferenceInventory.sha256||
      renderSha256!==latestV3CaptureReceipt.sha256||
      latestV3CaptureReceipt.referenceSha256!==referenceSha256||
      latestV3ReferenceReceipt?.referenceSha256!==referenceSha256||
      latestV3CaptureReceipt.dpr!==latestV3ReferenceReceipt.viewport?.dpr)
    throw Error('FIDELITY_SCORE_SOURCE_SHA_CHANGED');
-  source=await createImageBitmap(file);render=await createImageBitmap(latestV3CaptureBlob);
+  source=await createImageBitmap(file);render=await createImageBitmap(capturedBlob);
+  if(!scoreCurrent())throw Error('FIDELITY_SCORE_STALE');
   const pixels=bitmap=>{
    const c=document.createElement('canvas');c.width=bitmap.width;c.height=bitmap.height;
    const ctx=c.getContext('2d',{willReadFrequently:true});
@@ -537,6 +557,7 @@ el('fidelity-score-run').addEventListener('click',async()=>{
    ctx.drawImage(bitmap,0,0);return ctx.getImageData(0,0,c.width,c.height);
   };
   const {measureV3RegionDiagnostics}=await import('./fidelity-score.mjs');
+  if(!scoreCurrent())throw Error('FIDELITY_SCORE_STALE');
   latestV3ScoreResult=measureV3RegionDiagnostics({
    reference:pixels(source),render:pixels(render),scene:latestFidelityScene,
    typography:latestTypographyDraft,assets:latestAssetManifest,
@@ -561,8 +582,10 @@ el('fidelity-score-run').addEventListener('click',async()=>{
    '개 · 색상 진단 '+latestV3ScoreResult.axes.colors.diagnosticScore+
    '/100 · 기하 경계 진단 '+latestV3ScoreResult.axes.geometry.diagnosticScore+
    '/100. 최종 F95=UNASSESSED (글꼴·자산·사용자 수락·실기기 미검증).';
- }catch(e){latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;
-  status.textContent='영역별 비교 거부/실패: '+(e?.message||'FIDELITY_SCORE_FAILED');}
+ }catch(e){if(!scoreCurrent||scoreCurrent()){
+   latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;
+   status.textContent='영역별 비교 거부/실패: '+(e?.message||'FIDELITY_SCORE_FAILED');
+  }}
  finally{source?.close();render?.close();button.disabled=false;
   el('fidelity-score-consent').checked=false;}
 });
