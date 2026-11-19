@@ -33,3 +33,15 @@ test('FID-08 forbids self image SHA, mismatched viewport, forged source and miss
  assert.throws(()=>measureV3RegionDiagnostics({...params,reference:black,render:black,
   scene:{...scene,regions:[scene.regions[0]]}}),/SCENE_MISMATCH/);
 });
+
+test('P2-03 2x reference scores raw physical pixels without claiming F95',()=>{
+ const source=pixels([20,60,100]),render=pixels([20,60,100]);
+ const out=measureV3RegionDiagnostics({...params,reference:source,render,
+  viewport:{width:32,height:32,dpr:2}});
+ assert.equal(out.viewport.dpr,2);
+ assert.equal(out.axes.colors.diagnosticScore,100);
+ assert.equal(out.weightedF95Score,null);
+ assert.equal(out.status,'F95_UNASSESSED');
+ assert.throws(()=>measureV3RegionDiagnostics({...params,reference:source,render,
+  viewport:{width:32,height:32,dpr:3}}),/VIEWPORT_OR_RASTER/);
+});
