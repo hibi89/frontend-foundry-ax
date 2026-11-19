@@ -142,7 +142,7 @@ function exifJpeg(orientation,{width=800,height=600,endianness='II',badIfd=false
  const u32=(v,p)=>le?tiff.writeUInt32LE(v,p):tiff.writeUInt32BE(v,p);
  u16(42,2);u32(badIfd?0xfffffff0:8,4);
  u16(1,8);u16(0x0112,10);u16(3,12);u32(1,14);u16(orientation,18);
- const payload=Buffer.concat([Buffer.from('Exif\\0\\0','ascii'),tiff]);
+ const payload=Buffer.concat([Buffer.from([0x45,0x78,0x69,0x66,0,0]),tiff]);
  const app1=Buffer.concat([Buffer.from([0xff,0xe1,(payload.length+2)>>8,(payload.length+2)&255]),payload]);
  const sof=Buffer.from([0xff,0xc0,0,17,8,height>>8,height&255,width>>8,width&255,
   3,1,0x11,0,2,0x11,0,3,0x11,0]);
