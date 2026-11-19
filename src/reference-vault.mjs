@@ -5,7 +5,7 @@
  */
 import {createHash} from 'node:crypto';
 import {homedir} from 'node:os';
-import {join} from 'node:path';
+import {join,dirname,resolve} from 'node:path';
 import {mkdir,readFile,writeFile,lstat} from 'node:fs/promises';
 const MAX=6*1024*1024,SHA=/^[a-f0-9]{64}$/;
 const PNG=Buffer.from([137,80,78,71,13,10,26,10]);
@@ -79,9 +79,29 @@ async function safeDirectory(dir){
  const stat=await lstat(dir);
  if(!stat.isDirectory()||stat.isSymbolicLink())throw Error('REFERENCE_VAULT_UNSAFE_DIRECTORY');
 }
+async function checkAncestors(path){
+ let current=resolve(path);
+ for(;;){
+  let info;
+  try{info=await lstat(current);}
+  catch(e){if(e.code!=='ENOENT')throw e;}
+  if(info&&(!info.isDirectory()||info.isSymbolicLink()))
+   throw Error('REFERENCE_VAULT_UNSAFE_ANCESTOR');
+  const parent=dirname(current);
+  if(parent===current)break;
+  current=parent;
+ }
+}
 async function directory(root){
- const path=root||defaultRoot();
- await safeDirectory(join(path,'..'));await safeDirectory(path);
+ const path=resolve(root||defaultRoot());
+ // Check *all* existing ancestors before any directory-creating write.
+ // A symlink to a safe-looking directory one level above the vault must not
+ // redirect immutable customer reference bytes into a different filesystem.
+ await checkAncestors(path);
+ await safeDirectory(dirname(path));
+ await checkAncestors(path);
+ await safeDirectory(path);
+ await checkAncestors(path);
  return path;
 }
 async function readExact(root,sha256,extension){

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,readFile,rm,mkdir,symlink,lstat} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
@@ -59,5 +59,26 @@ test('RF-01 stores and verifies SHA-addressed JPEG and WebP reference headers wi
    const restored=await loadLocalReference({root,sha256:hashValue});
    assert.ok(restored.bytes.equals(bytes));
   }
+ }finally{await rm(home,{recursive:true,force:true});}
+});
+
+test('P2-01 vault rejects symlinked parent before any SHA-named customer byte write',async(t)=>{
+ const home=await mkdtemp(join(tmpdir(),'ffax-vault-p2-link-'));
+ const target=join(home,'safe-target'),alias=join(home,'alias');
+ try{
+  await mkdir(target);
+  try{await symlink(target,alias,process.platform==='win32'?'junction':'dir');}
+  catch(e){
+   if(['EPERM','ENOTSUP','EACCES'].includes(e.code)){t.skip('OS denies test symlink creation');return;}
+   throw e;
+  }
+  const root=join(alias,'vault');
+  const options={root,bytes:sample,sha256:sha,
+   rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'};
+  await assert.rejects(saveLocalReference(options),/UNSAFE_ANCESTOR/);
+  await assert.rejects(loadLocalReference({root,sha256:sha}),/UNSAFE_ANCESTOR/);
+  await assert.rejects(lstat(join(target,'vault')),e=>e.code==='ENOENT');
+  // A direct symlink to the purported vault is equally unsafe.
+  await assert.rejects(saveLocalReference({...options,root:alias}),/UNSAFE_ANCESTOR/);
  }finally{await rm(home,{recursive:true,force:true});}
 });
