@@ -74,16 +74,28 @@ function renderCanvas(){
 function updateAll(updateBrief=true){if(updateBrief)renderBrief();renderCanvas();renderInspector();renderReference();}
 function run(command){try{history.exec(command);updateAll();el('qa-report').textContent='수정 이후 다시 검증해야 합니다.';el('qa-report').className='qa-result';}catch(e){log(e.message,true);}}
 function edit(prop,value){if(!selected)return;run({kind:'update',id:selected,prop,value});}
-let latestReferenceInventory=null;
+let latestReferenceInventory=null,latestFidelityScene=null;
 function updateReference(){
  const file=el('reference-file').files?.[0];
  if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
  if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
  (async()=>{
-  el('export-reference-inventory').disabled=true;latestReferenceInventory=null;
+  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;
   try{
    const {analyzeUserReference}=await import('./reference-analysis.mjs');
    const inventory=await analyzeUserReference(file,{rightsConfirmed:true});
+   const {buildFidelityScene}=await import('./fidelity-scene.mjs');
+   const scene=buildFidelityScene(inventory);
+   latestFidelityScene=scene;
+   const selector=el('fidelity-region-select');selector.replaceChildren();
+   for(const region of scene.regions.filter(x=>x.id!=='canvas')){
+    const option=document.createElement('option');option.value=region.id;
+    option.textContent=region.id+' ('+region.bounds.x+','+region.bounds.y+')';
+    selector.append(option);
+   }
+   selector.disabled=false;el('fidelity-region-apply').disabled=false;
+   el('export-fidelity-scene').disabled=false;
+   el('fidelity-region-status').textContent='관측된 영역 '+(scene.regions.length-1)+'개. 수동 정정·내보내기 가능, React 복원은 미검증.';
    const colors=[inventory.paletteHints[0],inventory.paletteHints[2]];
    const next=createReference(history.present,file.name,true,colors,'user-provided',{sha256:inventory.sha256,width:inventory.width,height:inventory.height});
    history.past.push(history.present);history.present=next;history.future=[];latestReferenceInventory=inventory;
@@ -291,6 +303,27 @@ el('manual-apply-response').addEventListener('click',()=>{
 });
 el('apply-reference').addEventListener('click',updateReference);
 el('export-reference-inventory').addEventListener('click',()=>{if(latestReferenceInventory)save('FFAX-external-reference-inventory.json',JSON.stringify(latestReferenceInventory,null,2),'application/json');});
+
+el('export-fidelity-scene').addEventListener('click',()=>{
+ if(latestFidelityScene)save('FFAX-Fidelity-Scene.json',JSON.stringify(latestFidelityScene,null,2),'application/json');
+});
+el('fidelity-region-apply').addEventListener('click',async()=>{
+ const status=el('fidelity-region-status');
+ try{
+  if(!latestFidelityScene)throw Error('FIDELITY_SCENE_NOT_READY');
+  if(!el('fidelity-region-consent').checked)throw Error('FIDELITY_REGION_OWNER_APPROVAL_REQUIRED');
+  const raw=el('fidelity-region-bounds').value.trim().split(',').map(s=>Number(s.trim()));
+  if(raw.length!==4||raw.some(n=>!Number.isInteger(n)))throw Error('FIDELITY_REGION_BOUNDS_INVALID');
+  const {reviseFidelityRegion}=await import('./fidelity-scene.mjs');
+  latestFidelityScene=reviseFidelityRegion(latestFidelityScene,{
+   regionId:el('fidelity-region-select').value,role:el('fidelity-region-role').value,
+   bounds:{x:raw[0],y:raw[1],width:raw[2],height:raw[3]},
+   approval:'APPROVE_LOCAL_FIDELITY_REGION_EDIT'});
+  status.textContent='영역 정정 저장됨 · revision '+latestFidelityScene.revision+' · 원본 SHA 보존 · 실제 렌더 일치 미검증';
+ }catch(e){status.textContent='영역 정정 거부: '+e.message;}
+ finally{el('fidelity-region-consent').checked=false;}
+});
+
 
 el('reference-owner-map').addEventListener('click',async()=>{
  const button=el('reference-owner-map'),status=el('reference-owner-map-status');
