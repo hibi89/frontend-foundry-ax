@@ -4,6 +4,7 @@ import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {inspectReactProject} from '../src/workspace.mjs';
+import {main as integrationCli} from '../scripts/forge_integration_review.mjs';
 import {prepareV3FidelityIntegration,rollbackV3FidelityIntegration} from '../src/forge-safe-integration.mjs';
 const hash='a'.repeat(64);
 const scene={schema:'ffax.fidelity-scene.v1',sourceSha256:hash,width:640,height:400,revision:1,regions:[
@@ -71,4 +72,28 @@ test('FID-11 fails closed on forged source contract, dynamic discovery, unauthor
  try{await assert.rejects(prepareV3FidelityIntegration({source:g.source,dest:g.dest,jobId:'blocked',
  scene,typography,contract:contract(g.project.digest),approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'}),/DYNAMIC_DISCOVERY_BLOCKED/);}
  finally{await rm(g.root,{recursive:true,force:true});}
+});
+
+test('FID-11 real CLI prepare-v3/rollback-v3 roundtrip preserves customer app bytes',async()=>{
+ const f=await fixture();
+ try{
+  const sceneFile=join(f.root,'scene.json'),typographyFile=join(f.root,'typography.json'),
+   contractFile=join(f.root,'contract.json');
+  await Promise.all([
+   writeFile(sceneFile,JSON.stringify(scene)),
+   writeFile(typographyFile,JSON.stringify(typography)),
+   writeFile(contractFile,JSON.stringify(contract(f.project.digest)))
+  ]);
+  const result=await integrationCli(['prepare-v3','--source',f.source,'--dest',f.dest,
+   '--job','cli-001','--scene',sceneFile,'--typography',typographyFile,
+   '--contract',contractFile,'--approval','APPROVE_LOCAL_V3_INTEGRATION_REVIEW']);
+  assert.equal(result.receipt.textBindingCount,1);
+  assert.equal(result.receipt.intentBindingCount,1);
+  assert.equal(result.receipt.originalSourceModified,false);
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+  const undone=await integrationCli(['rollback-v3','--workdir',result.workDir,
+   '--approval','APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK']);
+  assert.equal(undone.state,'ROLLED_BACK_IN_ISOLATED_COPY');
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+ }finally{await rm(f.root,{recursive:true,force:true});}
 });
