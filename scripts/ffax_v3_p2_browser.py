@@ -348,7 +348,14 @@ try:
         }""")
         page.locator('#reference-file').set_input_files(str(fixture))
         page.locator('#apply-reference').click()
-        page.wait_for_function("typeof window.__ffaxReleaseHeld==='function'",timeout=15000)
+        # wait_for_function uses eval and is forbidden by our strict script-src
+        # CSP. Use ordinary page.evaluate with a bounded poll instead.
+        for _ in range(150):
+            if page.evaluate("() => typeof window.__ffaxReleaseHeld==='function'"):
+                break
+            page.wait_for_timeout(100)
+        else:
+            raise AssertionError('V3_DELAYED_ANALYSIS_HOOK_NOT_REACHED')
         page.locator('#reference-file').set_input_files(str(changed))
         page.evaluate("() => window.__ffaxReleaseHeld()")
         page.wait_for_timeout(450)
