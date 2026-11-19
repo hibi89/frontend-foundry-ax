@@ -169,3 +169,62 @@ test('P2-04 V3 audit and rollback refuse symlinked generated parent even with ma
   assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
  }finally{await rm(f.root,{recursive:true,force:true});}
 });
+
+
+test('P2-04 2x owner original yields half-size CSS inside untouched isolated React app',async()=>{
+ const f=await fixture();
+ try{
+  const prepared=await prepareV3FidelityIntegration({
+   source:f.source,dest:f.dest,jobId:'retina-2x',scene,typography,
+   dpr:2,contract:contract(f.project.digest),
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'
+  });
+  const css=await readFile(join(prepared.sourceDir,'src','ffax','FidelityScene.css'),'utf8');
+  assert.match(css,/width:320px; height:200px/);
+  assert.match(css,/left:25px; top:20px; width:110px; height:40px/);
+  assert.equal(prepared.receipt.dpr,2);
+  assert.equal(prepared.receipt.pixelWidth,640);
+  assert.equal(prepared.receipt.pixelHeight,400);
+  assert.equal(prepared.receipt.cssWidth,320);
+  assert.equal(prepared.receipt.cssHeight,200);
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+  const audit=()=>auditV3FidelityIntegration({workDir:prepared.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_AUDIT'});
+  assert.equal((await audit()).generatedFiles,3);
+  const receiptPath=join(prepared.workDir,'v3-fidelity-integration-receipt.json');
+  await writeFile(receiptPath,JSON.stringify({...prepared.receipt,cssWidth:640}));
+  await assert.rejects(audit(),/AUDIT_RECEIPT_INVALID/);
+  await writeFile(receiptPath,JSON.stringify(prepared.receipt));
+  assert.equal((await audit()).generatedFiles,3);
+  const rolled=await rollbackV3FidelityIntegration({workDir:prepared.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK'});
+  assert.equal(rolled.originalUnchanged,true);
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+
+test('P2-04 CLI --dpr 2 passes owner physical/CSS dimensions and refuses unsafe DPRs',async()=>{
+ const f=await fixture();
+ try{
+  const sceneFile=join(f.root,'scene.json'),contractFile=join(f.root,'contract.json');
+  await writeFile(sceneFile,JSON.stringify(scene));
+  await writeFile(contractFile,JSON.stringify(contract(f.project.digest)));
+  const base=['prepare-v3','--source',f.source,'--dest',f.dest,
+   '--job','cli-retina','--scene',sceneFile,'--contract',contractFile,
+   '--approval','APPROVE_LOCAL_V3_INTEGRATION_REVIEW'];
+  for(const invalid of ['0','3','2.0','Infinity','NaN','-1'])
+   await assert.rejects(integrationCli([...base,'--dpr',invalid]),/DPR_INVALID/);
+  const prepared=await integrationCli([...base,'--dpr','2']);
+  assert.equal(prepared.receipt.dpr,2);
+  assert.equal(prepared.receipt.cssWidth,320);
+  const css=await readFile(join(prepared.sourceDir,'src','ffax','FidelityScene.css'),'utf8');
+  assert.match(css,/width:320px; height:200px/);
+  await integrationCli(['rollback-v3','--workdir',prepared.workDir,
+   '--approval','APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK']);
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+  await assert.rejects(prepareV3FidelityIntegration({
+   source:f.source,dest:f.dest,jobId:'wrong-retina',scene,typography,dpr:3,
+   contract:contract(f.project.digest),approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'
+  }),/DPR_UNSUPPORTED/);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
