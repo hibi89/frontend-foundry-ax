@@ -394,6 +394,12 @@ async function verifyV3ReviewIntegrity(root,manifest,receipt){
    if(sha(bytes)!==f.sha256)throw Error('FORGE_V3_AUDIT_GENERATED_CHANGED');
    sources.push(bytes.toString('utf8'));
  }
+ // Bind recorded DPR metadata to actual CSS; otherwise a coherent forged
+ // dpr/cssWidth pair could survive static hashing of unrelated CSS bytes.
+ const cssRoot='.ffax-v3-root { position:relative; box-sizing:border-box; width:'+
+  receipt.cssWidth+'px; height:'+receipt.cssHeight+'px; overflow:hidden;';
+ if(!sources[1].includes(cssRoot))
+  throw Error('FORGE_V3_AUDIT_DPR_CSS_MISMATCH');
  const expected=V3_FILES.map((p,i)=>v3FileDiff(p,sources[i])).join('');
  const patchFile=join(root,'v3-fidelity-review.patch');
  const patchInfo=await lstat(patchFile);
