@@ -78,9 +78,16 @@ let latestReferenceInventory=null,latestFidelityScene=null,latestTypographyDraft
 let latestV3ReferenceReceipt=null,latestV3CaptureUrl=null ,latestV3CaptureBlob=null,latestV3CaptureReceipt=null,latestV3ScoreResult=null;
 let latestFidelityPatchRollback=null;
 let latestV3OwnerReview=null,latestV3ReviewImageUrl=null;
+// Epochs invalidate in-flight image decode, capture and score after owner changes.
+let referenceEpoch=0,visualEvidenceEpoch=0;
+const stillCurrentReference=(epoch,file)=>referenceEpoch===epoch&&
+ el('reference-file').files?.[0]===file&&el('rights').checked;
 window.addEventListener('ffax:v3-reference-receipt',event=>{
  const receipt=event.detail;
- if(receipt?.schema==='ffax.reference-bundle.v3'){
+ if(receipt?.schema==='ffax.reference-bundle.v3'&&
+    el('rights').checked&&latestReferenceInventory&&
+    receipt.referenceSha256===latestReferenceInventory.sha256&&
+    el('reference-file').files?.[0]){
   clearV3VisualEvidence('새 원본 권리·DPR 영수증 확인');
   latestV3ReferenceReceipt=receipt;
   el('fidelity-capture-status').textContent='로컬 원본 영수증 연결됨. 분석된 이미지 SHA와 같을 때만 실제 캡처 실행 가능.';
@@ -88,6 +95,7 @@ window.addEventListener('ffax:v3-reference-receipt',event=>{
 });
 
 function clearV3VisualEvidence(reason){
+ visualEvidenceEpoch++;
  latestV3ScoreResult=null;latestV3OwnerReview=null;
  latestV3CaptureBlob=null;latestV3CaptureReceipt=null;latestFidelityPatchRollback=null;
  for(const id of ['fidelity-score-export','fidelity-review-export','fidelity-review-accept',
@@ -99,14 +107,19 @@ function clearV3VisualEvidence(reason){
  el('fidelity-review-status').textContent=reason+' · 이전 수락 영수증 무효, 재비교 필요';
  el('fidelity-score-status').textContent='F95=UNASSESSED · 원본/후보 변경으로 이전 비교 무효';
 }
-el('reference-file').addEventListener('change',()=>{
- clearV3VisualEvidence('기준 이미지 파일 변경');
+function invalidateReferenceSelection(reason){
+ referenceEpoch++;
+ clearV3VisualEvidence(reason);
  latestReferenceInventory=null;latestFidelityScene=null;latestTypographyDraft=null;latestAssetManifest=null;
  latestV3ReferenceReceipt=null;
  for(const id of ['fidelity-region-apply','export-fidelity-scene','fidelity-text-export',
- 'fidelity-asset-export','export-reference-inventory'])el(id).disabled=true;
+ 'fidelity-asset-export','export-reference-inventory','reference-owner-map'])el(id).disabled=true;
  el('fidelity-region-select').replaceChildren();el('fidelity-region-select').disabled=true;
- el('fidelity-capture-status').textContent='새 기준 이미지를 다시 분석하고 권리·원본 영수증을 재확인하세요.';
+ el('fidelity-capture-status').textContent='새 기준 이미지 분석·권리 확인·로컬 원본 영수증이 필요합니다.';
+}
+el('reference-file').addEventListener('change',()=>invalidateReferenceSelection('기준 이미지 파일 변경'));
+el('rights').addEventListener('change',()=>{
+ if(!el('rights').checked)invalidateReferenceSelection('원본 사용 권한 확인 철회');
 });
 
 function updateReference(){
@@ -114,14 +127,17 @@ function updateReference(){
  if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
  if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
  (async()=>{
+  const epoch=++referenceEpoch;
   el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;clearV3VisualEvidence('이미지 재분석');el('fidelity-asset-export').disabled=true;
   try{
    const {analyzeUserReference}=await import('./reference-analysis.mjs');
    const inventory=await analyzeUserReference(file,{rightsConfirmed:true});
+   if(!stillCurrentReference(epoch,file))return;
    const {buildFidelityScene}=await import('./fidelity-scene.mjs');
    const scene=buildFidelityScene(inventory);
    const {createTypographyDraft}=await import('./fidelity-typography.mjs');
    const {createFidelityAssetManifest}=await import('./fidelity-assets.mjs');
+   if(!stillCurrentReference(epoch,file))return;
    latestTypographyDraft=createTypographyDraft(scene);
    latestAssetManifest=createFidelityAssetManifest(inventory.sha256);
    latestFidelityScene=scene;
@@ -141,7 +157,8 @@ function updateReference(){
    el('reference-owner-map').disabled=false;
    el('reference-result').textContent=file.name+': '+inventory.width+'×'+inventory.height+' · SHA256 '+inventory.sha256.slice(0,16)+'… · 색상 힌트 '+colors.join('/')+' · 추정 영역 '+inventory.fidelityGeometry.regions.length+'개(위치·색만; OCR/폰트·자산 미복원)';
    updateAll();
-  }catch(err){el('reference-result').textContent='참고 이미지 분석 실패: '+err.message;}
+  }catch(err){if(stillCurrentReference(epoch,file))
+   el('reference-result').textContent='참고 이미지 분석 실패: '+err.message;}
  })();
 }
 async function checkQA(){
