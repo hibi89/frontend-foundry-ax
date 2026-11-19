@@ -115,3 +115,22 @@ test('P2-01 vault refuses SHA-matching hardlinks to another local owner file',as
    rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'}),/UNSAFE_FILE/);
  }finally{await rm(home,{recursive:true,force:true});}
 });
+
+test('P2-01 exact 6MiB SHA image loads through bounded descriptor and larger file fails closed',async()=>{
+ const MAX=6*1024*1024;
+ const home=await mkdtemp(join(tmpdir(),'ffax-vault-p2-bound-')),root=join(home,'vault');
+ try{
+  // Structural PNG header only; browser decoding remains a separate P2 gate.
+  const bytes=Buffer.alloc(MAX);
+  sample.copy(bytes);
+  const contentSha=createHash('sha256').update(bytes).digest('hex');
+  await saveLocalReference({root,bytes,sha256:contentSha,
+   rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'});
+  const reloaded=await loadLocalReference({root,sha256:contentSha});
+  assert.equal(reloaded.bytes.length,MAX);
+  assert.equal(reloaded.receipt.verification,'HEADER_AND_SHA_ONLY_BROWSER_DECODE_REQUIRED');
+  assert.ok(reloaded.bytes.equals(bytes));
+  await writeFile(join(root,contentSha+'.png'),Buffer.concat([bytes,Buffer.from([1])]));
+  await assert.rejects(loadLocalReference({root,sha256:contentSha}),/UNSAFE_FILE/);
+ }finally{await rm(home,{recursive:true,force:true});}
+});
