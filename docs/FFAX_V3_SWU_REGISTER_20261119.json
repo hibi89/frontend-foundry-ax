@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
+  "auditSourceHead": "a6f4120a8b61086b60cdcbfce15200de3fe042d7",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -552,7 +552,7 @@
         "id": "P2-01",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Real external original rights/asset corpus, symlink/reparse/adversarial security full run",
-        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267"
+        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267; new descriptor no-follow and link tests committed a6f4120a8b61086b60cdcbfce15200de3fe042d7; isolated 3/3 PASS, full repo CI pending (not acceptance)"
       },
       {
         "id": "P2-02",
@@ -608,6 +608,24 @@
       "realOwnerReferences": "0/12",
       "independentAudit": "NOT_RUN",
       "scope": "SECURITY/INTEGRITY PARTIAL P2"
+    },
+    "latestUnverifiedP2Fix": {
+      "codeSha": "a6f4120a8b61086b60cdcbfce15200de3fe042d7",
+      "scope": "P2-01_VAULT_FILE_DESCRIPTOR_RACE_HARDENING",
+      "state": "SOURCE_COMMITTED_CI_NOT_VERIFIED",
+      "changedPaths": [
+        "src/reference-vault.mjs",
+        "tests/reference-vault.test.mjs"
+      ],
+      "checks": {
+        "isolatedNodeReproduction": "PASS 3/3: regular file, symlink denied, hardlink denied on Linux runner; does not stand in for repository CI",
+        "fullRepositoryNodeCI": "NOT_VERIFIED",
+        "githubActionsCI": "NOT_VERIFIED",
+        "ownerWindows11": "NOT_RUN",
+        "independentSecurityAudit": "NOT_RUN"
+      },
+      "safety": "No owner original files, network, main or Production touched",
+      "referenceImagesUsed": 0
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -639,7 +657,7 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
+  "lastSourceHead": "a6f4120a8b61086b60cdcbfce15200de3fe042d7",
   "lastEvidenceRun": {
     "id": 44510382267,
     "sha": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
@@ -766,6 +784,13 @@
       ],
       "commit": "b04003e4271d1bd5d557a371f9ae33ac6421c539",
       "meaning": "31/31 real Chromium synthetic full local flow with two recaptures, Korean text change and typed patch"
+    },
+    {
+      "units": [
+        "P2-01"
+      ],
+      "commit": "a6f4120a8b61086b60cdcbfce15200de3fe042d7",
+      "meaning": "Single-descriptor vault reads with no-follow on supported OS, inode/link/size/mtime stability checks; two link regression tests. Isolated 3/3 PASS, repository CI unverified."
     }
   ],
   "sharedVerificationPaths": [
