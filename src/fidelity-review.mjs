@@ -19,7 +19,29 @@ export function createV3OwnerVisualReview(diagnostic,referenceReceipt,captureRec
    diagnostic.referenceSha256!==referenceReceipt.referenceSha256||
    diagnostic.renderSha256!==captureReceipt.sha256||
    captureReceipt.referenceSha256!==referenceReceipt.referenceSha256||
-   referenceReceipt.provenance?.publicRedistributionAllowed!==false)
+   referenceReceipt.provenance?.publicRedistributionAllowed!==false||
+   // A visual approval is meaningful only when all three pieces of evidence
+   // refer to the same physical pixels and exact CSS viewport/DPR.
+   !Number.isInteger(diagnostic.viewport?.width)||
+   !Number.isInteger(diagnostic.viewport?.height)||
+   diagnostic.viewport.width<2||diagnostic.viewport.height<2||
+   diagnostic.viewport.width>2560||diagnostic.viewport.height>2200||
+   diagnostic.viewport.dpr!==1||
+   referenceReceipt.original?.pixelWidth!==diagnostic.viewport.width||
+   referenceReceipt.original?.pixelHeight!==diagnostic.viewport.height||
+   referenceReceipt.viewport?.cssWidth!==diagnostic.viewport.width||
+   referenceReceipt.viewport?.cssHeight!==diagnostic.viewport.height||
+   referenceReceipt.viewport?.dpr!==diagnostic.viewport.dpr||
+   captureReceipt.width!==diagnostic.viewport.width||
+   captureReceipt.height!==diagnostic.viewport.height||
+   captureReceipt.dpr!==diagnostic.viewport.dpr||
+   captureReceipt.preflight?.viewport?.width!==diagnostic.viewport.width||
+   captureReceipt.preflight?.viewport?.height!==diagnostic.viewport.height||
+   captureReceipt.preflight?.dpr!==diagnostic.viewport.dpr||
+   captureReceipt.preflight?.sceneRevision!==diagnostic.sceneRevision||
+   captureReceipt.preflight?.referenceSha256!==diagnostic.referenceSha256||
+   captureReceipt.scriptExecution!=='DISABLED'||
+   captureReceipt.network!=='ABORT_ALL')
   throw Error('FIDELITY_REVIEW_EVIDENCE_MISMATCH');
  return {schema:'ffax.v3.visual-review.v1',sceneRevision:diagnostic.sceneRevision,referenceSha256:diagnostic.referenceSha256,
   renderSha256:diagnostic.renderSha256,
