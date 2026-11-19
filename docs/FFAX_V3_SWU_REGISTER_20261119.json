@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "56822ad0c54eb880b0cfe8af95c28784e8176f23",
+  "auditSourceHead": "d6b5adae827a0f8701b79d50184ce422cd1d690b",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -13,7 +13,7 @@
   },
   "incremental": {
     "count": 12,
-    "sourceCandidate": 7,
+    "sourceCandidate": 10,
     "units": [
       {
         "swuId": "FFAX-V3-FID-01",
@@ -273,12 +273,16 @@
         ],
         "allowedPaths": [
           "src/fidelity-score.mjs",
-          "src/forge-convergence.mjs"
+          "src/forge-convergence.mjs",
+          "src/app.mjs",
+          "src/server.mjs",
+          "index.html",
+          "tests/fidelity-score.test.mjs"
         ],
         "implementationAcceptance": "Reference+actual browser render → bounded region metric report or UNASSESSED with reasons",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "49de3969fe5f157fa251933cb7b9f4492239162e",
+        "p1LocalCheck": "PASS: source syntax + 73/73 deterministic Node P1 tests, GitHub run 44500753132; real V3 Windows/owner screen fidelity and P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -307,12 +311,17 @@
         ],
         "allowedPaths": [
           "src/forge-correction.mjs",
-          "src/fidelity-patch.mjs"
+          "src/fidelity-patch.mjs",
+          "src/app.mjs",
+          "src/fidelity-renderer.mjs",
+          "src/server.mjs",
+          "index.html",
+          "tests/fidelity-patch.test.mjs"
         ],
         "implementationAcceptance": "Ranked visual error → reviewed candidate-only typed patch+rollback; owner lock denied",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "c040dec79f12f94d86f4b52bc7e339eac8e3148e",
+        "p1LocalCheck": "PASS: source syntax + 73/73 deterministic Node P1 tests, GitHub run 44500753132; real V3 Windows/owner screen fidelity and P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -341,12 +350,16 @@
         "allowedPaths": [
           "src/design-forge-ui.mjs",
           "src/forge-compare-ui.mjs",
-          "src/app.mjs"
+          "src/app.mjs",
+          "src/fidelity-review.mjs",
+          "src/server.mjs",
+          "index.html",
+          "tests/fidelity-review.test.mjs"
         ],
         "implementationAcceptance": "Select image→edit region→reconstruct→visual issues→accept and export receipt; error/resume",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "d6b5adae827a0f8701b79d50184ce422cd1d690b",
+        "p1LocalCheck": "PASS: source syntax + 73/73 deterministic Node P1 tests, GitHub run 44500753132; real V3 Windows/owner screen fidelity and P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -429,9 +442,9 @@
   },
   "basis": "37 independent source-slice outcomes = 25 preserved baseline SWUs + 12 explicit NEW V3 deltas beyond baseline. Each V3 unit excludes its inherited baseline functionality. No test-only/document-only credits.",
   "p1": {
-    "implementedUnverified": 32,
+    "implementedUnverified": 35,
     "total": 37,
-    "percent": 86.49,
+    "percent": 94.59,
     "state": "SOURCE_CANDIDATES_NOT_OFFICIAL_WEIGHTED_AC"
   },
   "p2": {
@@ -442,24 +455,27 @@
     "oldSelfVerifiedCI": "HISTORIC_4_OF_4_CI_SUCCESS",
     "newV3IndependentAudit": "NOT_RUN"
   },
-  "f95": "NOT_RUN; F95>=95 target NOT_VERIFIED",
+  "f95": "NOT_RUN: actual user-supplied screenshot achieving F95>=95 NOT_VERIFIED",
   "caveats": [
-    "FID-03 manual text bounding and OCR-not-run fallback implemented; an actual OCR engine is NOT_IMPLEMENTED.",
-    "FID-04 SHA/rights-limited asset manifest implemented; original asset bytes are NOT imported into the V3 renderer.",
-    "FID-06 TSX/CSS structural candidate and sandbox static preview implemented; actual app integration/TSX typecheck and visual fidelity P2 are NOT_RUN.",
-    "FID-07 source scene -> existing offline Chromium runner and SHA-replayed vault receipt wired to GUI/API, with P1 unit preflight PASS; real V3 capture/Windows11/visual scoring NOT_RUN.",
-    "P1 67/67 source tests passed at 56822ad0; subsequent changes are register/handoff documentation, not new code.",
-    "Official 12 AC weighted implementation and verification remain UNASSESSED; no invented 95% achieved."
+    "FID-03 owner's manual text bounding boxes only; optical character recognition NOT_IMPLEMENTED.",
+    "FID-04 verifies supplied file magic/SHA and asserts owner rights; actual original font/image asset bytes are not yet bound into V3 renderer.",
+    "FID-06 generates React TSX and CSS with static sandbox preview; customer app TSX compile/build E2E NOT_RUN.",
+    "FID-07 V3 offline Chromium capture code/receipt binding implemented, actual V3 live owner Windows11 screenshot P2 NOT_RUN.",
+    "FID-08 reports heuristic RGB/edge per region with F95 always UNASSESSED because font/assets/owner/functional evidence missing.",
+    "FID-09 allows isolated owner-reviewed bounded geometry/style/type corrections with local one-step rollback; customer originals unchanged.",
+    "FID-10 owner visual review and SHA-bound local work JSON resume recorded as candidates; no 95% fidelity/production approval.",
+    "P1 source smoke 73/73 PASS at 44500753132; legacy V2.1 synthetic browser P2 success does not imply new V3 fidelity full P2 PASS.",
+    "V3 outstanding FID-11 actual data/API/routes/auth contract-safe integration and FID-12 IAE_dev local versioned adapter; official 12AC weighted rates UNASSESSED."
   ],
   "release": "HOLD",
-  "lastSourceHead": "56822ad0c54eb880b0cfe8af95c28784e8176f23",
+  "lastSourceHead": "d6b5adae827a0f8701b79d50184ce422cd1d690b",
   "lastEvidenceRun": {
-    "id": 44498706378,
-    "sha": "56822ad0c54eb880b0cfe8af95c28784e8176f23",
+    "id": 44500753132,
+    "sha": "d6b5adae827a0f8701b79d50184ce422cd1d690b",
     "name": "FFAX V2 Design Forge P1 source smoke",
     "status": "SUCCESS",
-    "sourceTests": "67/67 PASS, 0 FAIL",
-    "scope": "P1 NODE STATIC LOCAL / NOT LIVE V3 BROWSER CAPTURE"
+    "sourceTests": "73/73 PASS, 0 FAIL",
+    "scope": "P1 NODE SOURCE / NEW V3 LIVE BROWSER FIDELITY AND FUNCTIONAL P2 NOT_RUN"
   },
   "lastCodeWave": [
     {
@@ -486,6 +502,25 @@
         "FID-07"
       ],
       "commit": "0ba205a048a5f6c90381dc1908ed7ea30778ede6"
+    },
+    {
+      "units": [
+        "FID-08"
+      ],
+      "commit": "49de3969fe5f157fa251933cb7b9f4492239162e"
+    },
+    {
+      "units": [
+        "FID-09"
+      ],
+      "commit": "c040dec79f12f94d86f4b52bc7e339eac8e3148e",
+      "fix": "3aa763122b2c43d0597beb70df3a6217e99912c7"
+    },
+    {
+      "units": [
+        "FID-10"
+      ],
+      "commit": "d6b5adae827a0f8701b79d50184ce422cd1d690b"
     }
   ],
   "sharedVerificationPaths": [
