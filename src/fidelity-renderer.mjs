@@ -79,10 +79,16 @@ function checked(scene,typography,assets){
  }
  return byId;
 }
-export function createFidelityArtifacts(scene,{typography=null,assets=null,approval}={}){
+export function createFidelityArtifacts(scene,{typography=null,assets=null,dpr=1,approval}={}){
  if(approval!=='APPROVE_FIDELITY_SCENE_SOURCE_EXPORT')
   throw Error('FIDELITY_RENDER_OWNER_APPROVAL_REQUIRED');
  const byId=checked(scene,typography,assets);
+ // Owner reference coordinates use original *physical* image pixels.
+ // A 2x screenshot must produce half-size CSS geometry and double-density PNG
+ // without modifying the reference Scene itself or widening source authority.
+ if(![1,2].includes(dpr)||scene.width%dpr!==0||scene.height%dpr!==0)
+  throw Error('FIDELITY_RENDER_DPR_UNSUPPORTED');
+ const cssPx=n=>n/dpr;
  const index=new Map(scene.regions.map((r,i)=>[r.id,i]));
  const children=new Map(scene.regions.map(r=>[r.id,[]]));
  for(const r of scene.regions)if(r.parentId!==null)children.get(r.parentId).push(r);
@@ -91,8 +97,8 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,appro
  const css=[
   // The canvas is an actual painted layer; omitting its background changes
   // all uncovered pixels (including the negative space around child regions).
-  ".ffax-v3-root { position:relative; box-sizing:border-box; width:"+scene.width+
-   "px; height:"+scene.height+"px; overflow:hidden; background-color:"+
+  ".ffax-v3-root { position:relative; box-sizing:border-box; width:"+cssPx(scene.width)+
+   "px; height:"+cssPx(scene.height)+"px; overflow:hidden; background-color:"+
    byId.get('canvas').style.background+"; font-family:system-ui,sans-serif; }",
   ".ffax-v3-root * { box-sizing:border-box; }",
   ".ffax-v3-node { position:absolute; margin:0; padding:0; }",
@@ -101,22 +107,22 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,appro
  for(const r of scene.regions){
   if(r.id==='canvas')continue;
   const parent=byId.get(r.parentId),at=index.get(r.id),x=r.bounds.x-parent.bounds.x,y=r.bounds.y-parent.bounds.y;
-  css.push(".ffax-v3-node-"+at+" { left:"+x+"px; top:"+y+
-   "px; width:"+r.bounds.width+"px; height:"+r.bounds.height+
+  css.push(".ffax-v3-node-"+at+" { left:"+cssPx(x)+"px; top:"+cssPx(y)+
+   "px; width:"+cssPx(r.bounds.width)+"px; height:"+cssPx(r.bounds.height)+
    "px; background-color:"+r.style.background+";"+
-   (r.style.radius!==undefined?" border-radius:"+r.style.radius+"px;":"")+
+   (r.style.radius!==undefined?" border-radius:"+cssPx(r.style.radius)+"px;":"")+
    (r.style.opacity!==undefined?" opacity:"+r.style.opacity+";":"")+" }");
  }
  for(let i=0;i<texts.length;i++){
   const t=texts[i],parent=byId.get(t.regionId);
-  css.push(".ffax-v3-text-"+i+" { left:"+(t.bounds.x-parent.bounds.x)+
-   "px; top:"+(t.bounds.y-parent.bounds.y)+
-   "px; width:"+t.bounds.width+"px; height:"+t.bounds.height+"px;"+
-   (t.fontSize!==undefined?" font-size:"+t.fontSize+"px;":"")+
+  css.push(".ffax-v3-text-"+i+" { left:"+cssPx(t.bounds.x-parent.bounds.x)+
+   "px; top:"+cssPx(t.bounds.y-parent.bounds.y)+
+   "px; width:"+cssPx(t.bounds.width)+"px; height:"+cssPx(t.bounds.height)+"px;"+
+   (t.fontSize!==undefined?" font-size:"+cssPx(t.fontSize)+"px;":"")+
    (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined?" font-weight:"+t.fontWeight+";":"")+
    (t.fontColor?" color:"+t.fontColor+";":"")+
    (t.lineHeight!==undefined&&t.lineHeight!=='UNKNOWN'?" line-height:"+t.lineHeight+";":"")+
-   (t.letterSpacing!==undefined?" letter-spacing:"+t.letterSpacing+"px;":"")+" }");
+   (t.letterSpacing!==undefined?" letter-spacing:"+cssPx(t.letterSpacing)+"px;":"")+" }");
  }
  function node(r,react){
   const root=r.id==='canvas',tag=roles[r.role];
@@ -146,7 +152,9 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,appro
   '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
   '<style>'+cssOutput+'</style></head><body style="margin:0">'+markup+'</body></html>';
  return {schema:'ffax.fidelity-render-artifacts.v1',sourceSha256:scene.sourceSha256,
-  sceneRevision:scene.revision,tsx,css:cssOutput,html,regionCount:scene.regions.length,
+  sceneRevision:scene.revision,dpr,pixelWidth:scene.width,pixelHeight:scene.height,
+  cssWidth:cssPx(scene.width),cssHeight:cssPx(scene.height),
+  tsx,css:cssOutput,html,regionCount:scene.regions.length,
   textBoxCount:texts.length,
   status:'STRUCTURAL_CANDIDATE_NOT_VISUALLY_OR_FUNCTIONALLY_VERIFIED',
   warnings:['STATIC_VIEWPORT_ONLY','UNKNOWN_FONTS_AND_RASTER_ASSETS',
