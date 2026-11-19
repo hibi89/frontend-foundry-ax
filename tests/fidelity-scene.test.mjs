@@ -30,3 +30,21 @@ test('FID-05 unsafe/unauthorized edits cannot corrupt parent bounds',()=>{
  assert.throws(()=>reviseFidelityRegion(scene,{...edited,bounds:{x:0,y:0,width:100,height:100},approval:'NO'}),/OWNER_APPROVAL_REQUIRED/);
  assert.throws(()=>buildFidelityScene({...inventory(),sha256:'bad'}),/SOURCE_INVALID/);
 });
+
+test('P2-03 owner can edit valid restored scene without confidence; missing revision fails closed',()=>{
+ const s=buildFidelityScene(inventory());
+ const imported={...s,regions:s.regions.map(({confidence,...region})=>region)};
+ const result=reviseFidelityRegion(imported,{
+  regionId:'section-1-panel-1',role:'card',
+  bounds:{x:4,y:4,width:280,height:260},
+  approval:'APPROVE_LOCAL_FIDELITY_REGION_EDIT'
+ });
+ assert.equal(result.regions[2].confidence.semantics,'OWNER_REVIEWED');
+ assert.equal(result.revision,2);
+ assert.equal(imported.regions[2].confidence,undefined);
+ assert.throws(()=>reviseFidelityRegion({...s,revision:undefined},{
+  regionId:'section-1-panel-1',role:'card',
+  bounds:{x:4,y:4,width:280,height:260},
+  approval:'APPROVE_LOCAL_FIDELITY_REGION_EDIT'
+ }),/SCENE_INVALID/);
+});
