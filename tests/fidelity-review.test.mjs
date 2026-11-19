@@ -57,3 +57,23 @@ test('P2-03 visual owner receipt fails closed for forged viewport/DPR, stale pre
  assert.throws(()=>accept(diag,reference,{...capture,network:'ALLOW_ALL'}),/EVIDENCE_MISMATCH/);
  assert.throws(()=>accept(diag,reference,{...capture,scriptExecution:'ENABLED'}),/EVIDENCE_MISMATCH/);
 });
+
+test('P2-03 restored snapshot binds inner scene SHA, revision, viewport and local-only flags',()=>{
+ const approval={referenceSha256:sha,referenceWidth:600,referenceHeight:400,
+  approval:'APPROVE_LOCAL_V3_SNAPSHOT_RESTORE'};
+ const snap=createV3LocalWorkSnapshot(scene,null,null,{
+  referenceSha256:sha,approval:'APPROVE_LOCAL_V3_SNAPSHOT_EXPORT'});
+ assert.equal(restoreV3LocalWorkSnapshot(snap,approval).scene.sourceSha256,sha);
+ for(const tampered of [
+  {...snap,scene:{...snap.scene,sourceSha256:'c'.repeat(64)}},
+  {...snap,scene:{...snap.scene,revision:0}},
+  {...snap,scene:{...snap.scene,width:601,regions:snap.scene.regions.map(r=>({
+   ...r,bounds:r.id==='canvas'?{...r.bounds,width:601}:r.bounds}))}},
+  {...snap,vaultRecheckRequired:false},
+  {...snap,scope:'REMOTE_PUBLISH_ALLOWED'},
+  {...snap,f95:'95'}
+ ])assert.throws(()=>restoreV3LocalWorkSnapshot(tampered,approval),/SOURCE_MISMATCH/);
+ assert.throws(()=>restoreV3LocalWorkSnapshot(snap,{...approval,referenceWidth:601}),/SOURCE_MISMATCH/);
+ assert.throws(()=>createV3LocalWorkSnapshot({...scene,revision:undefined},null,null,{
+  referenceSha256:sha,approval:'APPROVE_LOCAL_V3_SNAPSHOT_EXPORT'}),/REFERENCE_MISMATCH/);
+});
