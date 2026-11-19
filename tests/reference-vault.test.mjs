@@ -4,7 +4,7 @@ import {mkdtemp,writeFile,readFile,rm,mkdir,symlink,lstat,link} from 'node:fs/pr
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
-import {saveLocalReference,loadLocalReference} from '../src/reference-vault.mjs';
+import {saveLocalReference,loadLocalReference,inspectLocalReference,createV3ReferenceReceipt} from '../src/reference-vault.mjs';
 const sample=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==','base64');
 const sha=createHash('sha256').update(sample).digest('hex');
 test('RF-01 immutable local PNG save, exact SHA reload, repeat idempotently',async()=>{
@@ -133,4 +133,52 @@ test('P2-01 exact 6MiB SHA image loads through bounded descriptor and larger fil
   await writeFile(join(root,contentSha+'.png'),Buffer.concat([bytes,Buffer.from([1])]));
   await assert.rejects(loadLocalReference({root,sha256:contentSha}),/UNSAFE_FILE/);
  }finally{await rm(home,{recursive:true,force:true});}
+});
+
+function exifJpeg(orientation,{width=800,height=600,endianness='II',badIfd=false}={}){
+ const tiff=Buffer.alloc(26),le=endianness==='II';
+ tiff.write(endianness,0,'ascii');
+ const u16=(v,p)=>le?tiff.writeUInt16LE(v,p):tiff.writeUInt16BE(v,p);
+ const u32=(v,p)=>le?tiff.writeUInt32LE(v,p):tiff.writeUInt32BE(v,p);
+ u16(42,2);u32(badIfd?0xfffffff0:8,4);
+ u16(1,8);u16(0x0112,10);u16(3,12);u32(1,14);u16(orientation,18);
+ const payload=Buffer.concat([Buffer.from('Exif\\0\\0','ascii'),tiff]);
+ const app1=Buffer.concat([Buffer.from([0xff,0xe1,(payload.length+2)>>8,(payload.length+2)&255]),payload]);
+ const sof=Buffer.from([0xff,0xc0,0,17,8,height>>8,height&255,width>>8,width&255,
+  3,1,0x11,0,2,0x11,0,3,0x11,0]);
+ return Buffer.concat([Buffer.from([0xff,0xd8]),app1,sof,Buffer.from([0xff,0xda,0,2,0xff,0xd9])]);
+}
+test('P2-02 JPEG EXIF 90/270 rotations produce browser-facing display dimensions and same immutable SHA',async()=>{
+ const home=await mkdtemp(join(tmpdir(),'ffax-vault-p2-exif-')),root=join(home,'vault');
+ try{
+  for(const endianness of ['II','MM'])for(const orientation of [1,2,3,4,5,6,7,8]){
+   const bytes=exifJpeg(orientation,{endianness});
+   const info=inspectLocalReference(bytes);
+   const rotated=orientation>=5;
+   assert.equal(info.width,rotated?600:800);
+   assert.equal(info.height,rotated?800:600);
+   assert.equal(info.mime,'image/jpeg');
+   const receipt=await saveLocalReference({root,bytes,sha256:info.sha256,
+    rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'});
+   assert.equal(receipt.width,info.width);
+   assert.equal(receipt.height,info.height);
+   const loaded=await loadLocalReference({root,sha256:info.sha256});
+   assert.deepEqual(loaded.bytes,bytes);
+   const v3=createV3ReferenceReceipt(loaded.receipt,{
+    approval:'APPROVE_LOCAL_REFERENCE_RECEIPT',
+    sourceType:'OWNER_GENERATED',rightsBasis:'OWNER_CREATED',
+    dpr:2,projectLabel:'EXIF rotated synthetic'});
+   assert.equal(v3.viewport.cssWidth,info.width/2);
+   assert.equal(v3.viewport.cssHeight,info.height/2);
+   assert.equal(v3.original.sha256,info.sha256);
+   assert.equal(v3.provenance.publicRedistributionAllowed,false);
+  }
+ }finally{await rm(home,{recursive:true,force:true});}
+});
+test('P2-02 JPEG invalid orientation metadata fails closed without falsely verifying a browser image',()=>{
+ for(const bad of [0,9])assert.throws(()=>inspectLocalReference(exifJpeg(bad)),/EXIF_INVALID/);
+ assert.throws(()=>inspectLocalReference(exifJpeg(6,{badIfd:true})),/EXIF_INVALID/);
+ // Header inspection never substitutes for actual browser image decode.
+ const info=inspectLocalReference(exifJpeg(6));
+ assert.equal(info.verification,'HEADER_AND_SHA_ONLY_BROWSER_DECODE_REQUIRED');
 });
