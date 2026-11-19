@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "a6f4120a8b61086b60cdcbfce15200de3fe042d7",
+  "auditSourceHead": "9a325690aea45f3980ffb58880a33ddd0d42d8f8",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -568,7 +568,8 @@
       {
         "id": "P2-04",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "Real customer app data/auth/API/routes and actual full build"
+        "remaining": "Real customer app data/auth/API/routes and actual full build",
+        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test"
       },
       {
         "id": "P2-05",
@@ -626,6 +627,28 @@
       },
       "safety": "No owner original files, network, main or Production touched",
       "referenceImagesUsed": 0
+    },
+    "latestP204ReviewAudit": {
+      "sourceSha": "9a325690aea45f3980ffb58880a33ddd0d42d8f8",
+      "state": "SOURCE_COMMITTED_SYNTAX_PARSED_CI_NOT_VERIFIED",
+      "scope": "P2-04 ISOLATED REACT SOURCE BINDINGS / REVIEW DIFF",
+      "added": "read-only audit-v3 verifying original manifest digest, protected source SHA, 3 generated file SHAs, exact review.patch sha/content, no customer runtime mutation",
+      "changedPaths": [
+        "src/forge-safe-integration.mjs",
+        "scripts/forge_integration_review.mjs",
+        "tests/fidelity-v3-integration.test.mjs"
+      ],
+      "testsAdded": [
+        "normal audit and CLI",
+        "patch tampering denies audit and rollback",
+        "protected auth mutation denies audit",
+        "generated FidelityScene.css mutation denies audit"
+      ],
+      "executed": "V8 parser accepted transformed file syntax only; Node ESM/test suite and GitHub Actions NOT_VERIFIED",
+      "ownerEnvironment": "NOT_RUN",
+      "independentSecurityAudit": "NOT_RUN",
+      "customerAuthApiRoutes": "NOT_RUN",
+      "ownerOriginalFilesTouched": false
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -657,7 +680,7 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "a6f4120a8b61086b60cdcbfce15200de3fe042d7",
+  "lastSourceHead": "9a325690aea45f3980ffb58880a33ddd0d42d8f8",
   "lastEvidenceRun": {
     "id": 44510382267,
     "sha": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
@@ -791,6 +814,13 @@
       ],
       "commit": "a6f4120a8b61086b60cdcbfce15200de3fe042d7",
       "meaning": "Single-descriptor vault reads with no-follow on supported OS, inode/link/size/mtime stability checks; two link regression tests. Isolated 3/3 PASS, repository CI unverified."
+    },
+    {
+      "units": [
+        "P2-04"
+      ],
+      "commit": "9a325690aea45f3980ffb58880a33ddd0d42d8f8",
+      "meaning": "Source-only audit-v3, exact isolated V3 review diff integrity, abort rollback on changed review patch; 2 new tests. Actual Node CI and customer runtime NOT_VERIFIED."
     }
   ],
   "sharedVerificationPaths": [
