@@ -1,0 +1,432 @@
+{
+  "schema": "ffax.v3.swu.register.v1",
+  "dateKst": "2026-11-19",
+  "repo": "hibi89/frontend-foundry-ax",
+  "branch": "feature/ffax-reference-fidelity-20261118",
+  "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
+  "auditSourceHead": "b0207efe922276f2b6ebdc374e216e646b10ac85",
+  "baseline": {
+    "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
+    "count": 25,
+    "sourceCandidate": 25,
+    "scope": "V2.1 original source-only code candidate; not V3 readiness"
+  },
+  "incremental": {
+    "count": 12,
+    "sourceCandidate": 2,
+    "units": [
+      {
+        "swuId": "FFAX-V3-FID-01",
+        "deltaBeyondBaseline": "RF-01",
+        "goal": "New V3 ReferenceBundle rights/viewport provenance contract beyond RF-01",
+        "reqIds": [
+          "REQ-01",
+          "REQ-06",
+          "REQ-10",
+          "REQ-11"
+        ],
+        "dependencies": [],
+        "allowedPaths": [
+          "src/reference-vault.mjs",
+          "src/forge-api.mjs"
+        ],
+        "implementationAcceptance": "User-provided source+rights+viewport → versioned local receipt; missing provenance denied",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-02",
+        "deltaBeyondBaseline": "RF-02",
+        "goal": "Multi-region observed source-space geometry beyond RF-02 legacy three-band palette",
+        "reqIds": [
+          "REQ-03",
+          "REQ-06"
+        ],
+        "dependencies": [],
+        "allowedPaths": [
+          "src/fidelity-geometry.mjs",
+          "src/reference-analysis.mjs",
+          "src/app.mjs",
+          "index.html"
+        ],
+        "implementationAcceptance": "Actual browser image intake → approximate nested image bounds visible/exportable; invalid pixels denied",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "5ecfbe9e91bb120411cdabc673c1c9b46281d47a",
+        "p1LocalCheck": "NODE_TESTS_PASS_PER_SOURCE_SMOKE_WORKFLOW; ACTUAL_BROWSER_REGRESSION_UNDER_RECHECK",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-03",
+        "deltaBeyondBaseline": "RF-02",
+        "goal": "Owner-correctable OCR/text bounding boxes beyond existing unknown-text status",
+        "reqIds": [
+          "REQ-03",
+          "REQ-06"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-02"
+        ],
+        "allowedPaths": [
+          "src/fidelity-typography.mjs",
+          "src/forge-api.mjs"
+        ],
+        "implementationAcceptance": "Image region → local text box + confidence + manual correction; OCR absent stays UNKNOWN",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-04",
+        "deltaBeyondBaseline": "RF-02",
+        "goal": "Supplied image/font license manifest and required asset gating beyond RF-02 fallback",
+        "reqIds": [
+          "REQ-06",
+          "REQ-10",
+          "REQ-11"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-01",
+          "FFAX-V3-FID-02"
+        ],
+        "allowedPaths": [
+          "src/reference-assets.mjs",
+          "src/fidelity-assets.mjs"
+        ],
+        "implementationAcceptance": "User-supplied allowed asset → SHA/rights/typed manifest; unknown source blocks publication",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-05",
+        "deltaBeyondBaseline": "RF-03",
+        "goal": "Nested FidelityScene with owner geometry and semantics correction beyond RF-03 owner band labels",
+        "reqIds": [
+          "REQ-02",
+          "REQ-03",
+          "REQ-06"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-02"
+        ],
+        "allowedPaths": [
+          "src/fidelity-scene.mjs",
+          "src/app.mjs",
+          "index.html"
+        ],
+        "implementationAcceptance": "Browser observed geometry → typed parent/child scene → owner edit/revision/export; invalid parent rejected",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "daec7c6aef2d0dcff54806af6f699a03ff4f6a8c",
+        "p1LocalCheck": "NODE_TESTS_PASS_PER_SOURCE_SMOKE_WORKFLOW; ACTUAL_BROWSER_REGRESSION_UNDER_RECHECK",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-06",
+        "deltaBeyondBaseline": "RF-03",
+        "goal": "Real nested scene-to-TSX/CSS renderer beyond limited 17 flat legacy components",
+        "reqIds": [
+          "REQ-03",
+          "REQ-04",
+          "REQ-07"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-05",
+          "FFAX-V3-FID-04"
+        ],
+        "allowedPaths": [
+          "src/core.mjs",
+          "src/fidelity-renderer.mjs"
+        ],
+        "implementationAcceptance": "Owner-reviewed region tree → CSS layout and interactive React source; unsafe styling refused",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-07",
+        "deltaBeyondBaseline": "RF-04",
+        "goal": "Source-scene/font/asset readiness bound to exact real Chromium capture receipt",
+        "reqIds": [
+          "REQ-06",
+          "REQ-09",
+          "REQ-12"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-06"
+        ],
+        "allowedPaths": [
+          "src/forge-runner.mjs",
+          "scripts/forge_capture.mjs"
+        ],
+        "implementationAcceptance": "Scene source code → exact viewport/font-loaded PNG+receipt; timeout/missing asset refusal",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-08",
+        "deltaBeyondBaseline": "RF-05",
+        "goal": "Geometry/typography/assets/colors/effects F95 region scoring distinct from pixel-only RF-05",
+        "reqIds": [
+          "REQ-05",
+          "REQ-06",
+          "REQ-09"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-07"
+        ],
+        "allowedPaths": [
+          "src/fidelity-score.mjs",
+          "src/forge-convergence.mjs"
+        ],
+        "implementationAcceptance": "Reference+actual browser render → bounded region metric report or UNASSESSED with reasons",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-09",
+        "deltaBeyondBaseline": "RF-06",
+        "goal": "Layout/typography/asset-aware typed correction beyond existing RF-06 spacing and alignment",
+        "reqIds": [
+          "REQ-03",
+          "REQ-05",
+          "REQ-09",
+          "REQ-10"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-08",
+          "FFAX-V3-FID-05"
+        ],
+        "allowedPaths": [
+          "src/forge-correction.mjs",
+          "src/fidelity-patch.mjs"
+        ],
+        "implementationAcceptance": "Ranked visual error → reviewed candidate-only typed patch+rollback; owner lock denied",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-10",
+        "deltaBeyondBaseline": "RF-07",
+        "goal": "Complete reference/image scene editing, F95 difference view and owner acceptance GUI beyond RF-07",
+        "reqIds": [
+          "REQ-05",
+          "REQ-06",
+          "REQ-10"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-09",
+          "FFAX-V3-FID-05"
+        ],
+        "allowedPaths": [
+          "src/design-forge-ui.mjs",
+          "src/forge-compare-ui.mjs",
+          "src/app.mjs"
+        ],
+        "implementationAcceptance": "Select image→edit region→reconstruct→visual issues→accept and export receipt; error/resume",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-11",
+        "deltaBeyondBaseline": "RF-08",
+        "goal": "Production-grade app data/auth/routes binding evidence beyond RF-08 draft integration planning",
+        "reqIds": [
+          "REQ-04",
+          "REQ-08",
+          "REQ-10"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-10",
+          "FFAX-V3-FID-06"
+        ],
+        "allowedPaths": [
+          "src/forge-safe-integration.mjs",
+          "src/github-compare-review.mjs"
+        ],
+        "implementationAcceptance": "Approved project contract → scoped isolated React bindings and diff; original remains unchanged",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      },
+      {
+        "swuId": "FFAX-V3-FID-12",
+        "deltaBeyondBaseline": "IAE_DEV_TARGET",
+        "goal": "Versioned IAE_dev reference input and read-only result adapter beyond native FFAX usage",
+        "reqIds": [
+          "REQ-01",
+          "REQ-06",
+          "REQ-12"
+        ],
+        "dependencies": [
+          "FFAX-V3-FID-01",
+          "FFAX-V3-FID-10"
+        ],
+        "allowedPaths": [
+          "src/forge-api.mjs",
+          "src/server.mjs"
+        ],
+        "implementationAcceptance": "Local approved package → FFAX job→read-only status/receipts; unapproved execution denied",
+        "p1Status": "NOT_IMPLEMENTED",
+        "evidenceSha": null,
+        "p1LocalCheck": "NOT_RUN",
+        "p2Status": "NOT_RUN",
+        "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
+        "complexity": {
+          "S": 1,
+          "C": 1,
+          "I": 0,
+          "D": 0,
+          "U": 0,
+          "total": 2,
+          "description": "provisional single browser or local adapter vertical function; split if actual scope exceeds 1 SWU"
+        }
+      }
+    ]
+  },
+  "basis": "37 independent source-slice outcomes = 25 preserved baseline SWUs + 12 explicit NEW V3 deltas beyond baseline. Each V3 unit excludes its inherited baseline functionality. No test-only/document-only credits.",
+  "p1": {
+    "implementedUnverified": 27,
+    "total": 37,
+    "percent": 72.97,
+    "state": "SOURCE_CANDIDATES_NOT_OFFICIAL_WEIGHTED_AC"
+  },
+  "p2": {
+    "newV3AcceptanceVerified": 0,
+    "newV3AcceptanceTotal": 8,
+    "newV3Percent": 0,
+    "officialAC12Weighted": "UNASSESSED",
+    "oldSelfVerifiedCI": "HISTORIC_4_OF_4_CI_SUCCESS",
+    "newV3IndependentAudit": "NOT_RUN"
+  },
+  "f95": "NOT_RUN; 95 point user quality target NOT_VERIFIED",
+  "caveats": [
+    "FID-02 and FID-05 structural code+Node local tests present; browser reference flow had broken module allowlist and is being rechecked after source fix b21315f7.",
+    "Official current V3 P2 verification percent based on 12 AC evidence remains UNASSESSED; 0/8 is only the additional V3 acceptance checklist.",
+    "No user-approved release or changes to main, Production, permissions, customer originals or paid AI."
+  ],
+  "release": "HOLD"
+}
