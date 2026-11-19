@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {inspectReactProject} from '../src/workspace.mjs';
 import {main as integrationCli} from '../scripts/forge_integration_review.mjs';
-import {prepareV3FidelityIntegration,rollbackV3FidelityIntegration} from '../src/forge-safe-integration.mjs';
+import {prepareV3FidelityIntegration,rollbackV3FidelityIntegration,auditV3FidelityIntegration} from '../src/forge-safe-integration.mjs';
 const hash='a'.repeat(64);
 const scene={schema:'ffax.fidelity-scene.v1',sourceSha256:hash,width:640,height:400,revision:1,regions:[
  {id:'canvas',role:'canvas',parentId:null,bounds:{x:0,y:0,width:640,height:400},style:{background:'#ffffff'}},
@@ -95,6 +95,47 @@ test('FID-11 real CLI prepare-v3/rollback-v3 roundtrip preserves customer app by
   const undone=await integrationCli(['rollback-v3','--workdir',result.workDir,
    '--approval','APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK']);
   assert.equal(undone.state,'ROLLED_BACK_IN_ISOLATED_COPY');
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+
+test('P2-04 V3 review-only audit detects exact patch tampering and preserves originals',async()=>{
+ const f=await fixture();
+ try{
+  const result=await prepareV3FidelityIntegration({source:f.source,dest:f.dest,jobId:'v3-audit-01',
+   scene,typography,contract:contract(f.project.digest),approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'});
+  await assert.rejects(auditV3FidelityIntegration({workDir:result.workDir}),/AUDIT_APPROVAL_REQUIRED/);
+  const audit=await auditV3FidelityIntegration({workDir:result.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_AUDIT'});
+  assert.equal(audit.state,'P2_STATIC_ISOLATED_REVIEW_INTEGRITY_PASS');
+  assert.equal(audit.generatedFiles,3);
+  assert.equal(audit.customerAuthRuntimeVerified,false);
+  assert.equal(audit.customerApiRuntimeVerified,false);
+  assert.equal(audit.fullCustomerBuildVerified,false);
+  const viaCli=await integrationCli(['audit-v3','--workdir',result.workDir,
+   '--approval','APPROVE_LOCAL_V3_INTEGRATION_AUDIT']);
+  assert.equal(viaCli.verifiedDiffSha256,audit.verifiedDiffSha256);
+  await writeFile(result.diffPath,'diff --git a/malicious b/malicious\n');
+  await assert.rejects(auditV3FidelityIntegration({workDir:result.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_AUDIT'}),/DIFF_CHANGED/);
+  await assert.rejects(rollbackV3FidelityIntegration({workDir:result.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK'}),/DIFF_CHANGED/);
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+  assert.match(await readFile(join(result.sourceDir,'src','ffax','FidelityBindings.tsx'),'utf8'),/function FidelityBindings/);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+test('P2-04 V3 audit refuses modified protected auth and generated source',async()=>{
+ const f=await fixture();
+ try{
+  const r=await prepareV3FidelityIntegration({source:f.source,dest:f.dest,jobId:'v3-audit-02',
+   scene,typography,contract:contract(f.project.digest),approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'});
+  const audit=()=>auditV3FidelityIntegration({workDir:r.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_AUDIT'});
+  await writeFile(join(r.sourceDir,'src','auth.ts'),'export const token=()=> "tampered";\n');
+  await assert.rejects(audit(),/EXISTING_FILE_CHANGED/);
+  await writeFile(join(r.sourceDir,'src','auth.ts'),'export const token=()=> "unchanged";\n');
+  await writeFile(join(r.sourceDir,'src','ffax','FidelityScene.css'),'body { color:red }');
+  await assert.rejects(audit(),/GENERATED_CHANGED/);
   assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
  }finally{await rm(f.root,{recursive:true,force:true});}
 });
