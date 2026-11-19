@@ -186,6 +186,37 @@
          <p id="fidelity-region-status" class="helper" role="status">이미지를 선택하면 계층화된 영역 후보를 표시합니다. 폰트·OCR·React 구현은 별도 단계입니다.</p>
        </section>
 
+       <section aria-label="V3 텍스트 경계 수동 정정">
+         <p class="subheading">V3 · 글자 영역 직접 기록 (OCR 미탑재)</p>
+         <p class="helper">위 영역 선택에서 텍스트가 속한 구역을 고르고, 실제 이미지의 텍스트와 x,y,width,height 좌표를 입력합니다. 자동 OCR이나 폰트 식별을 실행했다고 주장하지 않습니다.</p>
+         <label for="fidelity-text-content">실제 이미지에서 직접 읽은 텍스트</label>
+         <input id="fidelity-text-content" maxlength="200" placeholder="오늘의 역학달력" />
+         <label for="fidelity-text-bounds">텍스트 x,y,width,height (위 선택 영역 안)</label>
+         <input id="fidelity-text-bounds" maxlength="60" placeholder="20,20,160,40" />
+         <label class="check"><input id="fidelity-text-consent" type="checkbox" /> 위치와 문구를 직접 검토했습니다.</label>
+         <button id="fidelity-text-add" type="button" class="ghost-btn">글자 영역 기록</button>
+         <button id="fidelity-text-export" type="button" class="ghost-btn" disabled>확인한 텍스트 좌표 JSON 저장</button>
+         <p id="fidelity-text-status" class="helper" role="status">한글·영문·숫자 수동 교정. 폰트·OCR confidence UNKNOWN.</p>
+       </section>
+       <section aria-label="V3 원본 이미지·폰트 자산 목록">
+         <p class="subheading">V3 · 로컬 이미지/폰트 원본 SHA 목록</p>
+         <label for="fidelity-asset-file">사용 권한이 있는 로고·그림·폰트 한 파일</label>
+         <input id="fidelity-asset-file" type="file" accept=".png,.jpg,.jpeg,.webp,.woff,.woff2,.ttf,.otf" />
+         <label for="fidelity-asset-role">파일 용도</label>
+         <select id="fidelity-asset-role">
+           <option value="logo">logo</option><option value="hero-photo">hero-photo</option>
+           <option value="illustration">illustration</option><option value="brand-font">brand-font</option>
+           <option value="icon">icon</option>
+         </select>
+         <label class="check"><input id="fidelity-asset-consent" type="checkbox" /> 이 로컬 파일을 참고용으로 사용할 권리를 확인했습니다. FFAX는 자동 검증하지 않습니다.</label>
+         <button id="fidelity-asset-add" type="button" class="ghost-btn">파일 종류·SHA 검사 후 기록</button>
+         <label for="fidelity-asset-required">필수 자산 종류 (콤마 구분; 위 역할 중 선택)</label>
+         <input id="fidelity-asset-required" maxlength="120" placeholder="logo,brand-font" />
+         <button id="fidelity-asset-export" type="button" class="ghost-btn" disabled>필수 자산 누락 확인 / JSON 저장</button>
+         <p id="fidelity-asset-status" class="helper" role="status">원본 자산 파일은 자동으로 저장/업로드되지 않습니다. SHA 기록은 렌더링 가능한 원본 제공을 의미하지 않습니다.</p>
+       </section>
+
+
 
       <p class="subheading">외부 이미지에서 실제 UI 코드로 (사용자 영역 지정)</p>
       <p class="helper">자동 분석으로 알 수 없는 텍스트·컴포넌트는 직접 입력합니다. 한 줄에 타입|텍스트를 쓰면 위·중간·아래 영역 순서대로 FFAX React 컴포넌트를 생성합니다. 복원 불가능한 원본 일러스트·폰트·숨겨진 동작은 별도 검토가 필요합니다.</p>

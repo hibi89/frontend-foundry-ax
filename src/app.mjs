@@ -74,18 +74,22 @@ function renderCanvas(){
 function updateAll(updateBrief=true){if(updateBrief)renderBrief();renderCanvas();renderInspector();renderReference();}
 function run(command){try{history.exec(command);updateAll();el('qa-report').textContent='수정 이후 다시 검증해야 합니다.';el('qa-report').className='qa-result';}catch(e){log(e.message,true);}}
 function edit(prop,value){if(!selected)return;run({kind:'update',id:selected,prop,value});}
-let latestReferenceInventory=null,latestFidelityScene=null;
+let latestReferenceInventory=null,latestFidelityScene=null,latestTypographyDraft=null,latestAssetManifest=null;
 function updateReference(){
  const file=el('reference-file').files?.[0];
  if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
  if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
  (async()=>{
-  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;
+  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;el('fidelity-asset-export').disabled=true;
   try{
    const {analyzeUserReference}=await import('./reference-analysis.mjs');
    const inventory=await analyzeUserReference(file,{rightsConfirmed:true});
    const {buildFidelityScene}=await import('./fidelity-scene.mjs');
    const scene=buildFidelityScene(inventory);
+   const {createTypographyDraft}=await import('./fidelity-typography.mjs');
+   const {createFidelityAssetManifest}=await import('./fidelity-assets.mjs');
+   latestTypographyDraft=createTypographyDraft(scene);
+   latestAssetManifest=createFidelityAssetManifest(inventory.sha256);
    latestFidelityScene=scene;
    const selector=el('fidelity-region-select');selector.replaceChildren();
    for(const region of scene.regions.filter(x=>x.id!=='canvas')){
@@ -319,11 +323,68 @@ el('fidelity-region-apply').addEventListener('click',async()=>{
    regionId:el('fidelity-region-select').value,role:el('fidelity-region-role').value,
    bounds:{x:raw[0],y:raw[1],width:raw[2],height:raw[3]},
    approval:'APPROVE_LOCAL_FIDELITY_REGION_EDIT'});
+  const {createTypographyDraft}=await import('./fidelity-typography.mjs');
+  latestTypographyDraft=createTypographyDraft(latestFidelityScene);
+  el('fidelity-text-export').disabled=true;
+  el('fidelity-text-status').textContent='영역 좌표 변경으로 이전 텍스트 후보를 초기화했습니다. 다시 입력해야 합니다.';
   status.textContent='영역 정정 저장됨 · revision '+latestFidelityScene.revision+' · 원본 SHA 보존 · 실제 렌더 일치 미검증';
  }catch(e){status.textContent='영역 정정 거부: '+e.message;}
  finally{el('fidelity-region-consent').checked=false;}
 });
 
+
+
+el('fidelity-text-add').addEventListener('click',async()=>{
+ const status=el('fidelity-text-status');
+ try{
+  if(!latestFidelityScene||!latestTypographyDraft)throw Error('FIDELITY_TEXT_SCENE_REQUIRED');
+  if(!el('fidelity-text-consent').checked)throw Error('FIDELITY_TEXT_OWNER_APPROVAL_REQUIRED');
+  const raw=el('fidelity-text-bounds').value.split(',').map(s=>Number(s.trim()));
+  if(raw.length!==4||raw.some(n=>!Number.isInteger(n)))throw Error('FIDELITY_TEXT_BOUNDS_INVALID');
+  const {addOwnerTextBox}=await import('./fidelity-typography.mjs');
+  latestTypographyDraft=addOwnerTextBox(latestTypographyDraft,latestFidelityScene,{
+   regionId:el('fidelity-region-select').value,text:el('fidelity-text-content').value,
+   bounds:{x:raw[0],y:raw[1],width:raw[2],height:raw[3]},
+   approval:'APPROVE_FIDELITY_LOCAL_TEXT_LABEL'});
+  el('fidelity-text-export').disabled=false;
+  status.textContent='직접 확인한 텍스트 '+latestTypographyDraft.textBoxes.length+
+   '개 기록됨 · OCR/폰트 자동 인식은 미실행, 원본 불변';
+ }catch(e){status.textContent='텍스트 위치 거부: '+e.message;}
+ finally{el('fidelity-text-consent').checked=false;}
+});
+el('fidelity-text-export').addEventListener('click',()=>{
+ if(latestTypographyDraft?.textBoxes.length)save('FFAX-V3-Text-Boxes.json',
+  JSON.stringify(latestTypographyDraft,null,2),'application/json');
+});
+el('fidelity-asset-add').addEventListener('click',async()=>{
+ const status=el('fidelity-asset-status'),button=el('fidelity-asset-add');
+ try{
+  if(!latestAssetManifest)throw Error('FIDELITY_ASSET_REFERENCE_REQUIRED');
+  if(!el('fidelity-asset-consent').checked)throw Error('FIDELITY_ASSET_OWNER_APPROVAL_REQUIRED');
+  const file=el('fidelity-asset-file').files?.[0];
+  const {addFidelityAssetFile}=await import('./fidelity-assets.mjs');
+  button.disabled=true;
+  latestAssetManifest=await addFidelityAssetFile(latestAssetManifest,file,{
+   kind:el('fidelity-asset-role').value,approval:'APPROVE_LOCAL_FIDELITY_ASSET'});
+  el('fidelity-asset-export').disabled=false;
+  status.textContent='로컬 자산 SHA 기록 '+latestAssetManifest.assets.length+
+   '개 · 원본 파일 bytes 미저장, 최종 사용권·React 자산 연결 미검증';
+ }catch(e){status.textContent='자산 기록 거부: '+e.message;}
+ finally{button.disabled=false;el('fidelity-asset-consent').checked=false;}
+});
+el('fidelity-asset-export').addEventListener('click',async()=>{
+ const status=el('fidelity-asset-status');
+ try{
+  if(!latestAssetManifest)throw Error('FIDELITY_ASSET_REFERENCE_REQUIRED');
+  const requiredKinds=el('fidelity-asset-required').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const {gateFidelityAssets}=await import('./fidelity-assets.mjs');
+  latestAssetManifest=gateFidelityAssets(latestAssetManifest,{
+   requiredKinds,approval:'APPROVE_FIDELITY_ASSET_REQUIREMENTS'});
+  save('FFAX-V3-Asset-Manifest.json',JSON.stringify(latestAssetManifest,null,2),'application/json');
+  status.textContent='자산 점검: '+latestAssetManifest.state+
+   ' · 누락 '+latestAssetManifest.missingKinds.join(',')+' · 공개/렌더링 승인 아님';
+ }catch(e){status.textContent='자산 요구조건 거부: '+e.message;}
+});
 
 el('reference-owner-map').addEventListener('click',async()=>{
  const button=el('reference-owner-map'),status=el('reference-owner-map-status');
