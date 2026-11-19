@@ -2,6 +2,8 @@
 
 > **[2026-11-18 KST · OWNER-SELECTED V2.1 DESIGN FORGE CANONICAL ADDITION]** 사용자는 **레퍼런스를 확정하기 전 디자인 추천·개선·다중 시안·사용자 지시 반영**까지 FFAX 내부화하도록 지시했다. 이 §0A는 아래 기존 §1의 '레퍼런스 이미지가 이미 존재한다'는 묵시적 전제를 대체한다. **신규 Design Forge 경로**와 **기존 외부 이미지 역설계 경로**를 명확히 나누며 나머지 보존·인증·비밀/원본·P1/P2·출시 게이트는 그대로다. 본문은 **확정 설계**이지 구현/검증 완료가 아니다.
 
+> **[2026-11-19 KST · OWNER FINAL FFAX V3 · CURRENT PRIORITY]** 사용자가 고른 레퍼런스 이미지/사이트/영상의 레이아웃·톤·타이포·자산·효과를 실제 React/CSS로 **가능한 한 높은 충실도로 재현**하는 것을 FFAX의 최우선 결과로 확정. **[V3 Reference Fidelity First 정본](FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md)**은 기존 외부 레퍼런스 복원 경로에 대한 최신 목표/수용 기준이다. 아래 §0A Design Forge 추천·변형·A/B/C 생성은 보존하며 사용자 기본 재현 모드의 우선순위만 바뀐다. REQ-01..12, 기존 WF/12AC 총100점, 17 컴포넌트, 25 SWU 기존 코드·실패 이력/CI 증거 및 권리·보안·Owner GO 불변. **F95>=95는 목표일 뿐 실증되지 않았으며, 신규 기능 P1/P2 공식율 UNASSESSED, RELEASE HOLD.**
+
 ## 0A. Design Forge — 레퍼런스 생성·개선·추천·승인 (V2.1 최우선 신규 진입단계)
 
 ### 0A-1. 핵심 결정: GitHub 기술 재사용 + FFAX 고유 엔진, 새 저장소 없음
