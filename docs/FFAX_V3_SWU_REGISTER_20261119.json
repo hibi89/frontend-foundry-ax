@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "9a325690aea45f3980ffb58880a33ddd0d42d8f8",
+  "auditSourceHead": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -568,8 +568,8 @@
       {
         "id": "P2-04",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "Real customer app data/auth/API/routes and actual full build",
-        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test"
+        "remaining": "Real customer app data/auth/API/routes and full build; current SHA full source CI and independent audit",
+        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED"
       },
       {
         "id": "P2-05",
@@ -649,6 +649,20 @@
       "independentSecurityAudit": "NOT_RUN",
       "customerAuthApiRoutes": "NOT_RUN",
       "ownerOriginalFilesTouched": false
+    },
+    "latestP204ParentSafety": {
+      "codeSha": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
+      "scope": "P2-04 V3 review audit and rollback",
+      "status": "SOURCE_COMMITTED_STANDALONE_GUARD_PASS_FULL_REPO_CI_NOT_VERIFIED",
+      "sourceCommit": "4b93bdd2649f727ac8e69f3d85c08681d88cae40",
+      "testCommit": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
+      "change": "Refuse symlink/junction ancestor or generated directory before audit and before destructive rollback, including matching file SHA substitution",
+      "test": "New cross-platform test with owner-synthetic external directory; separate exact guard Node22 Linux reproduction 3/3 PASS; full repository tests/CI NOT_VERIFIED",
+      "ownerOriginalModified": false,
+      "mainChanged": false,
+      "productionChanged": false,
+      "realCustomerRuntime": "NOT_RUN",
+      "ownerRealReferenceCount": 0
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -680,7 +694,7 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "9a325690aea45f3980ffb58880a33ddd0d42d8f8",
+  "lastSourceHead": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
   "lastEvidenceRun": {
     "id": 44510382267,
     "sha": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
@@ -821,6 +835,13 @@
       ],
       "commit": "9a325690aea45f3980ffb58880a33ddd0d42d8f8",
       "meaning": "Source-only audit-v3, exact isolated V3 review diff integrity, abort rollback on changed review patch; 2 new tests. Actual Node CI and customer runtime NOT_VERIFIED."
+    },
+    {
+      "units": [
+        "P2-04"
+      ],
+      "commit": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
+      "meaning": "P2 rollback symlink ancestor/ffax directory redirection guard before unlink; protects customer original even when generated files have matching SHA. Standalone guard 3/3 PASS, full repo CI pending."
     }
   ],
   "sharedVerificationPaths": [
