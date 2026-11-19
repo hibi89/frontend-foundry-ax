@@ -260,14 +260,14 @@ export function validateV3BindingContract(contract,scene,typography,originalDige
   intentBindings:contract.intentBindings.map(t=>({...t}))};
 }
 function buildV3BindingsSource(contract){
- const textMappings=contract.textBindings.map(t=>'  '+JSON.stringify(t.slotId)+': data['+JSON.stringify(t.dataKey)+'] ?? '+JSON.stringify('')+',').join('\n');
+ const textMappings=contract.textBindings.map(t=>'  if(typeof data['+JSON.stringify(t.dataKey)+'] === "string") textSlots['+JSON.stringify(t.slotId)+'] = data['+JSON.stringify(t.dataKey)+'];').join('\n');
  const intents=contract.intentBindings.map(t=>'  '+JSON.stringify(t.regionId)+': '+JSON.stringify(t.intent)+',').join('\n');
  return 'import * as React from "react";\nimport FidelityScene from "./FidelityScene";\n'+
   'export type FidelityBindingData = Record<string,string>;\n'+
   'export type FidelityBindingProps = { data: FidelityBindingData; onIntent?: (intent:string)=>void };\n'+
   'const INTENTS:Record<string,string> = {\n'+intents+'\n};\n'+
   'export default function FidelityBindings({data,onIntent}:FidelityBindingProps){\n'+
-  ' const textSlots:Record<string,string> = {\n'+textMappings+'\n };\n'+
+  ' const textSlots:Record<string,string> = {};\n'+textMappings+'\n'+
   ' const handleIntent=(regionId:string)=>{const intent=INTENTS[regionId]; if(intent!==undefined)onIntent?.(intent);};\n'+
   ' return <FidelityScene textSlots={textSlots} onAction={handleIntent}/>;\n}\n';
 }
