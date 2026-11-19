@@ -92,7 +92,7 @@ async function typeAndReactProbe(root){
  });
  const bridge=compile('FidelityBindings.tsx',id=>{
   if(id==='react')return React;
-  if(id==='./FidelityScene')return app;
+  if(id==='./FidelityScene.js')return app;
   throw Error('V3_P2_IMPORT_FORBIDDEN');
  });
  const overridden=ReactDOMServer.renderToStaticMarkup(

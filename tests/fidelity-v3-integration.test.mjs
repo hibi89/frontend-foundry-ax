@@ -40,6 +40,7 @@ test('FID-11 approved data and intent bridge generates three real files in isola
  assert.doesNotMatch(code,/\?\? ""/);
  assert.match(code,/onIntent\?\.\(intent\)/);
  assert.match(code,/region-button/);
+ assert.match(code,/from "\.\/FidelityScene\.js"/);
  assert.match(await readFile(join(result.sourceDir,'src','ffax','FidelityScene.tsx'),'utf8'),/function FidelityScene/);
  assert.match(await readFile(result.diffPath,'utf8'),/diff --git a\/src\/ffax\/FidelityBindings.tsx/);
  assert.equal(result.receipt.protectedFiles[0].path,'src/auth.ts');

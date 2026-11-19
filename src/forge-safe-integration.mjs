@@ -262,7 +262,7 @@ export function validateV3BindingContract(contract,scene,typography,originalDige
 function buildV3BindingsSource(contract){
  const textMappings=contract.textBindings.map(t=>'  if(typeof data['+JSON.stringify(t.dataKey)+'] === "string") textSlots['+JSON.stringify(t.slotId)+'] = data['+JSON.stringify(t.dataKey)+'];').join('\n');
  const intents=contract.intentBindings.map(t=>'  '+JSON.stringify(t.regionId)+': '+JSON.stringify(t.intent)+',').join('\n');
- return 'import * as React from "react";\nimport FidelityScene from "./FidelityScene";\n'+
+ return 'import * as React from "react";\nimport FidelityScene from "./FidelityScene.js";\n'+
   'export type FidelityBindingData = Record<string,string>;\n'+
   'export type FidelityBindingProps = { data: FidelityBindingData; onIntent?: (intent:string)=>void };\n'+
   'const INTENTS:Record<string,string> = {\n'+intents+'\n};\n'+
