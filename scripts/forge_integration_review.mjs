@@ -3,16 +3,21 @@
 import {readFile,stat,realpath} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {prepareForgeIntegration,rollbackForgeIntegration,auditForgeIntegration,planForgeDraftPR,prepareV3FidelityIntegration,rollbackV3FidelityIntegration} from '../src/forge-safe-integration.mjs';
+import {prepareForgeIntegration,rollbackForgeIntegration,auditForgeIntegration,planForgeDraftPR,prepareV3FidelityIntegration,rollbackV3FidelityIntegration,auditV3FidelityIntegration} from '../src/forge-safe-integration.mjs';
 async function main(argv){
  const mode=argv.shift();
- if(!['prepare','rollback','audit','plan','prepare-v3','rollback-v3'].includes(mode)||argv.length%2!==0)throw Error('FORGE_INTEGRATION_USAGE');
+ if(!['prepare','rollback','audit','plan','prepare-v3','rollback-v3','audit-v3'].includes(mode)||argv.length%2!==0)throw Error('FORGE_INTEGRATION_USAGE');
  const args={};
  for(let i=0;i<argv.length;i+=2){
   const key=argv[i],val=argv[i+1];
   if(!['--bundle','--source','--dest','--job','--workdir','--approval','--repo','--branch','--base','--commit','--scene','--typography','--assets','--contract'].includes(key)||
      Object.hasOwn(args,key)||!val)throw Error('FORGE_INTEGRATION_ARGUMENT_INVALID');
   args[key]=val;
+ }
+ if(mode==='audit-v3'){
+  if(Object.keys(args).sort().join(',')!=='--approval,--workdir')
+   throw Error('FORGE_V3_INTEGRATION_USAGE');
+  return auditV3FidelityIntegration({workDir:args['--workdir'],approval:args['--approval']});
  }
  if(mode==='rollback-v3'){
   if(Object.keys(args).sort().join(',')!=='--approval,--workdir')throw Error('FORGE_V3_INTEGRATION_USAGE');
