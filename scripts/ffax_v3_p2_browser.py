@@ -157,6 +157,23 @@ try:
         review=download_json(page,'#fidelity-review-export',ART/'v3-p2-review.json')
         check('owner-visual-review-not-release',review['publishApproved'] is False
               and review['f95']=='UNASSESSED' and review['ownerVisualAccepted'] is True)
+        # Owner text mutation must invalidate a previously accepted visual
+        # review. The new scene then requires fresh Chromium capture + score.
+        check('korean-text-owner-observed-in-real-chromium',REPORT['ownerKoreanTextObserved'])
+        page.locator('#fidelity-text-content').fill('변경된 한국어 텍스트')
+        page.locator('#fidelity-text-consent').check()
+        page.locator('#fidelity-text-add').click()
+        wait_for_good(page,'#fidelity-text-status','직접 확인한 텍스트 2개')
+        check('stale-visual-approval-revoked-after-text-mutation',
+              page.locator('#fidelity-review-export').is_disabled()
+              and page.locator('#fidelity-review-accept').is_disabled()
+              and not page.locator('#fidelity-capture-image').get_attribute('src'))
+        page.locator('#fidelity-capture-consent').check()
+        page.locator('#fidelity-capture-run').click()
+        wait_for_good(page,'#fidelity-capture-status','Chromium 실제 정지 캡처 완료',75000)
+        page.locator('#fidelity-score-consent').check()
+        page.locator('#fidelity-score-run').click()
+        wait_for_good(page,'#fidelity-score-status','F95=UNASSESSED',30000)
         page.locator('#fidelity-patch-property').select_option('background')
         page.locator('#fidelity-patch-value').fill('#102030')
         page.locator('#fidelity-patch-consent').check();page.locator('#fidelity-patch-apply').click()

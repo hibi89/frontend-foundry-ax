@@ -81,6 +81,7 @@ let latestV3OwnerReview=null,latestV3ReviewImageUrl=null;
 window.addEventListener('ffax:v3-reference-receipt',event=>{
  const receipt=event.detail;
  if(receipt?.schema==='ffax.reference-bundle.v3'){
+  clearV3VisualEvidence('새 원본 권리·DPR 영수증 확인');
   latestV3ReferenceReceipt=receipt;
   el('fidelity-capture-status').textContent='로컬 원본 영수증 연결됨. 분석된 이미지 SHA와 같을 때만 실제 캡처 실행 가능.';
  }
@@ -358,6 +359,7 @@ el('fidelity-region-apply').addEventListener('click',async()=>{
    approval:'APPROVE_LOCAL_FIDELITY_REGION_EDIT'});
   const {createTypographyDraft}=await import('./fidelity-typography.mjs');
   latestTypographyDraft=createTypographyDraft(latestFidelityScene);
+  clearV3VisualEvidence('이미지 영역 수동 정정');
   el('fidelity-text-export').disabled=true;
   el('fidelity-text-status').textContent='영역 좌표 변경으로 이전 텍스트 후보를 초기화했습니다. 다시 입력해야 합니다.';
   status.textContent='영역 정정 저장됨 · revision '+latestFidelityScene.revision+' · 원본 SHA 보존 · 실제 렌더 일치 미검증';
@@ -379,6 +381,7 @@ el('fidelity-text-add').addEventListener('click',async()=>{
    regionId:el('fidelity-region-select').value,text:el('fidelity-text-content').value,
    bounds:{x:raw[0],y:raw[1],width:raw[2],height:raw[3]},
    approval:'APPROVE_FIDELITY_LOCAL_TEXT_LABEL'});
+  clearV3VisualEvidence('텍스트 내용·좌표 정정');
   el('fidelity-text-export').disabled=false;
   status.textContent='직접 확인한 텍스트 '+latestTypographyDraft.textBoxes.length+
    '개 기록됨 · OCR/폰트 자동 인식은 미실행, 원본 불변';
@@ -399,6 +402,7 @@ el('fidelity-asset-add').addEventListener('click',async()=>{
   button.disabled=true;
   latestAssetManifest=await addFidelityAssetFile(latestAssetManifest,file,{
    kind:el('fidelity-asset-role').value,approval:'APPROVE_LOCAL_FIDELITY_ASSET'});
+  clearV3VisualEvidence('참조 로컬 자산 목록 변경');
   el('fidelity-asset-export').disabled=false;
   status.textContent='로컬 자산 SHA 기록 '+latestAssetManifest.assets.length+
    '개 · 원본 파일 bytes 미저장, 최종 사용권·React 자산 연결 미검증';
@@ -413,6 +417,7 @@ el('fidelity-asset-export').addEventListener('click',async()=>{
   const {gateFidelityAssets}=await import('./fidelity-assets.mjs');
   latestAssetManifest=gateFidelityAssets(latestAssetManifest,{
    requiredKinds,approval:'APPROVE_FIDELITY_ASSET_REQUIREMENTS'});
+  clearV3VisualEvidence('필수 자산 요구조건 변경');
   save('FFAX-V3-Asset-Manifest.json',JSON.stringify(latestAssetManifest,null,2),'application/json');
   status.textContent='자산 점검: '+latestAssetManifest.state+
    ' · 누락 '+latestAssetManifest.missingKinds.join(',')+' · 공개/렌더링 승인 아님';
