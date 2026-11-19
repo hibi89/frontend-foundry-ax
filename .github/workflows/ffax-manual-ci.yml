@@ -116,18 +116,25 @@ jobs:
         run: |
           python -m pip install 'playwright==1.56.0' 'Pillow==11.3.0'
           python -m playwright install chromium
-          # Prefer already-installed CJK fonts and cached apt indexes.
-          # Never bypass the required Korean glyph gate on a missing-font runner.
-          if ! fc-list :lang=ko | grep -q .; then
-            echo "KOREAN_FONT_INSTALL_REQUIRED"
-            if ! timeout 75s sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends fonts-noto-cjk; then
-              echo "APT_CACHED_INSTALL_FAILED; TRYING_ONE_BOUNDED_REFRESH"
-              timeout 75s sudo apt-get -o Acquire::Retries=0 update -qq
-              timeout 75s sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends fonts-noto-cjk
+          # Keep the Korean glyph gate, but avoid runner apt index stalls.
+          # Google Fonts Nanum Gothic has an OFL license. Pin BOTH upstream
+          # commit and Git blob SHA: never trust mutable font downloads.
+          if [ -z "$(fc-list :lang=ko)" ]; then
+            echo "KOREAN_FONT_PINNED_OFL_INSTALL_REQUIRED"
+            FONT_DIR="$HOME/.local/share/fonts/ffax"
+            FONT_PATH="$FONT_DIR/NanumGothic-Regular.ttf"
+            mkdir -p "$FONT_DIR"
+            curl --fail --location --silent --show-error --connect-timeout 10 --max-time 45 \
+              --retry 2 --retry-delay 1 \
+              'https://raw.githubusercontent.com/google/fonts/16680f8688ffcd467d2eb2146a9ce0343404581d/ofl/nanumgothic/NanumGothic-Regular.ttf' \
+              --output "$FONT_PATH"
+            if [ "$(git hash-object "$FONT_PATH")" != "2aa2b20905b4136808a0126d8e36e5c0f576715c" ]; then
+              echo "KOREAN_FONT_BLOB_SHA_MISMATCH"; exit 1
             fi
+            fc-cache -f "$FONT_DIR" >/dev/null
           fi
-          fc-cache -f >/dev/null
-          fc-list :lang=ko | grep -q . || { echo KOREAN_FONT_NOT_AVAILABLE; exit 1; }
+          if [ -z "$(fc-list :lang=ko)" ]; then echo "KOREAN_FONT_NOT_AVAILABLE"; exit 1; fi
+          echo "KOREAN_FONT_GLYPHS_AVAILABLE"
           # Ubuntu chromium-browser is a Snap wrapper; avoid network-bound Snap assertions.
           CHROME_PATH="$(python -c 'from playwright.sync_api import sync_playwright; p = sync_playwright().start(); print(p.chromium.executable_path); p.stop()')"
           if [ ! -x "$CHROME_PATH" ]; then echo "PLAYWRIGHT_CHROMIUM_NOT_FOUND"; exit 1; fi
