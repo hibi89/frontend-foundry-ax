@@ -26,17 +26,19 @@ export function createV3OwnerVisualReview(diagnostic,referenceReceipt,captureRec
    !Number.isInteger(diagnostic.viewport?.height)||
    diagnostic.viewport.width<2||diagnostic.viewport.height<2||
    diagnostic.viewport.width>2560||diagnostic.viewport.height>2200||
-   diagnostic.viewport.dpr!==1||
+   ![1,2].includes(diagnostic.viewport.dpr)||
+   diagnostic.viewport.width%diagnostic.viewport.dpr!==0||
+   diagnostic.viewport.height%diagnostic.viewport.dpr!==0||
    referenceReceipt.original?.pixelWidth!==diagnostic.viewport.width||
    referenceReceipt.original?.pixelHeight!==diagnostic.viewport.height||
-   referenceReceipt.viewport?.cssWidth!==diagnostic.viewport.width||
-   referenceReceipt.viewport?.cssHeight!==diagnostic.viewport.height||
+   referenceReceipt.viewport?.cssWidth!==diagnostic.viewport.width/diagnostic.viewport.dpr||
+   referenceReceipt.viewport?.cssHeight!==diagnostic.viewport.height/diagnostic.viewport.dpr||
    referenceReceipt.viewport?.dpr!==diagnostic.viewport.dpr||
-   captureReceipt.width!==diagnostic.viewport.width||
-   captureReceipt.height!==diagnostic.viewport.height||
+   captureReceipt.width!==diagnostic.viewport.width/diagnostic.viewport.dpr||
+   captureReceipt.height!==diagnostic.viewport.height/diagnostic.viewport.dpr||
    captureReceipt.dpr!==diagnostic.viewport.dpr||
-   captureReceipt.preflight?.viewport?.width!==diagnostic.viewport.width||
-   captureReceipt.preflight?.viewport?.height!==diagnostic.viewport.height||
+   captureReceipt.preflight?.viewport?.width!==diagnostic.viewport.width/diagnostic.viewport.dpr||
+   captureReceipt.preflight?.viewport?.height!==diagnostic.viewport.height/diagnostic.viewport.dpr||
    captureReceipt.preflight?.dpr!==diagnostic.viewport.dpr||
    captureReceipt.preflight?.sceneRevision!==diagnostic.sceneRevision||
    captureReceipt.preflight?.referenceSha256!==diagnostic.referenceSha256||
