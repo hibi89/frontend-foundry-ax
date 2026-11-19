@@ -26,7 +26,9 @@ function checked(scene,typography,assets){
   if(!r||typeof r.id!=='string'||!/^[a-z0-9-]{2,64}$/.test(r.id)||byId.has(r.id)||
    !Object.hasOwn(roles,r.role)||!bbox(r.bounds)||
    r.bounds.x+r.bounds.width>scene.width||r.bounds.y+r.bounds.height>scene.height||
-   !RGB.test(r.style?.background||''))
+   !RGB.test(r.style?.background||'')||
+   (r.style.radius!==undefined&&(!Number.isInteger(r.style.radius)||r.style.radius<0||r.style.radius>48))||
+   (r.style.opacity!==undefined&&(typeof r.style.opacity!=='number'||r.style.opacity<0||r.style.opacity>1)))
    throw Error('FIDELITY_RENDER_REGION_INVALID');
   byId.set(r.id,r);
  }
@@ -55,7 +57,13 @@ function checked(scene,typography,assets){
    const p=byId.get(t.regionId);
    if(!p||!bbox(t.bounds)||!inside(p.bounds,t.bounds)||
     typeof t.text!=='string'||t.text.length>200||/[\u0000-\u001f\u007f<>]/u.test(t.text)||
-    t.confidence!=='OWNER_SUPPLIED_NOT_OCR')
+    t.confidence!=='OWNER_SUPPLIED_NOT_OCR'||
+    (t.fontSize!==undefined&&(!Number.isInteger(t.fontSize)||t.fontSize<8||t.fontSize>96))||
+    (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined&&
+      (!Number.isInteger(t.fontWeight)||t.fontWeight<100||t.fontWeight>900||t.fontWeight%100!==0))||
+    (t.fontColor!==undefined&&!RGB.test(t.fontColor))||
+    (t.lineHeight!==undefined&&(typeof t.lineHeight!=='number'||t.lineHeight<.8||t.lineHeight>2.5))||
+    (t.letterSpacing!==undefined&&(typeof t.letterSpacing!=='number'||t.letterSpacing< -2||t.letterSpacing>8)))
     throw Error('FIDELITY_RENDER_TEXT_INVALID');
   }
  }
@@ -91,13 +99,20 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,appro
   const parent=byId.get(r.parentId),at=index.get(r.id),x=r.bounds.x-parent.bounds.x,y=r.bounds.y-parent.bounds.y;
   css.push(".ffax-v3-node-"+at+" { left:"+x+"px; top:"+y+
    "px; width:"+r.bounds.width+"px; height:"+r.bounds.height+
-   "px; background-color:"+r.style.background+"; }");
+   "px; background-color:"+r.style.background+";"+
+   (r.style.radius!==undefined?" border-radius:"+r.style.radius+"px;":"")+
+   (r.style.opacity!==undefined?" opacity:"+r.style.opacity+";":"")+" }");
  }
  for(let i=0;i<texts.length;i++){
   const t=texts[i],parent=byId.get(t.regionId);
   css.push(".ffax-v3-text-"+i+" { left:"+(t.bounds.x-parent.bounds.x)+
    "px; top:"+(t.bounds.y-parent.bounds.y)+
-   "px; width:"+t.bounds.width+"px; height:"+t.bounds.height+"px; }");
+   "px; width:"+t.bounds.width+"px; height:"+t.bounds.height+"px;"+
+   (t.fontSize!==undefined?" font-size:"+t.fontSize+"px;":"")+
+   (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined?" font-weight:"+t.fontWeight+";":"")+
+   (t.fontColor?" color:"+t.fontColor+";":"")+
+   (t.lineHeight!==undefined?" line-height:"+t.lineHeight+";":"")+
+   (t.letterSpacing!==undefined?" letter-spacing:"+t.letterSpacing+"px;":"")+" }");
  }
  function node(r,react){
   const root=r.id==='canvas',tag=roles[r.role];

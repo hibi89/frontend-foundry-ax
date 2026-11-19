@@ -234,6 +234,26 @@
          <button id="fidelity-score-run" type="button" class="ghost-btn">실제 화면 영역별 차이 계산</button>
          <button id="fidelity-score-export" type="button" class="ghost-btn" disabled>F95 불확실성·영역 진단 JSON 저장</button>
          <p id="fidelity-score-status" class="helper" role="status">실화면 캡처 전 F95=UNASSESSED. 판정 값을 억지로 만들지 않습니다.</p>
+         <p class="subheading">V3 · 진단된 영역 최소 수정</p>
+         <label for="fidelity-patch-region">차이가 큰 영역</label><select id="fidelity-patch-region" disabled></select>
+         <label for="fidelity-patch-property">안전한 속성</label>
+         <select id="fidelity-patch-property">
+          <option value="background">배경색</option><option value="x">x</option><option value="y">y</option>
+          <option value="width">너비</option><option value="height">높이</option>
+          <option value="radius">radius</option><option value="opacity">opacity</option>
+          <option value="fontSize">글자 크기</option><option value="fontColor">글자색</option>
+          <option value="fontWeight">글자 두께</option><option value="lineHeight">행간</option>
+          <option value="letterSpacing">자간</option>
+         </select>
+         <label for="fidelity-patch-text-id">글자 속성 수정 시 Text ID</label>
+         <input id="fidelity-patch-text-id" maxlength="50" placeholder="text-1" />
+         <label for="fidelity-patch-value">속성 값</label>
+         <input id="fidelity-patch-value" maxlength="30" placeholder="#334455 또는 숫자" />
+         <label class="check"><input id="fidelity-patch-consent" type="checkbox" /> 원본이 아닌 격리 후보만 수정하는 것을 승인합니다.</label>
+         <button id="fidelity-patch-apply" type="button" class="ghost-btn">격리 후보만 수정</button>
+         <button id="fidelity-patch-undo" type="button" class="ghost-btn" disabled>직전 수정 되돌리기</button>
+         <p id="fidelity-patch-status" class="helper" role="status">영역별 차이를 먼저 측정하세요. 임의 CSS·JS·원본 자산 변경 불가.</p>
+
 
 
          <iframe id="fidelity-render-preview" sandbox="" title="V3 정지 화면 구조 프리뷰" loading="lazy" style="width:100%;height:300px;border:1px solid var(--stroke, #444);background:#fff"></iframe>

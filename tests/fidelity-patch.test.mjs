@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {applyFidelityPatch,planFidelityPatches} from '../src/fidelity-patch.mjs';
+import {createFidelityArtifacts} from '../src/fidelity-renderer.mjs';
+import {createTypographyDraft,addOwnerTextBox} from '../src/fidelity-typography.mjs';
+const scene=()=>({schema:'ffax.fidelity-scene.v1',sourceSha256:'a'.repeat(64),width:600,height:400,revision:1,
+ regions:[
+ {id:'canvas',role:'canvas',parentId:null,bounds:{x:0,y:0,width:600,height:400},style:{background:'#ffffff'}},
+ {id:'section-1',role:'hero',parentId:'canvas',bounds:{x:0,y:0,width:600,height:200},style:{background:'#112233'},ownerReviewed:true}
+ ]});
+const diag={schema:'ffax.f95-region-diagnostics.v1',status:'F95_UNASSESSED',
+ referenceSha256:'a'.repeat(64),regions:[{regionId:'section-1',meanRgbError:80}]};
+test('FID-09 owner patches color and typography on a copy, CSS actually reflects edit',()=>{
+ const s=scene(),t=addOwnerTextBox(createTypographyDraft(s),s,{regionId:'section-1',
+  text:'역학달력',bounds:{x:10,y:10,width:200,height:40},approval:'APPROVE_FIDELITY_LOCAL_TEXT_LABEL'});
+ const color=applyFidelityPatch(s,t,null,diag,{regionId:'section-1',property:'background',
+  value:'#abcdef',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'});
+ assert.equal(s.regions[1].style.background,'#112233');
+ assert.equal(color.candidateScene.regions[1].style.background,'#abcdef');
+ assert.match(createFidelityArtifacts(color.candidateScene,{typography:color.candidateTypography,
+  approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'}).css,/background-color:#abcdef/);
+ const font=applyFidelityPatch(color.candidateScene,color.candidateTypography,null,diag,
+  {regionId:'section-1',property:'fontSize',textId:'text-1',value:'24',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'});
+ assert.match(createFidelityArtifacts(font.candidateScene,{typography:font.candidateTypography,
+  approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'}).css,/font-size:24px/);
+ assert.equal(font.originalSourceModified,false);
+});
+test('FID-09 rejects unauthorized CSS, out-of-bounds geometry and locked properties',()=>{
+ const s=scene();
+ assert.equal(planFidelityPatches(diag,s).options.length,1);
+ assert.throws(()=>applyFidelityPatch(s,null,null,diag,{regionId:'section-1',
+  property:'background',value:'url(http://bad)',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'}),/VALUE_INVALID/);
+ assert.throws(()=>applyFidelityPatch(s,null,null,diag,{regionId:'section-1',
+  property:'height',value:600,approval:'APPROVE_LOCAL_V3_TYPED_PATCH'}),/REGION_INVALID|PARENT_INVALID/);
+ const locked={...s,regions:s.regions.map(r=>r.id==='section-1'?{...r,lockedProperties:['background']}:r)};
+ assert.throws(()=>applyFidelityPatch(locked,null,null,diag,{regionId:'section-1',
+  property:'background',value:'#ffffff',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'}),/LOCKED/);
+ assert.throws(()=>applyFidelityPatch(s,null,null,diag,{regionId:'section-1',
+  property:'assetSha',value:'not-allowed',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'}),/PROPERTY_UNSUPPORTED/);
+});

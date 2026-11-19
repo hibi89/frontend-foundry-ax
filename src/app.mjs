@@ -76,6 +76,7 @@ function run(command){try{history.exec(command);updateAll();el('qa-report').text
 function edit(prop,value){if(!selected)return;run({kind:'update',id:selected,prop,value});}
 let latestReferenceInventory=null,latestFidelityScene=null,latestTypographyDraft=null,latestAssetManifest=null;
 let latestV3ReferenceReceipt=null,latestV3CaptureUrl=null ,latestV3CaptureBlob=null,latestV3CaptureReceipt=null,latestV3ScoreResult=null;
+let latestFidelityPatchRollback=null;
 window.addEventListener('ffax:v3-reference-receipt',event=>{
  const receipt=event.detail;
  if(receipt?.schema==='ffax.reference-bundle.v3'){
@@ -489,6 +490,12 @@ el('fidelity-score-run').addEventListener('click',async()=>{
    referenceSha256,renderSha256,
    viewport:{width:source.width,height:source.height,dpr:1}});
   el('fidelity-score-export').disabled=false;
+  const sel=el('fidelity-patch-region');sel.replaceChildren();
+  for(const issue of latestV3ScoreResult.criticalIssues){
+   const o=document.createElement('option');o.value=issue.regionId;
+   o.textContent=issue.regionId+' · RGB '+issue.rgbError;sel.append(o);
+  }
+  sel.disabled=sel.options.length===0;
   status.textContent='영역 '+latestV3ScoreResult.regions.length+
    '개 · 색상 진단 '+latestV3ScoreResult.axes.colors.diagnosticScore+
    '/100 · 기하 경계 진단 '+latestV3ScoreResult.axes.geometry.diagnosticScore+
@@ -501,6 +508,35 @@ el('fidelity-score-run').addEventListener('click',async()=>{
 el('fidelity-score-export').addEventListener('click',()=>{
  if(latestV3ScoreResult)save('FFAX-V3-Region-Diagnostic.json',
   JSON.stringify(latestV3ScoreResult,null,2),'application/json');
+});
+
+
+el('fidelity-patch-apply').addEventListener('click',async()=>{
+ const status=el('fidelity-patch-status');
+ try{
+  if(!el('fidelity-patch-consent').checked)throw Error('FIDELITY_PATCH_APPROVAL_REQUIRED');
+  if(!latestFidelityScene||!latestV3ScoreResult)throw Error('FIDELITY_PATCH_DIAGNOSTIC_REQUIRED');
+  const {applyFidelityPatch}=await import('./fidelity-patch.mjs');
+  const result=applyFidelityPatch(latestFidelityScene,latestTypographyDraft,latestAssetManifest,
+   latestV3ScoreResult,{regionId:el('fidelity-patch-region').value,
+    property:el('fidelity-patch-property').value,value:el('fidelity-patch-value').value,
+    textId:el('fidelity-patch-text-id').value,approval:'APPROVE_LOCAL_V3_TYPED_PATCH'});
+  latestFidelityPatchRollback={scene:result.rollbackScene,typography:result.rollbackTypography};
+  latestFidelityScene=result.candidateScene;latestTypographyDraft=result.candidateTypography;
+  latestV3ScoreResult=null;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;
+  el('fidelity-score-export').disabled=true;el('fidelity-patch-undo').disabled=false;
+  status.textContent='격리 후보만 수정. 원본 SHA 불변 · 새 브라우저 캡처 필요';
+ }catch(e){status.textContent='후보 수정 거부: '+(e?.message||'FIDELITY_PATCH_FAILED');}
+ finally{el('fidelity-patch-consent').checked=false;}
+});
+el('fidelity-patch-undo').addEventListener('click',()=>{
+ if(!latestFidelityPatchRollback)return;
+ latestFidelityScene=latestFidelityPatchRollback.scene;
+ latestTypographyDraft=latestFidelityPatchRollback.typography;
+ latestFidelityPatchRollback=null;el('fidelity-patch-undo').disabled=true;
+ latestV3ScoreResult=null;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;
+ el('fidelity-score-export').disabled=true;
+ el('fidelity-patch-status').textContent='로컬 Scene 직전 수정 되돌림. 캡처/진단 재실행 필요';
 });
 
 el('reference-owner-map').addEventListener('click',async()=>{
