@@ -10,7 +10,7 @@ async function main(argv){
  const args={};
  for(let i=0;i<argv.length;i+=2){
   const key=argv[i],val=argv[i+1];
-  if(!['--bundle','--source','--dest','--job','--workdir','--approval','--repo','--branch','--base','--commit','--scene','--typography','--assets','--contract'].includes(key)||
+  if(!['--bundle','--source','--dest','--job','--workdir','--approval','--repo','--branch','--base','--commit','--scene','--typography','--assets','--contract','--dpr'].includes(key)||
      Object.hasOwn(args,key)||!val)throw Error('FORGE_INTEGRATION_ARGUMENT_INVALID');
   args[key]=val;
  }
@@ -25,7 +25,7 @@ async function main(argv){
  }
  if(mode==='prepare-v3'){
   const required=['--approval','--contract','--dest','--job','--scene','--source'];
-  const optional=['--assets','--typography'];
+  const optional=['--assets','--typography','--dpr'];
   const supplied=Object.keys(args);
   if(!required.every(x=>supplied.includes(x))||
      supplied.some(x=>!required.includes(x)&&!optional.includes(x)))
@@ -40,8 +40,11 @@ async function main(argv){
    args['--typography']?load(args['--typography']):Promise.resolve(null),
    args['--assets']?load(args['--assets']):Promise.resolve(null)
   ]);
+  const dpr=args['--dpr']===undefined?1:Number(args['--dpr']);
+  if(!['1','2'].includes(args['--dpr']??'1'))
+   throw Error('FORGE_V3_INTEGRATION_DPR_INVALID');
   return prepareV3FidelityIntegration({source:args['--source'],dest:args['--dest'],
-   jobId:args['--job'],scene,contract,typography,assets,approval:args['--approval']});
+   jobId:args['--job'],scene,contract,typography,assets,dpr,approval:args['--approval']});
  }
  if(mode==='rollback'){
   if(Object.keys(args).sort().join(',')!=='--approval,--workdir')throw Error('FORGE_INTEGRATION_USAGE');
