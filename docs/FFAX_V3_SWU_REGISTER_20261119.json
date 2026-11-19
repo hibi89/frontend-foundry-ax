@@ -552,7 +552,7 @@
         "id": "P2-01",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Real external original rights/asset corpus, symlink/reparse/adversarial security full run",
-        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267; new descriptor no-follow and link tests committed a6f4120a8b61086b60cdcbfce15200de3fe042d7; isolated 3/3 PASS, full repo CI pending (not acceptance); updated source 86/86 PASS #44520106002 with regression link cases, owner adversarial/Windows not accepted"
+        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267; new descriptor no-follow and link tests committed a6f4120a8b61086b60cdcbfce15200de3fe042d7; isolated 3/3 PASS, full repo CI pending (not acceptance); updated source 86/86 PASS #44520106002 with regression link cases, owner adversarial/Windows not accepted; GitHub Actions hosted Linux/Windows + Chromium checks recovered, independent security audit NOT_RUN"
       },
       {
         "id": "P2-02",
@@ -569,12 +569,13 @@
         "id": "P2-04",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Real owner/customer React app authentication/API/routes/data, full build, rights, independent audits; P2 actual owner acceptance 0/8",
-        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED; FAIL #44518828926/#44519130545 and TS2550 #44518404139 fixed at f5cd3613 + c28c1d5f; PASS P2 React 17/17 #44520105942, source 86/86 #44520106002, full Linux Node 258/258 in manual run #44520105967; real customer app still NOT_RUN"
+        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED; FAIL #44518828926/#44519130545 and TS2550 #44518404139 fixed at f5cd3613 + c28c1d5f; PASS P2 React 17/17 #44520105942, source 86/86 #44520106002, full Linux Node 258/258 in manual run #44520105967; real customer app still NOT_RUN; full manual workflow 4/4 SUCCESS #44521069907 with hosted Windows/Linux 258/258 and 14 browser probes; real customer app auth/API/routes still NOT_RUN"
       },
       {
         "id": "P2-05",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "Generated app responsive 375/768/1440 plus keyboard/axe, effects/motion on real source"
+        "remaining": "Actual generated customer app with approved real reference 375/768/1440, keyboard/axe, exact effects/motion, owner visual evidence",
+        "partialEvidence": "; hosted Chromium browser P2 probes 14/14 PASS on 260377b0 #44521069907, Korean glyph available, 375/768/1440 responsive synthetic; real-owner source/effects/motion still pending"
       },
       {
         "id": "P2-06",
@@ -697,6 +698,11 @@
           "run": 44518404139,
           "sha": "4c2a458001e9897e30bc2a38a7fc1daa4525bf55",
           "reason": "TS2550 Object.hasOwn unsupported by existing compiler lib"
+        },
+        "manualBrowser": {
+          "run": 44520105967,
+          "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+          "reason": "GitHub Ubuntu apt font installation and refresh timed out (exit 124) during Korean-font setup; P2 browser probes skipped, not product code failure"
         }
       },
       "codeFix": {
@@ -742,15 +748,36 @@
           "result": "SUCCESS",
           "tests": "258/258 PASS",
           "note": "GitHub hosted Windows synthetic runner, not owner's Windows11 GTX1050Ti"
+        },
+        "manualFull": {
+          "run": 44521069907,
+          "sha": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
+          "result": "SUCCESS",
+          "jobs": "4/4 SUCCESS: offline-node, windows-native, browser-qa, unsigned owner-review package",
+          "linuxNode": "258/258 PASS",
+          "hostedWindowsNode": "258/258 PASS",
+          "browserProbes": "14/14 PASS; Korean font installed and glyph gate passed",
+          "browserResponsive": "375/768/1440 synthetic",
+          "react19SSR": "PASS_SYNTHETIC_ONLY",
+          "ownerReviewZip": "BUILD_AND_EXTRACT_SHA_SYNTAX_PASS; UNRELEASED",
+          "ownerReviewZipSha256": "8D7921CDE3995586018DB9B517F8AA215A12424CEC53AC344AD9C5B7D0BA963C",
+          "ownerWindowsHardware": "NOT_RUN",
+          "realReferenceF95": "NOT_VERIFIED",
+          "independentAudit": "NOT_RUN"
         }
       },
       "remaining": {
-        "manualBrowserAndWindows": "browser-qa job IN_PROGRESS; GitHub-hosted Windows synthetic Node 258/258 PASS, owner hardware NOT_RUN",
+        "manualBrowserAndWindows": "GITHUB_HOSTED_BROWSER_AND_WINDOWS_SYNTHETIC_PASS; OWNER_PC_GPU_NOT_RUN",
         "realOwnerReferenceImages": "0/12",
         "realF95": "NOT_VERIFIED",
         "realCustomerAuthApiRoutes": "NOT_RUN",
         "independentAudit": "NOT_RUN",
         "release": "HOLD"
+      },
+      "codeFixManualBrowser": {
+        "sha": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
+        "path": ".github/workflows/ffax-manual-ci.yml",
+        "description": "Replace apt timeout with pinned OFL NanumGothic-Regular.ttf from Google Fonts commit 16680f8688ffcd467d2eb2146a9ce0343404581d and exact verified Git blob SHA 2aa2b20905b4136808a0126d8e36e5c0f576715c, enforce fc-list Korean glyph gate"
       }
     }
   },
@@ -785,17 +812,16 @@
   "release": "HOLD",
   "lastSourceHead": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
   "lastEvidenceRun": {
-    "id": 44520106002,
-    "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
-    "name": "FFAX V2 Design Forge P1 source smoke",
+    "id": 44521069907,
+    "sha": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
+    "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
-    "sourceTests": "86/86 PASS, 0 FAIL",
-    "relatedRuns": [
-      44520105942,
-      44520105967,
-      44520106482
-    ],
-    "scope": "P2 synthetic regression, not actual owner reference/customer integration/real F95"
+    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_REAL_OWNER_ACCEPTANCE",
+    "jobs": "4/4 SUCCESS",
+    "linuxTests": "258/258 PASS",
+    "windowsTests": "258/258 PASS",
+    "browserProbes": "14/14 PASS",
+    "package": "OWNER_REVIEW_UNSIGNED_UNRELEASED"
   },
   "lastCodeWave": [
     {
@@ -958,6 +984,13 @@
       ],
       "commit": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
       "meaning": "P2 failure-driven correction: enforce symlink parent audit call and remove unsupported Object.hasOwn in generated TSX; GitHub Actions source 86/86, React19 17/17, manual Linux Node 258/258 PASS; owner acceptance still 0/8."
+    },
+    {
+      "units": [
+        "P2_BROWSER_QA_CI"
+      ],
+      "commit": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
+      "meaning": "Replaced apt Korea-font install timeout with pinned OFL font and Git blob verification; entire manual P2 hosted runner 4/4 SUCCESS, browser 14/14, Linux/Windows 258/258, no actual owner Windows/real F95/independent acceptance."
     }
   ],
   "sharedVerificationPaths": [
@@ -965,6 +998,19 @@
     "tests/server-security.test.mjs"
   ],
   "previousEvidenceRun": {
+    "id": 44520106002,
+    "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+    "name": "FFAX V2 Design Forge P1 source smoke",
+    "status": "SUCCESS",
+    "sourceTests": "86/86 PASS, 0 FAIL",
+    "relatedRuns": [
+      44520105942,
+      44520105967,
+      44520106482
+    ],
+    "scope": "P2 synthetic regression, not actual owner reference/customer integration/real F95"
+  },
+  "previousEvidenceRun2": {
     "id": 44510382267,
     "sha": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
     "name": "FFAX V2 Design Forge P1 source smoke",
