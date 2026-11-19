@@ -182,6 +182,28 @@ try:
               page.locator('#fidelity-review-accept').is_disabled()
               and not page.locator('#fidelity-capture-image').get_attribute('src')
               and page.locator('#fidelity-region-select').is_disabled())
+        # Exercise the complete V3 editing interface at required viewport widths.
+        # This is web-workbench responsiveness, NOT generated customer React viewport parity.
+        for width in (375,768,1440):
+            page.set_viewport_size({'width':width,'height':900})
+            page.wait_for_timeout(160)
+            metric=page.evaluate("""() => ({
+                viewport:innerWidth,
+                scrollWidth:document.documentElement.scrollWidth,
+                bodyWidth:document.body.scrollWidth,
+                renderControls:document.querySelector('#fidelity-render-create')!==null,
+                captureControls:document.querySelector('#fidelity-capture-run')!==null,
+                reviewControls:document.querySelector('#fidelity-review-accept')!==null
+            })""")
+            check('v3-workbench-responsive-'+str(width),
+                  metric['viewport']==width and metric['scrollWidth']<=width+2
+                  and metric['renderControls'] and metric['captureControls']
+                  and metric['reviewControls'],metric)
+            page.screenshot(path=str(ART/f'v3-p2-responsive-{width}.png'),
+                            full_page=False,timeout=20000)
+        page.keyboard.press('Tab')
+        focused=page.evaluate("() => document.activeElement?.tagName")
+        check('v3-keyboard-tab-focus-not-lost',focused not in (None,'BODY','HTML'),focused)
         check('browser-no-remote-image-or-model-requests',len(REPORT['externalRequests'])==0,
               REPORT['externalRequests'])
         check('browser-javascript-errors-absent',len(REPORT['pageErrors'])==0,REPORT['pageErrors'])
