@@ -194,6 +194,11 @@ test('P2-04 2x owner original yields half-size CSS inside untouched isolated Rea
   const receiptPath=join(prepared.workDir,'v3-fidelity-integration-receipt.json');
   await writeFile(receiptPath,JSON.stringify({...prepared.receipt,cssWidth:640}));
   await assert.rejects(audit(),/AUDIT_RECEIPT_INVALID/);
+  // Arithmetic alone is insufficient: forged DPR1, width640, height400 is
+  // internally consistent, but exported CSS was actually written for DPR2.
+  await writeFile(receiptPath,JSON.stringify({...prepared.receipt,
+   dpr:1,cssWidth:640,cssHeight:400}));
+  await assert.rejects(audit(),/AUDIT_DPR_CSS_MISMATCH/);
   await writeFile(receiptPath,JSON.stringify(prepared.receipt));
   assert.equal((await audit()).generatedFiles,3);
   const rolled=await rollbackV3FidelityIntegration({workDir:prepared.workDir,
