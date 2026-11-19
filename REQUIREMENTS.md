@@ -106,3 +106,20 @@ FFAX는 **Figma 전체 복제품도, 범용 백엔드 자동 제작기도, 수�
 **기술 결정:** FFAX 본체를 구현·수정, GitHub UI UX Pro Max(MIT) 스타일 추천 데이터는 선택적 오프라인 pin/라이선스 검토 후 채택, OpenUI/OpenStitch는 패턴 참고만, 기존 Qwen 4B는 텍스트 제안 선택형, MLA/EAI/AXZERO는 필수 의존 없음. ChatGPT 이미지 생성/유료 SaaS/클라우드 업로드 자동 연계 금지. 화려한 배경 삽화가 없으면 누락/대체 자산을 명시하고 사용자 확인 필요.
 
 **P1 수용:** 입력→실제 디자인 A/B/C source→렌더/보정→freeze→동일 소스 handoff 및 정상/거부 경로 연결. P2는 디자인 품질·시각/접근성·실기기·독립 감사·사용자 승인. 신규 구현/검증률을 기존 잠정 점수에 억지 가산하지 않는다.
+
+## 11. [OWNER FINAL V3] Reference Fidelity First (2026-11-19 KST)
+
+**현재 FFAX 외부 레퍼런스 고충실도 최종설계:** [docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md](docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md).
+
+**변경 목적:** 레퍼런스를 임의 재해석한 새 디자인보다, 사용자 제공/권리 있는 이미지·사이트·영상의 레이아웃·톤·폰트·이미지/브랜드 자산·CSS 효과를 **실제 동작하는 React/TSX·CSS로 가능한 한 정확히 복원**하는 것을 먼저 달성한다. 외부 입력은 이미지 영역/기하·OCR 글자 위치·색상·asset/font manifest→FidelityScene 중첩 계층→React/CSS→동일 viewport 브라우저 캡처→영역별 오차 분석/격리 patch/사용자 확정. Forge-native 시안은 동일 source bundle 직접 구현. 창작/추천/편집/기존 17종 컴포넌트 기능은 축소하지 않는다.
+
+**기존 REQ-01..12에 누적할 추가 수용조건:**
+- REQ-01/06/10/11: 실제 이미지·사용권/출처·원본 SHA·viewport/DPR·자산/폰트 해시와 잠금, 허가 없는 원본/외부전송·미확인 필수 자산을 거부.
+- REQ-02/03/06/07: 실제 nested bbox/섹션/그리드·OCR 위치·타이포·색/효과/자산을 관측·추정·미상 구분해 추출하고, owner가 영역/문자/폰트/자산을 정정할 수 있는 UI. 기존 단순 3개 가로색상띠의 구조 추출 능력 대체.
+- REQ-04/05/08: 기존 17종 registry를 재사용하되 한계일 때 안전한 typed scene-node/스타일로 확장, 잠금 부분을 유지하면서 실제 편집 가능한 TSX/CSS·데이터 슬롯·핸들러 생성. 고객 원본 auth/routes/API·데이터 보존 및 diff/rollback.
+- REQ-05/09/12: 실제 Chromium 동등 viewport/DPR 캡처, geometry·typography·assets·color·effects와 중요 영역 비교, 안전한 후보 수정·최고 후보 보존/최대5회, 점수/불확실성/비충족 원인 제공 및 owner 시각 승인.
+- REQ-11/12: Windows11 GTX1050Ti/16GB에서 무료·로컬·순차 실행/명시 자원 한도, 원본/권리/기밀·모델/비용/Production 승인 경계와 실패·복구 상태.
+
+**F95 목표:** 95/100은 새 **참조화면 시각 재현 품질 목표**이지 FFAX 기존 AC-01..12 총100점의 구현/검증완료율, 전체 이미지에서의 성공률, 보장된 픽셀 일치도가 아니다. 화면 종류별 권리 있는 실제 이미지·동일 촬영 환경·영역별 점수/치명 누락·사용자 승인으로 P2 실증 전 NOT_VERIFIED. 기능/API·반응형·접근성/모션은 별도 PASS 필수.
+
+**범위/이력:** 기존 REQ-01..12 / WF-01..07 / 12AC 합계100점·25개 P1 SWU/기존 시도 이력·정확 기존 소스/CI 증거는 보존한다. V3 신규 FID-01..12는 최종설계의 후보 수직 작업이며 **공식 신규 SWU 분모·allowed_paths·CPAA/WE 우선순위는 FFAX 최신 HEAD/actual source 간극을 검토해 확정**한다. 기존 25/25 소스 후보를 V3까지 소급 100%로 기록하지 않는다. 공식 신규 구현율/검증율 UNASSESSED, F95 NOT_VERIFIED, RELEASE HOLD.
