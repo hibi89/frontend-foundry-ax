@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+  "auditSourceHead": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -562,8 +562,8 @@
       {
         "id": "P2-03",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "12 owner-rights-approved real images, calibrated actual five-axis F95, missing critical assets/fonts and owner actual visual acceptance",
-        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313; new viewport/DPR/preflight fail-closed owner-review receipts 0853ac664b416f70f02710705776df78f3dcaf3c; Node CI 87/87 PASS #44526072706; synthetic Chromium #44526066904 on source SHA 4392b3 PASS, real owner visual F95 still NOT_VERIFIED"
+        "remaining": "Rights cleared real reference corpus 12 images, calibrated 5-axis F95, owner visual decision; actual customer app/owner Windows and independent checks separate",
+        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313; new viewport/DPR/preflight fail-closed owner-review receipts 0853ac664b416f70f02710705776df78f3dcaf3c; Node CI 87/87 PASS #44526072706; synthetic Chromium #44526066904 on source SHA 4392b3 PASS, real owner visual F95 still NOT_VERIFIED; restored snapshot nested SHA/scene revision/exact owner reference dimensions and missing confidence edit guard on source e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76; source 90/90 #44530558366, hosted Linux/Windows 262/262 and browser probes 14/14 in 4/4 manual #44530558342 SUCCESS; real owner F95 unverified"
       },
       {
         "id": "P2-04",
@@ -877,6 +877,53 @@
       "independentAudit": "NOT_RUN",
       "ownerRightsCorpus": 0,
       "release": "HOLD"
+    },
+    "latestP203RestoreBindingFix": {
+      "sourceSha": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
+      "sourceFiles": [
+        "src/fidelity-review.mjs",
+        "src/fidelity-scene.mjs",
+        "src/app.mjs"
+      ],
+      "regressionFiles": [
+        "tests/fidelity-review.test.mjs",
+        "tests/fidelity-scene.test.mjs"
+      ],
+      "scope": "P2-03 local work snapshot restore and owner region editing",
+      "issue": "Snapshot outer reference SHA could match while nested scene source SHA/revision or viewport differed; valid restored scene with missing confidence crashed owner geometry edit",
+      "fix": "Require nested scene reference SHA, finite positive revision, local-only flags and current reference dimensions in browser restore; safely synthesize owner-reviewed confidence for scenes lacking optional extraction metadata",
+      "syntheticEvidence": {
+        "sourceSmoke": {
+          "run": 44530558366,
+          "sha": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
+          "conclusion": "SUCCESS",
+          "tests": "90/90 PASS"
+        },
+        "manual": {
+          "run": 44530558342,
+          "sha": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
+          "conclusion": "SUCCESS",
+          "jobs": "4/4 SUCCESS",
+          "linuxNode": "262/262 PASS",
+          "windowsNode": "262/262 PASS",
+          "browserProbes": "14/14 PASS",
+          "unsignedReviewPackage": "SUCCESS"
+        },
+        "blueprint": {
+          "run": 44530559189,
+          "sha": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
+          "conclusion": "SUCCESS"
+        }
+      },
+      "notVerified": [
+        "Owner original images 0/12",
+        "F95 >=95",
+        "Real customer app auth/API/routes",
+        "Owner Win11 GTX1050Ti",
+        "Independent code/security/UI-UX audit",
+        "Commercial release"
+      ],
+      "ownerInputsTransmitted": false
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -908,17 +955,17 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+  "lastSourceHead": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
   "lastEvidenceRun": {
-    "id": 44528875566,
-    "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+    "id": 44530558342,
+    "sha": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
     "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
-    "scope": "SYNTHETIC_GITHUB_HOSTED_ONLY",
+    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_REAL_OWNER_ACCEPTANCE",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "260/260",
-    "windowsTests": "260/260",
-    "browserProbes": "14/14",
+    "linuxTests": "262/262 PASS",
+    "windowsTests": "262/262 PASS",
+    "browserProbes": "14/14 PASS",
     "package": "UNRELEASED_OWNER_REVIEW"
   },
   "lastCodeWave": [
@@ -1103,6 +1150,13 @@
       ],
       "commit": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
       "meaning": "P2 original-reference vault TOCTOU memory exhaustion guard: fixed-buffer descriptor read <=6MiB+1; size-change fail closed, valid boundary retained. Source 88/88, React 18/18, Linux Node 260/260 PASS. Owner/adversarial/independent security verification outstanding."
+    },
+    {
+      "units": [
+        "P2-03"
+      ],
+      "commit": "e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76",
+      "meaning": "Restore-to-reference binding and owner editor crash fix across real UI BE/FE path; source 90/90, hosted Linux/Windows 262/262, browser 14/14; full manual 4/4 success, real F95 NOT_VERIFIED."
     }
   ],
   "sharedVerificationPaths": [
