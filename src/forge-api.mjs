@@ -1,5 +1,5 @@
 /* FFAX loopback Design Forge API: strict origin/CSRF, typed only, optional owner-approved local storage. */
-import {randomBytes} from 'node:crypto';
+import {randomBytes,createHash} from 'node:crypto';
 import {homedir,tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {mkdir,readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
@@ -26,11 +26,12 @@ async function parseJson(req){
 function assertKeys(body,allowed){
  if(Object.keys(body).some(x=>!allowed.includes(x)))throw Error('FORGE_FIELDS_INVALID');
 }
-export function createForgeApi({host='127.0.0.1',port=4173}={}){
+export function createForgeApi({host='127.0.0.1',port=4173,iaeReferenceLoader=loadLocalReference}={}){
  const origin='http://'+host+':'+port;
  const csrf=randomBytes(32).toString('hex');
  let busy=false;
  const captures=new Map();
+ const iaeJobs=new Map();
  const runner=createForgeRunner();
  const handle=async(req,res,path)=>{
   if(!path.startsWith('/api/design/'))return false;
@@ -53,6 +54,27 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
    res.writeHead(200,{'Content-Type':'image/png','Content-Length':saved.bytes.length,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}).end(saved.bytes);
    return true;
   }
+  // FID-12: read-only localhost job/status/result adapter for IAE Design Intelligence.
+  // All reads require the existing same-origin CSRF token and exact ID.
+  const iaeMatch=/^\/api\/design\/iae\/(jobs|results)\/([a-f0-9]{32})$/.exec(path);
+  if(iaeMatch){
+   if(req.method!=='GET'){reply(res,405,{error:'FORGE_IAE_READ_ONLY'});return true;}
+   const job=iaeJobs.get(iaeMatch[2]);
+   if(!job){reply(res,404,{error:'FORGE_IAE_JOB_NOT_FOUND'});return true;}
+   if(iaeMatch[1]==='jobs'){
+    reply(res,200,{schema:'ffax.iae-job-status.v1',id:iaeMatch[2],
+     state:job.state,referenceSha256:job.referenceSha256,
+     resultSha256:job.resultSha256,sourceCodeGenerated:true,
+     originalBytesStored:false,externalNetworkUsed:false,customerOriginalModified:false,
+     p2:'NOT_RUN',independentAudit:'NOT_RUN',publishAllowed:false});
+   }else{
+    reply(res,200,{schema:'ffax.iae-readonly-result.v1',id:iaeMatch[2],
+     referenceSha256:job.referenceSha256,resultSha256:job.resultSha256,
+     tsx:job.tsx,css:job.css,receipt:job.receipt});
+   }
+   return true;
+  }
+
   if(req.method==='GET'&&/^\/api\/design\/jobs\/[a-f0-9]{64}$/.test(path)){
    try{
     const id=path.slice('/api/design/jobs/'.length);
@@ -72,6 +94,62 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
    const body=await parseJson(req);
    let value;
    switch(path){
+    case '/api/design/iae/submit':{
+     assertKeys(body,['package','scene','typography','assets','approval']);
+     if(body.approval!=='APPROVE_LOCAL_IAE_TO_FFAX_SOURCE_REVIEW')
+      throw Error('FORGE_IAE_OWNER_APPROVAL_REQUIRED');
+     const reqPackage=body.package;
+     if(!reqPackage||typeof reqPackage!=='object'||Array.isArray(reqPackage))
+      throw Error('FORGE_IAE_PACKAGE_INVALID');
+     assertKeys(reqPackage,['schema','jobKey','mode','source','referenceSha256',
+      'rightsBasis','target']);
+     if(reqPackage.schema!=='iae.ffax-reference-request.v1'||
+        reqPackage.mode!=='MATCH_REFERENCE'||
+        reqPackage.source!=='IAE_DESIGN_INTELLIGENCE_LOCAL'||
+        reqPackage.target!=='FFAX_REACT_SOURCE_CANDIDATE_ONLY'||
+        reqPackage.rightsBasis!=='OWNER_ASSERTED_REFERENCE_ONLY'||
+        typeof reqPackage.jobKey!=='string'||
+        !/^[a-z][a-z0-9_-]{2,47}$/.test(reqPackage.jobKey)||
+        !/^[a-f0-9]{64}$/.test(reqPackage.referenceSha256||'')||
+        body.scene?.sourceSha256!==reqPackage.referenceSha256)
+      throw Error('FORGE_IAE_PACKAGE_INVALID');
+     let saved;
+     try{saved=await iaeReferenceLoader({sha256:reqPackage.referenceSha256});}
+     catch{throw Error('FORGE_IAE_REFERENCE_NOT_IN_LOCAL_VAULT');}
+     const rec=saved?.receipt;
+     if(rec?.schema!=='ffax.local-reference-receipt.v1'||
+        rec.sha256!==reqPackage.referenceSha256||rec.immutable!==true||
+        rec.rights!=='OWNER_ASSERTED_NOT_VERIFIED'||rec.networkRequests!==0||
+        rec.verification!=='HEADER_AND_SHA_ONLY_BROWSER_DECODE_REQUIRED'||
+        rec.width!==body.scene?.width||rec.height!==body.scene?.height)
+      throw Error('FORGE_IAE_REFERENCE_RECEIPT_INVALID');
+     let artifacts;
+     try{artifacts=createFidelityArtifacts(body.scene,{
+       typography:body.typography??null,assets:body.assets??null,
+       approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});}
+     catch{throw Error('FORGE_IAE_SCENE_INVALID');}
+     if(Buffer.byteLength(artifacts.tsx)+Buffer.byteLength(artifacts.css)>200000||
+        artifacts.sourceSha256!==rec.sha256||artifacts.canPublish!==false)
+      throw Error('FORGE_IAE_RESULT_INVALID');
+     const resultSha256=createHash('sha256').update(artifacts.tsx+'\n'+artifacts.css).digest('hex');
+     const id=randomBytes(16).toString('hex');
+     const receipt={schema:'ffax.iae-source-receipt.v1',referenceSha256:rec.sha256,
+      resultSha256,mode:reqPackage.mode,jobKey:reqPackage.jobKey,
+      sourceOwner:'FFAX_LOCAL_SOURCE_RENDERER',state:'SOURCE_CANDIDATE_UNVERIFIED',
+      f95:'UNASSESSED',p2:'NOT_RUN',ownerOriginalModified:false,
+      localVaultReferenceVerified:true,originalAssetBytesCopied:false,
+      externalRequests:0,generatedCodeExecuted:false,
+      authenticatedCustomerAPIBinding:false,productionDeploy:false};
+     iaeJobs.set(id,{state:'SOURCE_CANDIDATE_UNVERIFIED',referenceSha256:rec.sha256,
+      resultSha256,tsx:artifacts.tsx,css:artifacts.css,receipt});
+     while(iaeJobs.size>3)iaeJobs.delete(iaeJobs.keys().next().value);
+     value={schema:'ffax.iae-accepted.v1',id,state:'SOURCE_CANDIDATE_UNVERIFIED',
+      statusUrl:'/api/design/iae/jobs/'+id,
+      resultUrl:'/api/design/iae/results/'+id,
+      receipt,storage:'PROCESS_MEMORY_ONLY_NO_ORIGINAL_BYTES',
+      externalRequests:0};
+     break;}
+
     case '/api/design/v3-capture':{
      assertKeys(body,['scene','typography','assets','referenceReceipt','approval']);
      if(body.approval!=='APPROVE_FIDELITY_LOCAL_CAPTURE')
