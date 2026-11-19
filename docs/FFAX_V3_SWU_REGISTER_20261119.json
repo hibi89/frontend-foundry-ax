@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "d6b5adae827a0f8701b79d50184ce422cd1d690b",
+  "auditSourceHead": "52e94737c2f35577665c02a22c6433d522530cf7",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -13,7 +13,7 @@
   },
   "incremental": {
     "count": 12,
-    "sourceCandidate": 10,
+    "sourceCandidate": 12,
     "units": [
       {
         "swuId": "FFAX-V3-FID-01",
@@ -387,12 +387,15 @@
         ],
         "allowedPaths": [
           "src/forge-safe-integration.mjs",
-          "src/github-compare-review.mjs"
+          "src/github-compare-review.mjs",
+          "tests/fidelity-v3-integration.test.mjs",
+          "src/fidelity-renderer.mjs",
+          ".github/workflows/ffax-design-forge-p1.yml"
         ],
         "implementationAcceptance": "Approved project contract → scoped isolated React bindings and diff; original remains unchanged",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "52e94737c2f35577665c02a22c6433d522530cf7",
+        "p1LocalCheck": "PASS: 77/77 Node source/synthetic unit tests, CI #44502995359 at 52e94737; real customer-app compile/auth/API/routes and browser E2E NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -420,12 +423,14 @@
         ],
         "allowedPaths": [
           "src/forge-api.mjs",
-          "src/server.mjs"
+          "src/server.mjs",
+          "tests/fidelity-iae-adapter.test.mjs",
+          ".github/workflows/ffax-design-forge-p1.yml"
         ],
         "implementationAcceptance": "Local approved package → FFAX job→read-only status/receipts; unapproved execution denied",
-        "p1Status": "NOT_IMPLEMENTED",
-        "evidenceSha": null,
-        "p1LocalCheck": "NOT_RUN",
+        "p1Status": "IMPLEMENTED_UNVERIFIED",
+        "evidenceSha": "e4616bb75424dfa73797c28e0f76181e0e4e2016",
+        "p1LocalCheck": "PASS: 77/77 Node source/synthetic unit tests, CI #44502995359 at 52e94737; external IAE_dev product caller and live Windows P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -442,10 +447,10 @@
   },
   "basis": "37 independent source-slice outcomes = 25 preserved baseline SWUs + 12 explicit NEW V3 deltas beyond baseline. Each V3 unit excludes its inherited baseline functionality. No test-only/document-only credits.",
   "p1": {
-    "implementedUnverified": 35,
+    "implementedUnverified": 37,
     "total": 37,
-    "percent": 94.59,
-    "state": "SOURCE_CANDIDATES_NOT_OFFICIAL_WEIGHTED_AC"
+    "percent": 100,
+    "state": "P1_SOURCE_CANDIDATE_ALL_SWUS_IMPLEMENTED_UNVERIFIED; P2_AND_WEIGHTED_AC_NOT_VERIFIED"
   },
   "p2": {
     "newV3AcceptanceVerified": 0,
@@ -455,7 +460,7 @@
     "oldSelfVerifiedCI": "HISTORIC_4_OF_4_CI_SUCCESS",
     "newV3IndependentAudit": "NOT_RUN"
   },
-  "f95": "NOT_RUN: actual user-supplied screenshot achieving F95>=95 NOT_VERIFIED",
+  "f95": "NOT_RUN: real owner image F95>=95 NOT_VERIFIED",
   "caveats": [
     "FID-03 owner's manual text bounding boxes only; optical character recognition NOT_IMPLEMENTED.",
     "FID-04 verifies supplied file magic/SHA and asserts owner rights; actual original font/image asset bytes are not yet bound into V3 renderer.",
@@ -465,17 +470,21 @@
     "FID-09 allows isolated owner-reviewed bounded geometry/style/type corrections with local one-step rollback; customer originals unchanged.",
     "FID-10 owner visual review and SHA-bound local work JSON resume recorded as candidates; no 95% fidelity/production approval.",
     "P1 source smoke 73/73 PASS at 44500753132; legacy V2.1 synthetic browser P2 success does not imply new V3 fidelity full P2 PASS.",
-    "V3 outstanding FID-11 actual data/API/routes/auth contract-safe integration and FID-12 IAE_dev local versioned adapter; official 12AC weighted rates UNASSESSED."
+    "P1 V3 37/37 is only candidate source implementation, NOT official 12AC weighted completion; source-only CI 77/77 PASS #44502995359.",
+    "FID-11 generates actual source TSX/CSS and typed text-slot/event callback bridge in isolated copy, preserves protected original file hashes, rollback and diff; NOT real customer runtime/auth/API/routes integration verified.",
+    "FID-12 FFAX-local loopback IAE request/job/status/results API only; external IAE_dev client deployment and cross-repo E2E NOT_RUN. CSRF+Origin+vault SHA required, no remote/source writes.",
+    "Additional V3 P2 acceptance 0/8, official weighted AC P1/P2 UNASSESSED, real 95-point visual reproduction NOT_VERIFIED, independent audit NOT_RUN.",
+    "P2 must test 12 real owner-rights references, Windows 11, actual React TSX compiling, auth/API/routes, network/sandbox boundaries, and owner acceptance before any release GO."
   ],
   "release": "HOLD",
-  "lastSourceHead": "d6b5adae827a0f8701b79d50184ce422cd1d690b",
+  "lastSourceHead": "52e94737c2f35577665c02a22c6433d522530cf7",
   "lastEvidenceRun": {
-    "id": 44500753132,
-    "sha": "d6b5adae827a0f8701b79d50184ce422cd1d690b",
+    "id": 44502995359,
+    "sha": "52e94737c2f35577665c02a22c6433d522530cf7",
     "name": "FFAX V2 Design Forge P1 source smoke",
     "status": "SUCCESS",
-    "sourceTests": "73/73 PASS, 0 FAIL",
-    "scope": "P1 NODE SOURCE / NEW V3 LIVE BROWSER FIDELITY AND FUNCTIONAL P2 NOT_RUN"
+    "sourceTests": "77/77 PASS, 0 FAIL",
+    "scope": "P1 SOURCE/SYNTHETIC NODE; GENERATED TSX APP BUILD AND EXTERNAL IAE CLIENT P2 NOT_RUN"
   },
   "lastCodeWave": [
     {
@@ -521,6 +530,19 @@
         "FID-10"
       ],
       "commit": "d6b5adae827a0f8701b79d50184ce422cd1d690b"
+    },
+    {
+      "units": [
+        "FID-11"
+      ],
+      "commit": "9f8bdbebfda7e1f106e8475e443a01a73bad8882",
+      "fix": "52e94737c2f35577665c02a22c6433d522530cf7"
+    },
+    {
+      "units": [
+        "FID-12"
+      ],
+      "commit": "e4616bb75424dfa73797c28e0f76181e0e4e2016"
     }
   ],
   "sharedVerificationPaths": [
