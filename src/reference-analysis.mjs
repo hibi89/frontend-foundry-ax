@@ -23,8 +23,12 @@ export async function analyzeUserReference(file,{rightsConfirmed=false}={}){
   for(let i=0;i<3;i++){
    const minY=i*16,maxY=(i+1)*16;let r=0,g=0,b=0,total=0;
    for(let y=minY;y<maxY;y++)for(let x=0;x<60;x++){
-    const at=(y*60+x)*4;if(rgba[at+3]<128)continue;
-    r+=rgba[at];g+=rgba[at+1];b+=rgba[at+2];total++;
+    const at=(y*60+x)*4,alpha=rgba[at+3];
+    // Match the white-backed visible geometry segmentation, rather than
+    // using hidden RGB or skipping semi-transparent source pixels.
+    r+=(rgba[at]*alpha+255*(255-alpha))/255;
+    g+=(rgba[at+1]*alpha+255*(255-alpha))/255;
+    b+=(rgba[at+2]*alpha+255*(255-alpha))/255;total++;
    }
    const rgb=total?[r,g,b].map(x=>Math.round(x/total).toString(16).padStart(2,'0')).join(''):'64748b';
    regions.push({id:'band-'+(i+1),bounds:{x:0,y:Math.floor(height*i/3),width,height:Math.ceil(height/3)},colorHint:'#'+rgb,geometry:'OBSERVED_APPROXIMATE',semantic:'UNKNOWN_REQUIRES_HUMAN_REVIEW'});
