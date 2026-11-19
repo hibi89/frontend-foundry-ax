@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/ffax-p2-forge-browser.yml'
       - 'scripts/forge_p2_browser_probe.py'
+      - 'scripts/ffax_v3_p2_browser.py'
       - 'src/**'
       - 'scripts/forge_capture.py'
       - 'scripts/forge_capture.mjs'
@@ -57,6 +58,8 @@ jobs:
           python scripts/export_visual_token_browser_probe.py
       - name: V3 synthetic real React19 TypeScript bridge and live localhost IAE HTTP security (P2 partial)
         run: node scripts/fidelity_v3_p2_rehearsal.mjs
+      - name: P2 V3 real Chromium reference-to-React-to-capture-score-review and stale-approval security (synthetic)
+        run: python scripts/ffax_v3_p2_browser.py
       - name: P2 live loopback UI revision, SHA render, pixel comparison and blocked original asset
         run: python scripts/forge_p2_browser_probe.py
       - name: Retain synthetic-only browser evidence for defect analysis
@@ -64,6 +67,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ffax-v21-p2-forge-chromium-evidence
-          path: artifacts/qa/forge-p2-*
+          path: |
+            artifacts/qa/forge-p2-*
+            artifacts/qa/v3-p2-*
           if-no-files-found: warn
           retention-days: 7
