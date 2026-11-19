@@ -1,10 +1,10 @@
 {
   "schema": "ffax.v3.swu.register.v1",
-  "dateKst": "2026-11-19",
+  "dateKst": "2026-11-20",
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "9f12e1f97e4042a0185c68ba1a430f227f008060",
+  "auditSourceHead": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -462,8 +462,8 @@
     "newV3IndependentAudit": "NOT_RUN",
     "partialSynthetic": {
       "status": "PASS_SYNTHETIC_ONLY_NOT_P2_ACCEPTANCE",
-      "runId": 44504946712,
-      "sourceSha": "65e254dde247cacbcaf0f872d03e1597bc48468b",
+      "runId": 44561628520,
+      "sourceSha": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
       "scope": [
         "Strict TypeScript NodeNext generated FidelityScene/Binding TSX: 0 type errors",
         "Real React 19 server-side rendering: owner fallback text preserved + dynamic data text bound",
@@ -570,7 +570,7 @@
         "id": "P2-04",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Real rights-approved reference/customer React project, auth/API/routes/data/full build, owner acceptance and independent audits",
-        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED; FAIL #44518828926/#44519130545 and TS2550 #44518404139 fixed at f5cd3613 + c28c1d5f; PASS P2 React 17/17 #44520105942, source 86/86 #44520106002, full Linux Node 258/258 in manual run #44520105967; real customer app still NOT_RUN; full manual workflow 4/4 SUCCESS #44521069907 with hosted Windows/Linux 258/258 and 14 browser probes; real customer app auth/API/routes still NOT_RUN; 2x isolated React CSS source+CLI fix 6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6; source 97/97 #44543032440, real React19 synthetic 20/20 #44543032699, hosted Linux Node 269/269 in manual #44543032652; customer app real build/auth/routes NOT_RUN; forged integration audit claims + protected files/binding counts fail-closed ab7383fb31ea428b0685ece3f573ceab6117477e; source 98/98 #44544867652, React 21/21 #44544867687, hosted Chromium 43/43 #44544867660; Linux/Windows 270/270 browser QA 14/14 and 4/4 manual CI #44544867286 all SUCCESS; real customer auth/API/routes and owner rights not accepted"
+        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED; FAIL #44518828926/#44519130545 and TS2550 #44518404139 fixed at f5cd3613 + c28c1d5f; PASS P2 React 17/17 #44520105942, source 86/86 #44520106002, full Linux Node 258/258 in manual run #44520105967; real customer app still NOT_RUN; full manual workflow 4/4 SUCCESS #44521069907 with hosted Windows/Linux 258/258 and 14 browser probes; real customer app auth/API/routes still NOT_RUN; 2x isolated React CSS source+CLI fix 6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6; source 97/97 #44543032440, real React19 synthetic 20/20 #44543032699, hosted Linux Node 269/269 in manual #44543032652; customer app real build/auth/routes NOT_RUN; forged integration audit claims + protected files/binding counts fail-closed ab7383fb31ea428b0685ece3f573ceab6117477e; source 98/98 #44544867652, React 21/21 #44544867687, hosted Chromium 43/43 #44544867660; Linux/Windows 270/270 browser QA 14/14 and 4/4 manual CI #44544867286 all SUCCESS; real customer auth/API/routes and owner rights not accepted; V2 legacy rollback path also now rejects SHA-matching external symlink/junction-generated directory before unlink, functional/test SHA e9bd14911423e9c76bd1e8b902231e7489d5fb08; source 103/103 #44561628425, React19 23/23 #44561628426, Chromium 48/48 #44561628520, hosted Linux/Windows 275/275 + manual CI 4/4 #44561629117 all PASS; real customer/owner app remains NOT_RUN"
       },
       {
         "id": "P2-05",
@@ -1390,18 +1390,22 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "9f12e1f97e4042a0185c68ba1a430f227f008060",
+  "lastSourceHead": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
   "lastEvidenceRun": {
-    "id": 44555095749,
-    "sha": "9f12e1f97e4042a0185c68ba1a430f227f008060",
+    "id": 44561629117,
+    "sha": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
     "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
     "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "274/274 PASS",
-    "windowsTests": "274/274 PASS",
-    "browserProbes": "14/14 PASS",
-    "package": "UNRELEASED_OWNER_REVIEW"
+    "linuxTests": "275/275 PASS",
+    "windowsTests": "275/275 PASS",
+    "browserProbes": "PASS",
+    "package": "UNRELEASED_OWNER_REVIEW",
+    "sourceSmoke": "103/103 PASS #44561628425",
+    "reactSynthetic": "23/23 PASS #44561628426",
+    "chromiumSynthetic": "48/48 PASS #44561628520",
+    "windowsExtracted": "SUCCESS #44561628412"
   },
   "lastCodeWave": [
     {
@@ -1643,6 +1647,13 @@
       ],
       "commit": "9f12e1f97e4042a0185c68ba1a430f227f008060",
       "meaning": "Real EXIF-oriented JPEG reference dimensions now bind browser ImageBitmap, vault, DPR2 CSS/Chromium capture and raw-pixel diagnostics. Node 102/102, hosted Linux+Windows 274/274, actual synthetic Chromium 48/48 with 5 new EXIF checks, browser QA 14/14 and 4/4 manual PASS. Owner F95 still NOT_VERIFIED."
+    },
+    {
+      "units": [
+        "P2-04"
+      ],
+      "commit": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
+      "meaning": "Fix legacy V2 React integration rollback symlink/junction external-file deletion path; exact-sha source 103/103, React 23/23, Chromium 48/48, hosted Linux/Windows Node 275/275 and manual 4/4 PASS. User/customer real acceptance 0/8."
     }
   ],
   "sharedVerificationPaths": [
@@ -1669,5 +1680,37 @@
     "status": "SUCCESS",
     "sourceTests": "81/81 PASS, 0 FAIL",
     "scope": "P1 regression + P2-01/P2-03 security tests; owner environment NOT_VERIFIED"
+  },
+  "previousEvidenceRun3": {
+    "id": 44555095749,
+    "sha": "9f12e1f97e4042a0185c68ba1a430f227f008060",
+    "name": "FFAX manual verification (opt-in)",
+    "status": "SUCCESS",
+    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
+    "jobs": "4/4 SUCCESS",
+    "linuxTests": "274/274 PASS",
+    "windowsTests": "274/274 PASS",
+    "browserProbes": "14/14 PASS",
+    "package": "UNRELEASED_OWNER_REVIEW"
+  },
+  "latestP204LegacyRollbackGuard": {
+    "codeSha": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
+    "status": "PASS_SYNTHETIC_ONLY_OWNER_ACCEPTANCE_HOLD",
+    "risk": "V2 legacy isolated rollback could unlink an external GeneratedScreen.tsx through redirected symlink/junction even with identical SHA",
+    "changedPaths": [
+      "src/forge-safe-integration.mjs",
+      "tests/forge-safe-integration.test.mjs"
+    ],
+    "fix": "Reuse generated parent symlink/junction guard before V2 rollback file verification and immediately before unlink",
+    "sourceRun": 44561628425,
+    "sourceTests": "103/103 PASS, 0 SKIP",
+    "reactRun": 44561628426,
+    "reactTests": "23/23 PASS",
+    "chromiumRun": 44561628520,
+    "chromiumTests": "48/48 PASS",
+    "manualRun": 44561629117,
+    "manualCI": "4/4 SUCCESS, Linux/Windows Node 275/275 each",
+    "realOwnerAcceptance": "0/8",
+    "release": "HOLD"
   }
 }
