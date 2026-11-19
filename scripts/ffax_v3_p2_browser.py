@@ -11,6 +11,7 @@ import socket
 import subprocess
 import time
 import urllib.request
+from io import BytesIO
 from PIL import Image, ImageDraw
 from playwright.sync_api import sync_playwright, expect
 
@@ -221,6 +222,44 @@ try:
                   and metric['reviewControls'],metric)
             page.screenshot(path=str(ART/f'v3-p2-responsive-{width}.png'),
                             full_page=False,timeout=20000)
+        # P2-03 real Chromium paint parity for the typed scene canvas, not
+        # an F95 score or user reference. A canvas background must cover
+        # negative space that child nodes do not occupy.
+        paint_html=page.evaluate("""async () => {
+            const {createFidelityArtifacts}=await import('/src/fidelity-renderer.mjs');
+            const scene={
+              schema:'ffax.fidelity-scene.v1',sourceSha256:'a'.repeat(64),
+              width:320,height:320,revision:1,
+              regions:[
+                {id:'canvas',parentId:null,role:'canvas',
+                  bounds:{x:0,y:0,width:320,height:320},
+                  style:{background:'#13579b'}},
+                {id:'section-1',parentId:'canvas',role:'panel',
+                  bounds:{x:16,y:24,width:64,height:48},
+                  style:{background:'#f8e0ba'}}
+              ]
+            };
+            return createFidelityArtifacts(scene,{
+              approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'
+            }).html;
+        }""")
+        paint_page=context.new_page()
+        try:
+            paint_page.set_viewport_size({'width':360,'height':360})
+            paint_page.set_content(paint_html,wait_until='load')
+            paint_image=Image.open(BytesIO(paint_page.screenshot(
+                full_page=False,timeout=15000))).convert('RGB')
+            check('v3-root-background-raster-matches-owner-scene',
+                  paint_image.getpixel((200,150))==(19,87,155),
+                  paint_image.getpixel((200,150)))
+            check('v3-child-background-raster-overrides-root',
+                  paint_image.getpixel((25,35))==(248,224,186),
+                  paint_image.getpixel((25,35)))
+            check('v3-root-paint-still-not-real-f95',
+                  REPORT['f95']=='UNASSESSED'
+                  and REPORT['p2FullAcceptance']=='NOT_RUN')
+        finally:
+            paint_page.close()
         page.keyboard.press('Tab')
         focused=page.evaluate("() => document.activeElement?.tagName")
         check('v3-keyboard-tab-focus-not-lost',focused not in (None,'BODY','HTML'),focused)
