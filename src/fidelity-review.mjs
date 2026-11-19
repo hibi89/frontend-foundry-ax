@@ -55,7 +55,8 @@ export function createV3OwnerVisualReview(diagnostic,referenceReceipt,captureRec
 export function createV3LocalWorkSnapshot(scene,typography,assets,{referenceSha256,approval}={}){
  if(approval!=='APPROVE_LOCAL_V3_SNAPSHOT_EXPORT')
   throw Error('FIDELITY_SNAPSHOT_OWNER_APPROVAL_REQUIRED');
- if(!sha.test(referenceSha256||'')||scene?.sourceSha256!==referenceSha256)
+ if(!sha.test(referenceSha256||'')||scene?.sourceSha256!==referenceSha256||
+   !Number.isInteger(scene.revision)||scene.revision<1)
   throw Error('FIDELITY_SNAPSHOT_REFERENCE_MISMATCH');
  createFidelityArtifacts(scene,{typography,assets,
   approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
@@ -65,13 +66,18 @@ export function createV3LocalWorkSnapshot(scene,typography,assets,{referenceSha2
   scope:'LOCAL_OWNER_EXPORT_NO_BYTES',vaultRecheckRequired:true,
   f95:'UNASSESSED',originalSourceModified:false};
 }
-export function restoreV3LocalWorkSnapshot(value,{referenceSha256,approval}={}){
+export function restoreV3LocalWorkSnapshot(value,{referenceSha256,approval,referenceWidth,referenceHeight}={}){
  if(approval!=='APPROVE_LOCAL_V3_SNAPSHOT_RESTORE')
   throw Error('FIDELITY_RESTORE_OWNER_APPROVAL_REQUIRED');
  const obj=typeof value==='string'?JSON.parse(value):value;
  if(obj?.schema!=='ffax.v3.work-snapshot.v1'||
    !sha.test(referenceSha256||'')||obj.referenceSha256!==referenceSha256||
-   obj.vaultRecheckRequired!==true||obj.originalSourceModified!==false)
+   obj.vaultRecheckRequired!==true||obj.originalSourceModified!==false||
+   obj.scope!=='LOCAL_OWNER_EXPORT_NO_BYTES'||obj.f95!=='UNASSESSED'||
+   obj.scene?.sourceSha256!==referenceSha256||
+   !Number.isInteger(obj.scene?.revision)||obj.scene.revision<1||
+   (referenceWidth!==undefined&&(!Number.isInteger(referenceWidth)||referenceWidth!==obj.scene.width))||
+   (referenceHeight!==undefined&&(!Number.isInteger(referenceHeight)||referenceHeight!==obj.scene.height)))
   throw Error('FIDELITY_RESTORE_SOURCE_MISMATCH');
  createFidelityArtifacts(obj.scene,{typography:obj.typography,assets:obj.assets,
   approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
