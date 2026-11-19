@@ -418,7 +418,7 @@ async function verifyV3ReviewIntegrity(root,manifest,receipt){
  if(JSON.stringify(receipt.protectedFiles)!==JSON.stringify(protectedExpected))
   throw Error('FORGE_V3_AUDIT_PROTECTED_FILES_MISMATCH');
  // Also bind claimed binding counts to the actual emitted typed bridge.
- const actualTextBindings=(sources[2].match(/Object\\.prototype\\.hasOwnProperty\\.call\\(safeData,/g)||[]).length;
+ const actualTextBindings=sources[2].split('Object.prototype.hasOwnProperty.call(safeData,').length-1;
  const actualIntentBindings=(sources[2].match(/^  "[a-z0-9-]{2,64}": "[A-Za-z][A-Za-z0-9_]{0,47}",$/gm)||[]).length;
  if(receipt.textBindingCount!==actualTextBindings||
     receipt.intentBindingCount!==actualIntentBindings)
