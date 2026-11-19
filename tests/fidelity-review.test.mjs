@@ -77,3 +77,19 @@ test('P2-03 restored snapshot binds inner scene SHA, revision, viewport and loca
  assert.throws(()=>createV3LocalWorkSnapshot({...scene,revision:undefined},null,null,{
   referenceSha256:sha,approval:'APPROVE_LOCAL_V3_SNAPSHOT_EXPORT'}),/REFERENCE_MISMATCH/);
 });
+
+test('P2-03 retina owner visual receipt matches 2x physical pixels to 1x CSS viewport',()=>{
+ const options={decision:'ACCEPT_VISUAL_CANDIDATE',approval:'APPROVE_V3_CANDIDATE_VISUAL_REVIEW'};
+ const d={...diag,viewport:{width:600,height:400,dpr:2}};
+ const ref={...reference,viewport:{cssWidth:300,cssHeight:200,dpr:2},
+  original:{pixelWidth:600,pixelHeight:400}};
+ const c={...capture,width:300,height:200,dpr:2,
+  preflight:{...capture.preflight,viewport:{width:300,height:200},dpr:2}};
+ const result=createV3OwnerVisualReview(d,ref,c,options);
+ assert.equal(result.ownerVisualAccepted,true);
+ assert.equal(result.f95,'UNASSESSED');
+ assert.equal(result.publishApproved,false);
+ assert.throws(()=>createV3OwnerVisualReview(d,ref,{...c,width:600},options),/EVIDENCE_MISMATCH/);
+ assert.throws(()=>createV3OwnerVisualReview(d,{...ref,viewport:{...ref.viewport,dpr:1}},c,options),/EVIDENCE_MISMATCH/);
+ assert.throws(()=>createV3OwnerVisualReview(d,ref,{...c,preflight:{...c.preflight,dpr:1}},options),/EVIDENCE_MISMATCH/);
+});
