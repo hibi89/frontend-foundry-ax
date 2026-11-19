@@ -1398,8 +1398,8 @@
     "status": "SUCCESS",
     "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "NOT_RECORDED PASS",
-    "windowsTests": "NOT_RECORDED PASS",
+    "linuxTests": "279/279 PASS, 0 SKIP",
+    "windowsTests": "279/279 PASS, 0 SKIP",
     "browserProbes": "success",
     "package": "UNRELEASED_OWNER_REVIEW"
   },
@@ -1763,20 +1763,20 @@
       "conclusion": "success",
       "jobs": {
         "windows-native": {
-          "tests": null,
-          "pass": null,
-          "fail": null,
-          "skipped": null,
+          "tests": 279,
+          "pass": 279,
+          "fail": 0,
+          "skipped": 0,
           "status": "success"
         },
         "browser-qa": {
           "status": "success"
         },
         "offline-node": {
-          "tests": null,
-          "pass": null,
-          "fail": null,
-          "skipped": null,
+          "tests": 279,
+          "pass": 279,
+          "fail": 0,
+          "skipped": 0,
           "status": "success"
         },
         "package-owner-review": {
