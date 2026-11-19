@@ -75,7 +75,7 @@ function updateAll(updateBrief=true){if(updateBrief)renderBrief();renderCanvas()
 function run(command){try{history.exec(command);updateAll();el('qa-report').textContent='수정 이후 다시 검증해야 합니다.';el('qa-report').className='qa-result';}catch(e){log(e.message,true);}}
 function edit(prop,value){if(!selected)return;run({kind:'update',id:selected,prop,value});}
 let latestReferenceInventory=null,latestFidelityScene=null,latestTypographyDraft=null,latestAssetManifest=null;
-let latestV3ReferenceReceipt=null,latestV3CaptureUrl=null;
+let latestV3ReferenceReceipt=null,latestV3CaptureUrl=null ,latestV3CaptureBlob=null,latestV3CaptureReceipt=null,latestV3ScoreResult=null;
 window.addEventListener('ffax:v3-reference-receipt',event=>{
  const receipt=event.detail;
  if(receipt?.schema==='ffax.reference-bundle.v3'){
@@ -89,7 +89,7 @@ function updateReference(){
  if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
  if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
  (async()=>{
-  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;el('fidelity-asset-export').disabled=true;
+  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;el('fidelity-asset-export').disabled=true;
   try{
    const {analyzeUserReference}=await import('./reference-analysis.mjs');
    const inventory=await analyzeUserReference(file,{rightsConfirmed:true});
@@ -446,6 +446,8 @@ el('fidelity-capture-run').addEventListener('click',async()=>{
   const image=el('fidelity-capture-image');
   if(latestV3CaptureUrl)URL.revokeObjectURL(latestV3CaptureUrl);
   latestV3CaptureUrl=URL.createObjectURL(blob);
+  latestV3CaptureBlob=blob;latestV3CaptureReceipt=result.receipt;
+  latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;
   image.src=latestV3CaptureUrl;
   save('FFAX-V3-Chromium-Capture-Receipt.json',JSON.stringify(result.receipt,null,2),'application/json');
   status.textContent='Chromium 실제 정지 캡처 완료 · '+result.receipt.width+'×'+result.receipt.height+
@@ -453,6 +455,52 @@ el('fidelity-capture-run').addEventListener('click',async()=>{
    '… · 기능/실원본 시각 95점 검증 및 폰트/자산 재현은 미완';
  }catch(e){status.textContent='실캡처 거부/실패: '+(e?.message||'FORGE_V3_CAPTURE_FAILED');}
  finally{button.disabled=false;el('fidelity-capture-consent').checked=false;}
+});
+
+
+el('fidelity-score-run').addEventListener('click',async()=>{
+ const status=el('fidelity-score-status'),button=el('fidelity-score-run');
+ let source,render;
+ try{
+  if(!el('fidelity-score-consent').checked)throw Error('FIDELITY_SCORE_OWNER_CONSENT_REQUIRED');
+  const file=el('reference-file').files?.[0];
+  if(!file||!latestReferenceInventory||!latestFidelityScene||
+    !latestV3CaptureBlob||!latestV3CaptureReceipt)
+   throw Error('FIDELITY_SCORE_SOURCE_OR_CAPTURE_MISSING');
+  button.disabled=true;
+  const hashed=async(blob)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))]
+   .map(x=>x.toString(16).padStart(2,'0')).join('');
+  const [referenceSha256,renderSha256]=await Promise.all([hashed(file),hashed(latestV3CaptureBlob)]);
+  if(referenceSha256!==latestReferenceInventory.sha256||
+     renderSha256!==latestV3CaptureReceipt.sha256||
+     latestV3CaptureReceipt.referenceSha256!==referenceSha256)
+   throw Error('FIDELITY_SCORE_SOURCE_SHA_CHANGED');
+  source=await createImageBitmap(file);render=await createImageBitmap(latestV3CaptureBlob);
+  const pixels=bitmap=>{
+   const c=document.createElement('canvas');c.width=bitmap.width;c.height=bitmap.height;
+   const ctx=c.getContext('2d',{willReadFrequently:true});
+   if(!ctx)throw Error('FIDELITY_SCORE_CANVAS_UNAVAILABLE');
+   ctx.drawImage(bitmap,0,0);return ctx.getImageData(0,0,c.width,c.height);
+  };
+  const {measureV3RegionDiagnostics}=await import('./fidelity-score.mjs');
+  latestV3ScoreResult=measureV3RegionDiagnostics({
+   reference:pixels(source),render:pixels(render),scene:latestFidelityScene,
+   typography:latestTypographyDraft,assets:latestAssetManifest,
+   referenceSha256,renderSha256,
+   viewport:{width:source.width,height:source.height,dpr:1}});
+  el('fidelity-score-export').disabled=false;
+  status.textContent='영역 '+latestV3ScoreResult.regions.length+
+   '개 · 색상 진단 '+latestV3ScoreResult.axes.colors.diagnosticScore+
+   '/100 · 기하 경계 진단 '+latestV3ScoreResult.axes.geometry.diagnosticScore+
+   '/100. 최종 F95=UNASSESSED (글꼴·자산·사용자 수락·실기기 미검증).';
+ }catch(e){latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;
+  status.textContent='영역별 비교 거부/실패: '+(e?.message||'FIDELITY_SCORE_FAILED');}
+ finally{source?.close();render?.close();button.disabled=false;
+  el('fidelity-score-consent').checked=false;}
+});
+el('fidelity-score-export').addEventListener('click',()=>{
+ if(latestV3ScoreResult)save('FFAX-V3-Region-Diagnostic.json',
+  JSON.stringify(latestV3ScoreResult,null,2),'application/json');
 });
 
 el('reference-owner-map').addEventListener('click',async()=>{

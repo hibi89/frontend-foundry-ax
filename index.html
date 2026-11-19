@@ -228,6 +228,14 @@
          <p id="fidelity-capture-status" class="helper" role="status">위 별도 원본 Vault에서 이미지 SHA·권리·DPR 영수증을 먼저 생성해야 합니다. DPR 1 지원.</p>
          <img id="fidelity-capture-image" alt="V3 Chromium 정지 캡처 (시각 일치도 미검증)" style="max-width:100%;height:auto" />
 
+         <p class="subheading">V3 · 원본↔실 Chromium 영역별 차이 분석</p>
+         <p class="helper">이미지 파일 SHA와 실제 캡처 SHA를 다시 확인합니다. 색상/경계는 대략 점수로 볼 수 있지만 글꼴/자산 및 95점 최종 점수는 현재 미검증으로 처리합니다.</p>
+         <label class="check"><input id="fidelity-score-consent" type="checkbox" /> 로컬 원본과 방금 촬영한 실제 브라우저 PNG의 영역별 차이 분석에 동의합니다.</label>
+         <button id="fidelity-score-run" type="button" class="ghost-btn">실제 화면 영역별 차이 계산</button>
+         <button id="fidelity-score-export" type="button" class="ghost-btn" disabled>F95 불확실성·영역 진단 JSON 저장</button>
+         <p id="fidelity-score-status" class="helper" role="status">실화면 캡처 전 F95=UNASSESSED. 판정 값을 억지로 만들지 않습니다.</p>
+
+
          <iframe id="fidelity-render-preview" sandbox="" title="V3 정지 화면 구조 프리뷰" loading="lazy" style="width:100%;height:300px;border:1px solid var(--stroke, #444);background:#fff"></iframe>
        </section>
 
