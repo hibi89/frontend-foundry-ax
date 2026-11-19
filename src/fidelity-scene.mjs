@@ -17,6 +17,7 @@ function validate(scene){
  if(scene?.schema!=='ffax.fidelity-scene.v1'||!SHA.test(scene.sourceSha256||'')||
     !Number.isInteger(scene.width)||!Number.isInteger(scene.height)||
     scene.width<1||scene.height<1||scene.width*scene.height>32000000||
+    !Number.isInteger(scene.revision)||scene.revision<1||
     !Array.isArray(scene.regions)||scene.regions.length<2||scene.regions.length>24)
   throw Error('FIDELITY_SCENE_INVALID');
  const byId=new Map();
@@ -77,7 +78,10 @@ export function reviseFidelityRegion(scene,{regionId,role,bounds,approval}={}){
  const next=clone(scene),region=next.regions.find(r=>r.id===regionId);
  if(!region)throw Error('FIDELITY_REGION_UNKNOWN');
  region.role=role;region.bounds=clone(bounds);region.ownerReviewed=true;
- region.confidence.semantics='OWNER_REVIEWED';
+ // A valid restored scene may omit extraction confidence metadata.
+ if(!region.confidence||typeof region.confidence!=='object'||Array.isArray(region.confidence))
+  region.confidence={geometry:'OWNER_CORRECTED',semantics:'OWNER_REVIEWED'};
+ else region.confidence.semantics='OWNER_REVIEWED';
  next.revision++;next.provenance='OWNER_CORRECTED_GEOMETRY_UNVERIFIED';
  validate(next);
  return next;
