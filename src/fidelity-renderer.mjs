@@ -19,6 +19,7 @@ function checked(scene,typography,assets){
    !Number.isInteger(scene.width)||!Number.isInteger(scene.height)||
    scene.width<1||scene.height<1||scene.width>10000||scene.height>10000||
    scene.width*scene.height>32000000||
+   !Number.isInteger(scene.revision)||scene.revision<1||
    !Array.isArray(scene.regions)||scene.regions.length<2||scene.regions.length>24)
   throw Error('FIDELITY_RENDER_SCENE_INVALID');
  const byId=new Map();
@@ -28,7 +29,7 @@ function checked(scene,typography,assets){
    r.bounds.x+r.bounds.width>scene.width||r.bounds.y+r.bounds.height>scene.height||
    !RGB.test(r.style?.background||'')||
    (r.style.radius!==undefined&&(!Number.isInteger(r.style.radius)||r.style.radius<0||r.style.radius>48))||
-   (r.style.opacity!==undefined&&(typeof r.style.opacity!=='number'||r.style.opacity<0||r.style.opacity>1)))
+   (r.style.opacity!==undefined&&(!Number.isFinite(r.style.opacity)||r.style.opacity<0||r.style.opacity>1)))
    throw Error('FIDELITY_RENDER_REGION_INVALID');
   byId.set(r.id,r);
  }
@@ -62,8 +63,8 @@ function checked(scene,typography,assets){
     (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined&&
       (!Number.isInteger(t.fontWeight)||t.fontWeight<100||t.fontWeight>900||t.fontWeight%100!==0))||
     (t.fontColor!==undefined&&!RGB.test(t.fontColor))||
-    (t.lineHeight!==undefined&&t.lineHeight!=='UNKNOWN'&&(typeof t.lineHeight!=='number'||t.lineHeight<.8||t.lineHeight>2.5))||
-    (t.letterSpacing!==undefined&&(typeof t.letterSpacing!=='number'||t.letterSpacing< -2||t.letterSpacing>8)))
+    (t.lineHeight!==undefined&&t.lineHeight!=='UNKNOWN'&&(!Number.isFinite(t.lineHeight)||t.lineHeight<.8||t.lineHeight>2.5))||
+    (t.letterSpacing!==undefined&&(!Number.isFinite(t.letterSpacing)||t.letterSpacing< -2||t.letterSpacing>8)))
     throw Error('FIDELITY_RENDER_TEXT_INVALID');
   }
  }
@@ -88,8 +89,11 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,appro
  const texts=typography?.textBoxes||[];
  const textFor=id=>texts.filter(t=>t.regionId===id);
  const css=[
+  // The canvas is an actual painted layer; omitting its background changes
+  // all uncovered pixels (including the negative space around child regions).
   ".ffax-v3-root { position:relative; box-sizing:border-box; width:"+scene.width+
-   "px; height:"+scene.height+"px; overflow:hidden; font-family:system-ui,sans-serif; }",
+   "px; height:"+scene.height+"px; overflow:hidden; background-color:"+
+   byId.get('canvas').style.background+"; font-family:system-ui,sans-serif; }",
   ".ffax-v3-root * { box-sizing:border-box; }",
   ".ffax-v3-node { position:absolute; margin:0; padding:0; }",
   ".ffax-v3-text { position:absolute; margin:0; white-space:pre-wrap; font:inherit; }"
