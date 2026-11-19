@@ -216,3 +216,152 @@ export async function requestApprovedForgeDraft({plan,approval,adapter}={}){
   throw Error('FORGE_DRAFT_PLAN_SCOPE_INVALID');
  return requestDraftPR({plan,approval,adapter});
 }
+
+
+/* FFAX V3 FID-11: actual typed props and intent-callback bridge in an isolated
+ * snapshot, never existing app/auth/routes/API changes or privileged execution.
+ * Runtime parity and customer integration remain P2/owner approval gates.
+ */
+import {createFidelityArtifacts} from './fidelity-renderer.mjs';
+const V3_FILES=Object.freeze([
+ 'src/ffax/FidelityScene.tsx','src/ffax/FidelityScene.css','src/ffax/FidelityBindings.tsx'
+]);
+const contractKey=/^[A-Za-z][A-Za-z0-9_]{0,47}$/;
+function exactlyKeys(value,keys){
+ return value&&typeof value==='object'&&!Array.isArray(value)&&
+  Object.keys(value).sort().join(',')===keys.slice().sort().join(',');
+}
+export function validateV3BindingContract(contract,scene,typography,originalDigest){
+ if(!exactlyKeys(contract,['schema','sourceDigest','textBindings','intentBindings','boundaries'])||
+    contract.schema!=='ffax.v3.app-binding-contract.v1'||contract.sourceDigest!==originalDigest||
+    !HEX.test(originalDigest||'')||
+    !exactlyKeys(contract.boundaries,['auth','api','routes'])||
+    Object.values(contract.boundaries).some(v=>v!=='OWNER_APPLICATION_ONLY')||
+    !Array.isArray(contract.textBindings)||!Array.isArray(contract.intentBindings)||
+    contract.textBindings.length>32||contract.intentBindings.length>16||
+    contract.textBindings.length+contract.intentBindings.length<1)
+  throw Error('FORGE_V3_CONTRACT_INVALID');
+ const labels=new Set(typography?.textBoxes?.map(t=>t.id)||[]);
+ const buttons=new Set(scene?.regions?.filter(r=>r.role==='button').map(r=>r.id)||[]);
+ const textSlots=new Set(),dataKeys=new Set(),intents=new Set(),regions=new Set();
+ for(const t of contract.textBindings){
+  if(!exactlyKeys(t,['slotId','dataKey'])||!labels.has(t.slotId)||
+     !contractKey.test(t.dataKey||'')||textSlots.has(t.slotId)||dataKeys.has(t.dataKey))
+   throw Error('FORGE_V3_TEXT_BINDING_INVALID');
+  textSlots.add(t.slotId);dataKeys.add(t.dataKey);
+ }
+ for(const t of contract.intentBindings){
+  if(!exactlyKeys(t,['regionId','intent'])||!buttons.has(t.regionId)||
+     !contractKey.test(t.intent||'')||regions.has(t.regionId)||intents.has(t.intent))
+   throw Error('FORGE_V3_INTENT_BINDING_INVALID');
+  regions.add(t.regionId);intents.add(t.intent);
+ }
+ return {textBindings:contract.textBindings.map(t=>({...t})),
+  intentBindings:contract.intentBindings.map(t=>({...t}))};
+}
+function buildV3BindingsSource(contract){
+ const textMappings=contract.textBindings.map(t=>'  '+JSON.stringify(t.slotId)+': data['+JSON.stringify(t.dataKey)+'] ?? '+JSON.stringify('')+',').join('\n');
+ const intents=contract.intentBindings.map(t=>'  '+JSON.stringify(t.regionId)+': '+JSON.stringify(t.intent)+',').join('\n');
+ return 'import * as React from "react";\nimport FidelityScene from "./FidelityScene";\n'+
+  'export type FidelityBindingData = Record<string,string>;\n'+
+  'export type FidelityBindingProps = { data: FidelityBindingData; onIntent?: (intent:string)=>void };\n'+
+  'const INTENTS:Record<string,string> = {\n'+intents+'\n};\n'+
+  'export default function FidelityBindings({data,onIntent}:FidelityBindingProps){\n'+
+  ' const textSlots:Record<string,string> = {\n'+textMappings+'\n };\n'+
+  ' const handleIntent=(regionId:string)=>{const intent=INTENTS[regionId]; if(intent!==undefined)onIntent?.(intent);};\n'+
+  ' return <FidelityScene textSlots={textSlots} onAction={handleIntent}/>;\n}\n';
+}
+function v3FileDiff(path,value){
+ const lines=value.replace(/\r\n/g,'\n').split('\n');if(lines.at(-1)==='')lines.pop();
+ return 'diff --git a/'+path+' b/'+path+'\nnew file mode 100644\n--- /dev/null\n+++ b/'+path+
+  '\n@@ -0,0 +1,'+lines.length+' @@\n'+lines.map(l=>'+'+l).join('\n')+'\n';
+}
+export async function prepareV3FidelityIntegration({source,dest,jobId,scene,typography=null,assets=null,contract,approval}={}){
+ if(approval!=='APPROVE_LOCAL_V3_INTEGRATION_REVIEW')
+  throw Error('FORGE_V3_INTEGRATION_OWNER_APPROVAL_REQUIRED');
+ if(!SAFE_JOB.test(jobId||'')||typeof source!=='string'||!source.trim()||
+    typeof dest!=='string'||!dest.trim())
+  throw Error('FORGE_V3_INTEGRATION_INPUT_INVALID');
+ const generated=createFidelityArtifacts(scene,{typography,assets,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
+ const before=await inspectReactProject(source);
+ const bindings=validateV3BindingContract(contract,scene,typography,before.digest);
+ // Glob discovery may auto-bundle new files even without a route import. Fail closed.
+ for(const item of before.files){
+  if(!/\.(?:[cm]?js|jsx|tsx?)$/.test(item.path)||item.size>512000)continue;
+  const file=await readFile(join(before.source,...item.path.split('/')),'utf8');
+  if(/(?:import\.meta\.glob|require\.context)\s*\(/.test(file))
+   throw Error('FORGE_V3_DYNAMIC_DISCOVERY_BLOCKED');
+ }
+ const sources=[generated.tsx,generated.css,buildV3BindingsSource(bindings)];
+ if(sources.some(s=>s.length<15||s.length>512000))
+  throw Error('FORGE_V3_GENERATED_SOURCE_INVALID');
+ let workDir=null;
+ try{
+  const copy=await importReactProject({source,dest,id:jobId});
+  workDir=copy.workDir;
+  if(copy.manifest.digest!==before.digest)throw Error('FORGE_V3_INTEGRATION_SOURCE_CHANGED');
+  const targetDir=join(copy.sourceDir,'src','ffax');
+  await mkdir(targetDir,{mode:0o700});
+  for(let i=0;i<V3_FILES.length;i++){
+   const target=join(copy.sourceDir,...V3_FILES[i].split('/'));
+   await writeFile(target,sources[i],{flag:'wx',mode:0o600});
+   if(sha(await readFile(target))!==sha(Buffer.from(sources[i])))
+    throw Error('FORGE_V3_INTEGRATION_READBACK_FAILED');
+  }
+  await sameSnapshot(copy.sourceDir,copy.manifest);
+  if(!(await verifyOriginalUnchanged({workDir})).unchanged)
+   throw Error('FORGE_V3_INTEGRATION_ORIGINAL_CHANGED');
+  const diff=V3_FILES.map((p,i)=>v3FileDiff(p,sources[i])).join('');
+  await writeFile(join(workDir,'v3-fidelity-review.patch'),diff,{flag:'wx',mode:0o600});
+  const protectedFiles=copy.manifest.files.filter(f=>sensitivePath.test(f.path))
+   .map(f=>({path:f.path,sha256:f.sha256,state:'ORIGINAL_SHA_IDENTICAL_RUNTIME_UNVERIFIED'}));
+  const receipt={schema:'ffax.v3.integration-review.v1',jobId,
+   originalDigest:before.digest,referenceSha256:scene.sourceSha256,
+   sourceFiles:V3_FILES.map((path,i)=>({path,sha256:sha(Buffer.from(sources[i]))})),
+   diffSha256:sha(Buffer.from(diff)),textBindingCount:bindings.textBindings.length,
+   intentBindingCount:bindings.intentBindings.length,contractBoundaries:{...contract.boundaries},
+   protectedFiles,existingFilesModified:0,originalSourceModified:false,
+   state:'ISOLATED_REACT_PROP_INTENT_BRIDGE_REVIEW_ONLY',
+   dataBindings:'TYPED_PROPS_ONLY_CUSTOMER_HANDLER_NOT_CONNECTED',
+   apiVerified:false,authVerified:false,routesVerified:false,buildVerified:false,
+   gitPush:false,prCreated:false,productionDeployed:false,
+   requiredNextGate:'OWNER_CONTRACT_REVIEW_THEN_P2_REAL_APP_BUILD'};
+  await writeFile(join(workDir,'v3-fidelity-integration-receipt.json'),JSON.stringify(receipt,null,2)+'\n',
+   {flag:'wx',mode:0o600});
+  return {schema:receipt.schema,workDir,sourceDir:copy.sourceDir,receipt,
+   diffPath:join(workDir,'v3-fidelity-review.patch'),originalUnchanged:true};
+ }catch(e){if(workDir)await rm(workDir,{recursive:true,force:true});throw e;}
+}
+export async function rollbackV3FidelityIntegration({workDir,approval}={}){
+ if(approval!=='APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK')
+  throw Error('FORGE_V3_ROLLBACK_APPROVAL_REQUIRED');
+ if(typeof workDir!=='string'||!workDir.trim())throw Error('FORGE_V3_ROLLBACK_WORKDIR_INVALID');
+ const root=resolve(workDir);
+ const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));
+ const receiptPath=join(root,'v3-fidelity-integration-receipt.json');
+ const receipt=JSON.parse(await readFile(receiptPath,'utf8'));
+ if(manifest.schema!=='ffax-project-snapshot.v1'||
+    receipt.schema!=='ffax.v3.integration-review.v1'||
+    receipt.state!=='ISOLATED_REACT_PROP_INTENT_BRIDGE_REVIEW_ONLY'||
+    receipt.jobId!==manifest.id||receipt.originalDigest!==manifest.digest||
+    !Array.isArray(receipt.sourceFiles)||receipt.sourceFiles.length!==3||
+    receipt.sourceFiles.some((r,i)=>r.path!==V3_FILES[i]||!HEX.test(r.sha256||'')))
+  throw Error('FORGE_V3_ROLLBACK_RECEIPT_INVALID');
+ const clone=join(root,'source');
+ await sameSnapshot(clone,manifest);
+ if(!(await verifyOriginalUnchanged({workDir:root})).unchanged)
+  throw Error('FORGE_V3_ROLLBACK_ORIGINAL_CHANGED');
+ for(const f of receipt.sourceFiles){
+  const file=join(clone,...f.path.split('/')),stat=await lstat(file);
+  if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1||
+     sha(await readFile(file))!==f.sha256)
+   throw Error('FORGE_V3_ROLLBACK_GENERATED_CONFLICT');
+ }
+ for(const f of receipt.sourceFiles)await unlink(join(clone,...f.path.split('/')));
+ await rmdir(join(clone,'src','ffax'));
+ const after=await inspectReactProject(clone);
+ if(after.digest!==manifest.digest)throw Error('FORGE_V3_ROLLBACK_COPY_MISMATCH');
+ const updated={...receipt,state:'ROLLED_BACK_IN_ISOLATED_COPY'};
+ await writeFile(receiptPath,JSON.stringify(updated,null,2)+'\n',{mode:0o600});
+ return {schema:updated.schema,state:updated.state,originalUnchanged:true,workDir:root};
+}
