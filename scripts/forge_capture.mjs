@@ -144,14 +144,20 @@ export function inspectV3CaptureReadiness(artifacts,referenceReceipt,{width,heig
   throw Error('FORGE_V3_CAPTURE_ARTIFACTS_INVALID');
  if(!Number.isInteger(width)||width<320||width>2560||
     !Number.isInteger(height)||height<320||height>2200||
-    dpr!==1)throw Error('FORGE_V3_CAPTURE_VIEWPORT_UNSUPPORTED');
+    ![1,2].includes(dpr)||(artifacts.dpr??1)!==dpr||
+    width*dpr>2560||height*dpr>2200)
+  throw Error('FORGE_V3_CAPTURE_VIEWPORT_UNSUPPORTED');
  if(referenceReceipt?.schema!=='ffax.reference-bundle.v3'||
     referenceReceipt.referenceSha256!==artifacts.sourceSha256||
-    referenceReceipt.original?.pixelWidth!==width||
-    referenceReceipt.original?.pixelHeight!==height||
+    referenceReceipt.original?.pixelWidth!==width*dpr||
+    referenceReceipt.original?.pixelHeight!==height*dpr||
+    (artifacts.pixelWidth??width)!==width*dpr||
+    (artifacts.pixelHeight??height)!==height*dpr||
     referenceReceipt.viewport?.cssWidth!==width||
     referenceReceipt.viewport?.cssHeight!==height||
-    referenceReceipt.viewport?.dpr!==1||
+    referenceReceipt.viewport?.dpr!==dpr||
+    referenceReceipt.viewport?.capturedPixelWidth!==undefined&&referenceReceipt.viewport?.capturedPixelWidth!==width*dpr||
+    referenceReceipt.viewport?.capturedPixelHeight!==undefined&&referenceReceipt.viewport?.capturedPixelHeight!==height*dpr||
     referenceReceipt.provenance?.publicRedistributionAllowed!==false)
   throw Error('FORGE_V3_CAPTURE_REFERENCE_MISMATCH');
  return {schema:'ffax.v3.capture-preflight.v1',referenceSha256:artifacts.sourceSha256,
@@ -194,7 +200,13 @@ export async function captureV3FidelitySource(artifacts,referenceReceipt,{width,
   const response=await runPython([join(root,'scripts/forge_capture.py'),
    '--html',html,'--out',png,'--width',String(width),'--height',String(height),'--dpr',String(dpr)]);
   const bytes=await readFile(png),sha256=createHash('sha256').update(bytes).digest('hex');
-  if(response?.schema!=='ffax.capture.v1'||response.sha256!==sha256||
+  // Browser receipt width/height are CSS pixels. PNG IHDR must be the
+  // owner-source physical dimensions (CSS viewport multiplied by DPR).
+  const physicalPngValid=bytes.length>=33&&
+   bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))&&
+   bytes.readUInt32BE(16)===width*dpr&&bytes.readUInt32BE(20)===height*dpr;
+  if(!physicalPngValid||
+      response?.schema!=='ffax.capture.v1'||response.sha256!==sha256||
       response.width!==width||response.height!==height||response.dpr!==dpr||
       response.scriptExecution!=='DISABLED'||response.network!=='ABORT_ALL'||
       bytes.length<33||bytes.length>6*1024*1024)
