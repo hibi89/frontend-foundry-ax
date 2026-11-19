@@ -6,6 +6,11 @@ on:
     paths:
       - '.github/workflows/ffax-design-forge-p1.yml'
       - 'src/core.mjs'
+      - 'src/app.mjs'
+      - 'src/fidelity-*.mjs'
+      - 'index.html'
+      - 'tests/fidelity-*.test.mjs'
+      - 'docs/FFAX_V3_SWU_REGISTER_20261119.json'
       - 'src/design-forge.mjs'
       - 'src/forge-style-intelligence.mjs'
       - 'src/design-forge-ui.mjs'
@@ -42,7 +47,7 @@ on:
       - 'tests/external-reference-to-forge.test.mjs'
       - 'tests/forge-safe-integration.test.mjs'
       - 'tests/reference-assets.test.mjs'
-      - 'tests/ffax-reference-fidelity.test.mjs'
+      - 'tests/ffax-reference-fidelity.test.mjs tests/fidelity-geometry.test.mjs tests/fidelity-scene.test.mjs tests/fidelity-reference-receipt.test.mjs tests/fidelity-typography.test.mjs tests/fidelity-assets.test.mjs tests/fidelity-renderer.test.mjs tests/fidelity-v3-capture.test.mjs'
 permissions:
   contents: read
 concurrency:
@@ -75,6 +80,12 @@ jobs:
           node --check scripts/forge_integration_review.mjs
           node --check src/forge-convergence-ui.mjs
           node --check src/reference-analysis.mjs
+          node --check src/fidelity-geometry.mjs
+          node --check src/fidelity-scene.mjs
+          node --check src/fidelity-typography.mjs
+          node --check src/fidelity-assets.mjs
+          node --check src/fidelity-renderer.mjs
+          node --check src/app.mjs
           node --check src/reference-assets.mjs
           node --check src/server.mjs
           node --check scripts/forge_capture.mjs
