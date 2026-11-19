@@ -50,7 +50,9 @@ export function measureV3RegionDiagnostics({reference,render,scene,typography=nu
     referenceSha256===renderSha256)throw Error('FIDELITY_SCORE_SELF_COMPARISON_FORBIDDEN');
  if(!validRaster(reference)||!validRaster(render)||reference.width!==render.width||
     reference.height!==render.height||reference.width<2||reference.height<2||
-    viewport?.width!==reference.width||viewport?.height!==reference.height||viewport?.dpr!==1)
+    viewport?.width!==reference.width||viewport?.height!==reference.height||
+    ![1,2].includes(viewport?.dpr)||reference.width%viewport.dpr!==0||
+    reference.height%viewport.dpr!==0)
   throw Error('FIDELITY_SCORE_VIEWPORT_OR_RASTER_INVALID');
  if(scene?.schema!=='ffax.fidelity-scene.v1'||!Number.isInteger(scene.revision)||scene.revision<1||scene.sourceSha256!==referenceSha256||
     scene.width!==reference.width||scene.height!==reference.height||
