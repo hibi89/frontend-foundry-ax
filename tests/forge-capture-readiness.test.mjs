@@ -34,10 +34,15 @@ test('DF-05: unknown asset provider and forged external provenance fail closed',
  assert.throws(()=>inspectCaptureReadiness(value,{width:250,height:900,dpr:1}),/VIEWPORT_UNSUPPORTED/);
 });
 
-test('P2: capture output never enters source tree (including Windows path semantics)',async()=>{
+test('P2: capture output never enters any repository path (including Windows path semantics)',async()=>{
  const projectRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
  await assert.rejects(validateCaptureOutputDestination(join(projectRoot,'src','capture-attempt')),
   /FORGE_OUTPUT_CONFLICT/);
+ // Output artifacts must not be written into other tracked repository areas.
+ for(const subdir of ['docs','tests','.github']){
+  await assert.rejects(validateCaptureOutputDestination(join(projectRoot,subdir,'capture-attempt')),
+   /FORGE_OUTPUT_CONFLICT/);
+ }
  const outside=join(tmpdir(),'ffax-capture-guard-output-new');
  assert.equal(await validateCaptureOutputDestination(outside),resolve(outside));
  // On Unix, ensure a safe-looking path through a symlink cannot reach source.
