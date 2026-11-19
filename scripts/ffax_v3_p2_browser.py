@@ -326,6 +326,60 @@ try:
               and retina_review['publishApproved'] is False
               and retina_review['f95']=='UNASSESSED'
               and REPORT['p2FullAcceptance']=='NOT_RUN')
+        # Reproduce a real async owner-source race deterministically: hold
+        # reference file decoding, change the selected file, then release the
+        # old promise. Old results must never restore enabled exports or
+        # owner approval for a now-unselected reference.
+        page.evaluate("""() => {
+            const original=File.prototype.arrayBuffer;
+            window.__ffaxDelayUsed=false;
+            window.__ffaxReleaseHeld=null;
+            File.prototype.arrayBuffer=function(...args) {
+                if(this.name==='v3-p2-synthetic.png'&&!window.__ffaxDelayUsed){
+                    window.__ffaxDelayUsed=true;
+                    return new Promise((resolve,reject)=>{
+                        window.__ffaxReleaseHeld=()=>{
+                            original.apply(this,args).then(resolve,reject);
+                        };
+                    });
+                }
+                return original.apply(this,args);
+            };
+        }""")
+        page.locator('#reference-file').set_input_files(str(fixture))
+        page.locator('#apply-reference').click()
+        page.wait_for_function("typeof window.__ffaxReleaseHeld==='function'",timeout=15000)
+        page.locator('#reference-file').set_input_files(str(changed))
+        page.evaluate("() => window.__ffaxReleaseHeld()")
+        page.wait_for_timeout(450)
+        check('v3-stale-file-decode-cannot-restore-previous-source',
+              page.locator('#export-fidelity-scene').is_disabled()
+              and page.locator('#fidelity-region-select').is_disabled()
+              and page.locator('#fidelity-review-accept').is_disabled()
+              and not page.locator('#fidelity-capture-image').get_attribute('src'))
+        # A forged/late receipt event from a different owner reference must
+        # not re-enable capture or bind unrelated provenance to the new file.
+        page.evaluate("""() => window.dispatchEvent(new CustomEvent(
+            'ffax:v3-reference-receipt',{detail:{
+              schema:'ffax.reference-bundle.v3',
+              referenceSha256:'a'.repeat(64),
+              viewport:{dpr:2}
+            }}))""")
+        check('v3-late-unmatched-receipt-cannot-bind-source',
+              '원본 영수증' in page.locator('#fidelity-capture-status').inner_text()
+              and page.locator('#export-fidelity-scene').is_disabled())
+        # Owner rights withdrawal must revoke current edit/capture authority.
+        page.locator('#apply-reference').click()
+        expect(page.locator('#export-fidelity-scene')).to_be_enabled(timeout=15000)
+        page.locator('#rights').uncheck()
+        check('v3-owner-rights-revocation-invalidates-loaded-scene',
+              page.locator('#export-fidelity-scene').is_disabled()
+              and page.locator('#fidelity-region-select').is_disabled()
+              and page.locator('#fidelity-review-accept').is_disabled())
+        page.locator('#rights').check()
+        page.locator('#apply-reference').click()
+        expect(page.locator('#export-fidelity-scene')).to_be_enabled(timeout=15000)
+        check('v3-new-owner-reanalysis-after-revocation',True)
         page.keyboard.press('Tab')
         focused=page.evaluate("() => document.activeElement?.tagName")
         check('v3-keyboard-tab-focus-not-lost',focused not in (None,'BODY','HTML'),focused)
