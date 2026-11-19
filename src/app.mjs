@@ -460,6 +460,8 @@ el('fidelity-capture-run').addEventListener('click',async()=>{
    throw Error('FORGE_V3_CAPTURE_REFERENCE_MISMATCH');
   const {postForgeReview,getForgeSessionToken}=await import('./design-forge-ui.mjs');
   button.disabled=true;
+  clearV3VisualEvidence('새 Chromium 캡처 시작');
+  status.textContent='Chromium 새 캡처 실행 중 · 이전 완료 화면과 시각 승인은 무효';
   const result=await postForgeReview('v3-capture',{
    scene:latestFidelityScene,typography:latestTypographyDraft,assets:latestAssetManifest,
    referenceReceipt:latestV3ReferenceReceipt,approval:'APPROVE_FIDELITY_LOCAL_CAPTURE'});
@@ -472,7 +474,6 @@ el('fidelity-capture-run').addEventListener('click',async()=>{
    throw Error('FORGE_V3_CAPTURE_PNG_UNAVAILABLE');
   const blob=await png.blob();
   if(blob.size<33||blob.size>6*1024*1024)throw Error('FORGE_V3_CAPTURE_PNG_INVALID');
-  clearV3VisualEvidence('새 Chromium 캡처');
   const image=el('fidelity-capture-image');
   if(latestV3CaptureUrl)URL.revokeObjectURL(latestV3CaptureUrl);
   latestV3CaptureUrl=URL.createObjectURL(blob);
