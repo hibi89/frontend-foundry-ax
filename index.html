@@ -254,6 +254,26 @@
          <button id="fidelity-patch-undo" type="button" class="ghost-btn" disabled>직전 수정 되돌리기</button>
          <p id="fidelity-patch-status" class="helper" role="status">영역별 차이를 먼저 측정하세요. 임의 CSS·JS·원본 자산 변경 불가.</p>
 
+         <p class="subheading">V3 · 실제 원본/구현 나란히 비교 · 사용자 수락</p>
+         <div style="display:flex;gap:8px;overflow:auto">
+           <div><small>ORIGINAL</small><img id="fidelity-v3-source-view" alt="사용자가 제공한 원본 레퍼런스" style="max-width:320px;width:100%" /></div>
+           <div><small>CHROMIUM RENDER</small><img id="fidelity-v3-render-view" alt="실제 캡처된 React 구조의 정지 화면" style="max-width:320px;width:100%" /></div>
+         </div>
+         <label class="check"><input id="fidelity-review-consent" type="checkbox" /> 양쪽 이미지를 직접 확인했으며 후보 수락/거절은 F95나 출시 승인이 아님을 이해합니다.</label>
+         <button id="fidelity-review-accept" type="button" class="ghost-btn" disabled>시각 후보 수락 (최종 합격 아님)</button>
+         <button id="fidelity-review-reject" type="button" class="ghost-btn" disabled>시각 후보 거절</button>
+         <button id="fidelity-review-export" type="button" class="ghost-btn" disabled>시각 검토 영수증 JSON 저장</button>
+         <p id="fidelity-review-status" class="helper" role="status">실캡처 비교를 완료해야 수락/거절 가능합니다. 원본 기능/API·F95는 별도.</p>
+         <p class="subheading">V3 · 구조 작업 로컬 저장 / 이어하기</p>
+         <label class="check"><input id="fidelity-snapshot-consent" type="checkbox" /> 원본 이미지/자산 파일은 포함하지 않는 로컬 JSON 구조 저장 승인</label>
+         <button id="fidelity-snapshot-save" type="button" class="ghost-btn">작업 Scene 스냅샷 저장</button>
+         <label for="fidelity-snapshot-file">이전에 저장한 FFAX V3 스냅샷</label>
+         <input id="fidelity-snapshot-file" type="file" accept=".json,application/json" />
+         <label class="check"><input id="fidelity-restore-consent" type="checkbox" /> 같은 원본 SHA 확인 후 이 로컬 구조로 복구 승인</label>
+         <button id="fidelity-snapshot-restore" type="button" class="ghost-btn">같은 이미지 SHA인 경우 구조 복구</button>
+         <p id="fidelity-snapshot-status" class="helper" role="status">원본 이미지 및 권리·실자산은 작업 재개 시 별도로 다시 확인해야 합니다.</p>
+
+
 
 
          <iframe id="fidelity-render-preview" sandbox="" title="V3 정지 화면 구조 프리뷰" loading="lazy" style="width:100%;height:300px;border:1px solid var(--stroke, #444);background:#fff"></iframe>

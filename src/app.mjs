@@ -77,6 +77,7 @@ function edit(prop,value){if(!selected)return;run({kind:'update',id:selected,pro
 let latestReferenceInventory=null,latestFidelityScene=null,latestTypographyDraft=null,latestAssetManifest=null;
 let latestV3ReferenceReceipt=null,latestV3CaptureUrl=null ,latestV3CaptureBlob=null,latestV3CaptureReceipt=null,latestV3ScoreResult=null;
 let latestFidelityPatchRollback=null;
+let latestV3OwnerReview=null,latestV3ReviewImageUrl=null;
 window.addEventListener('ffax:v3-reference-receipt',event=>{
  const receipt=event.detail;
  if(receipt?.schema==='ffax.reference-bundle.v3'){
@@ -90,7 +91,7 @@ function updateReference(){
  if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
  if(!el('rights').checked){el('reference-result').textContent='사용 권한 확인이 필요합니다.';return;}
  (async()=>{
-  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;el('fidelity-asset-export').disabled=true;
+  el('export-reference-inventory').disabled=true;el('export-fidelity-scene').disabled=true;latestReferenceInventory=null;latestFidelityScene=null;el('fidelity-region-apply').disabled=true;latestTypographyDraft=null;latestAssetManifest=null;el('fidelity-text-export').disabled=true;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;latestV3ScoreResult=null;el('fidelity-score-export').disabled=true;latestV3OwnerReview=null;el('fidelity-review-export').disabled=true;el('fidelity-asset-export').disabled=true;
   try{
    const {analyzeUserReference}=await import('./reference-analysis.mjs');
    const inventory=await analyzeUserReference(file,{rightsConfirmed:true});
@@ -490,6 +491,13 @@ el('fidelity-score-run').addEventListener('click',async()=>{
    referenceSha256,renderSha256,
    viewport:{width:source.width,height:source.height,dpr:1}});
   el('fidelity-score-export').disabled=false;
+  if(latestV3ReviewImageUrl)URL.revokeObjectURL(latestV3ReviewImageUrl);
+  latestV3ReviewImageUrl=URL.createObjectURL(file);
+  el('fidelity-v3-source-view').src=latestV3ReviewImageUrl;
+  el('fidelity-v3-render-view').src=latestV3CaptureUrl;
+  el('fidelity-review-accept').disabled=false;
+  el('fidelity-review-reject').disabled=false;
+  latestV3OwnerReview=null;el('fidelity-review-export').disabled=true;
   const sel=el('fidelity-patch-region');sel.replaceChildren();
   for(const issue of latestV3ScoreResult.criticalIssues){
    const o=document.createElement('option');o.value=issue.regionId;
@@ -537,6 +545,76 @@ el('fidelity-patch-undo').addEventListener('click',()=>{
  latestV3ScoreResult=null;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;
  el('fidelity-score-export').disabled=true;
  el('fidelity-patch-status').textContent='로컬 Scene 직전 수정 되돌림. 캡처/진단 재실행 필요';
+});
+
+
+for(const [buttonId,decision] of [
+ ['fidelity-review-accept','ACCEPT_VISUAL_CANDIDATE'],
+ ['fidelity-review-reject','REJECT_VISUAL_CANDIDATE']]){
+ el(buttonId).addEventListener('click',async()=>{
+  const status=el('fidelity-review-status');
+  try{
+   if(!el('fidelity-review-consent').checked)throw Error('FIDELITY_REVIEW_OWNER_APPROVAL_REQUIRED');
+   if(!latestV3ScoreResult||!latestV3ReferenceReceipt||!latestV3CaptureReceipt)
+    throw Error('FIDELITY_REVIEW_EVIDENCE_REQUIRED');
+   const {createV3OwnerVisualReview}=await import('./fidelity-review.mjs');
+   latestV3OwnerReview=createV3OwnerVisualReview(latestV3ScoreResult,
+    latestV3ReferenceReceipt,latestV3CaptureReceipt,
+    {decision,approval:'APPROVE_V3_CANDIDATE_VISUAL_REVIEW'});
+   el('fidelity-review-export').disabled=false;
+   status.textContent=latestV3OwnerReview.status+
+    ' · F95=UNASSESSED / 기능·독립 감사 미검증 / 원본 파일 미변경';
+  }catch(e){status.textContent='시각 수락 거부: '+e.message;}
+  finally{el('fidelity-review-consent').checked=false;}
+ });
+}
+el('fidelity-review-export').addEventListener('click',()=>{
+ if(latestV3OwnerReview)save('FFAX-V3-Owner-Visual-Review.json',
+  JSON.stringify(latestV3OwnerReview,null,2),'application/json');
+});
+el('fidelity-snapshot-save').addEventListener('click',async()=>{
+ const status=el('fidelity-snapshot-status');
+ try{
+  if(!latestFidelityScene||!latestReferenceInventory)throw Error('FIDELITY_SNAPSHOT_SCENE_REQUIRED');
+  if(!el('fidelity-snapshot-consent').checked)throw Error('FIDELITY_SNAPSHOT_OWNER_APPROVAL_REQUIRED');
+  const {createV3LocalWorkSnapshot}=await import('./fidelity-review.mjs');
+  const snapshot=createV3LocalWorkSnapshot(latestFidelityScene,latestTypographyDraft,
+   latestAssetManifest,{referenceSha256:latestReferenceInventory.sha256,
+    approval:'APPROVE_LOCAL_V3_SNAPSHOT_EXPORT'});
+  save('FFAX-V3-Local-Work-Snapshot.json',JSON.stringify(snapshot,null,2),'application/json');
+  status.textContent='로컬 작업 구조 저장 완료 · 원본 이미지/폰트 바이트는 포함되지 않습니다.';
+ }catch(e){status.textContent='작업 저장 거부: '+e.message;}
+ finally{el('fidelity-snapshot-consent').checked=false;}
+});
+el('fidelity-snapshot-restore').addEventListener('click',async()=>{
+ const status=el('fidelity-snapshot-status');
+ try{
+  if(!latestReferenceInventory)throw Error('FIDELITY_RESTORE_REFERENCE_REQUIRED');
+  if(!el('fidelity-restore-consent').checked)throw Error('FIDELITY_RESTORE_OWNER_APPROVAL_REQUIRED');
+  const file=el('fidelity-snapshot-file').files?.[0];
+  if(!file||file.size<60||file.size>200000||!file.name.endsWith('.json'))
+   throw Error('FIDELITY_RESTORE_FILE_INVALID');
+  const {restoreV3LocalWorkSnapshot}=await import('./fidelity-review.mjs');
+  const restored=restoreV3LocalWorkSnapshot(await file.text(),{
+   referenceSha256:latestReferenceInventory.sha256,
+   approval:'APPROVE_LOCAL_V3_SNAPSHOT_RESTORE'});
+  latestFidelityScene=restored.scene;latestTypographyDraft=restored.typography;
+  latestAssetManifest=restored.assets;latestV3OwnerReview=null;
+  latestV3ScoreResult=null;latestV3CaptureBlob=null;latestV3CaptureReceipt=null;
+  el('fidelity-review-export').disabled=true;el('fidelity-score-export').disabled=true;
+  el('fidelity-patch-undo').disabled=true;latestFidelityPatchRollback=null;
+  const sel=el('fidelity-region-select');sel.replaceChildren();
+  for(const region of latestFidelityScene.regions.filter(x=>x.id!=='canvas')){
+   const option=document.createElement('option');option.value=region.id;option.textContent=region.id;
+   sel.append(option);
+  }
+  sel.disabled=false;el('export-fidelity-scene').disabled=false;
+  el('fidelity-text-export').disabled=!latestTypographyDraft?.textBoxes?.length;
+  el('fidelity-asset-export').disabled=!latestAssetManifest?.assets?.length;
+  status.textContent='SHA가 일치하는 로컬 구조 복구 완료 · 재캡처/권리·자산 재확인 필수';
+ }catch(e){status.textContent='로컬 작업 복원 거부: '+e.message;}
+ finally{el('fidelity-restore-consent').checked=false;
+  el('fidelity-snapshot-file').value='';}
 });
 
 el('reference-owner-map').addEventListener('click',async()=>{
