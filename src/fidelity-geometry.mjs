@@ -1,6 +1,12 @@
 /* FID-02. Bounded local color-edge segmentation; not OCR or semantic vision. */
 const MAX=512*512;
-const dist=(data,a,b)=>{const i=a*4,j=b*4;return (Math.abs(data[i]-data[j])+Math.abs(data[i+1]-data[j+1])+Math.abs(data[i+2]-data[j+2]))/3;};
+// The visible reference preview is composited onto a white canvas. Raw RGB
+// under transparent PNG/WebP pixels is not visible and must not invent edges.
+const visibleChannel=(data,i,c)=>Math.round((data[i+c]*data[i+3]+255*(255-data[i+3]))/255);
+const dist=(data,a,b)=>{const i=a*4,j=b*4;return (
+ Math.abs(visibleChannel(data,i,0)-visibleChannel(data,j,0))+
+ Math.abs(visibleChannel(data,i,1)-visibleChannel(data,j,1))+
+ Math.abs(visibleChannel(data,i,2)-visibleChannel(data,j,2)))/3;};
 function pickCuts(energy,length,limit){
  const max=Math.max(0,...energy),average=energy.reduce((a,b)=>a+b,0)/Math.max(1,length);
  if(max<24)return [];
@@ -16,8 +22,8 @@ function sampleColor(data,width,height,x0,x1,y0,y1){
  const sum=[0,0,0];let valid=0;
  for(const [u,v] of [[.25,.25],[.5,.5],[.75,.75],[.25,.75],[.75,.25]]){
   const x=Math.min(width-1,Math.floor(x0+(x1-x0)*u)),y=Math.min(height-1,Math.floor(y0+(y1-y0)*v));
-  const i=(y*width+x)*4;if(data[i+3]<128)continue;
-  for(let k=0;k<3;k++)sum[k]+=data[i+k];valid++;
+  const i=(y*width+x)*4;
+  for(let k=0;k<3;k++)sum[k]+=visibleChannel(data,i,k);valid++;
  }
  return '#'+(valid?sum.map(n=>Math.round(n/valid).toString(16).padStart(2,'0')).join(''):'64748b');
 }
