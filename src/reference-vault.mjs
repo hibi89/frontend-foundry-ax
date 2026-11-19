@@ -125,7 +125,18 @@ async function readExact(root,sha256,extension){
   if(!opened.isFile()||opened.nlink!==1||opened.size>MAX||
      opened.dev!==before.dev||opened.ino!==before.ino)
    throw Error('REFERENCE_VAULT_UNSAFE_FILE');
-  const bytes=await handle.readFile();
+  // A file can grow after stat() while readFile() is still reading it.
+  // Allocate at most MAX + 1, read through the held descriptor, and refuse
+  // truncation/growth (including a one-byte append) before SHA verification.
+  const bounded=Buffer.allocUnsafe(opened.size+1);
+  let count=0;
+  while(count<bounded.length){
+   const {bytesRead}=await handle.read(bounded,count,bounded.length-count,count);
+   if(bytesRead===0)break;
+   count+=bytesRead;
+  }
+  if(count!==opened.size)throw Error('REFERENCE_VAULT_UNSAFE_FILE');
+  const bytes=bounded.subarray(0,count);
   const after=await handle.stat(),current=await lstat(path);
   if(!current.isFile()||current.isSymbolicLink()||current.nlink!==1||
      current.dev!==opened.dev||current.ino!==opened.ino||
