@@ -281,7 +281,7 @@ export function validateV3BindingContract(contract,scene,typography,originalDige
   intentBindings:contract.intentBindings.map(t=>({...t}))};
 }
 function buildV3BindingsSource(contract){
- const textMappings=contract.textBindings.map(t=>'  if(Object.hasOwn(safeData,'+JSON.stringify(t.dataKey)+') && typeof safeData['+JSON.stringify(t.dataKey)+'] === "string") textSlots['+JSON.stringify(t.slotId)+'] = safeData['+JSON.stringify(t.dataKey)+'];').join('\n');
+ const textMappings=contract.textBindings.map(t=>'  if(Object.prototype.hasOwnProperty.call(safeData,'+JSON.stringify(t.dataKey)+') && typeof safeData['+JSON.stringify(t.dataKey)+'] === "string") textSlots['+JSON.stringify(t.slotId)+'] = safeData['+JSON.stringify(t.dataKey)+'];').join('\n');
  const intents=contract.intentBindings.map(t=>'  '+JSON.stringify(t.regionId)+': '+JSON.stringify(t.intent)+',').join('\n');
  return 'import * as React from "react";\nimport FidelityScene from "./FidelityScene.js";\n'+
   'export type FidelityBindingData = Record<string,unknown>;\n'+
@@ -369,6 +369,9 @@ async function verifyV3ReviewIntegrity(root,manifest,receipt){
     receipt.sourceFiles.some((f,i)=>f.path!==V3_FILES[i]||!HEX.test(f.sha256||'')))
    throw Error('FORGE_V3_AUDIT_RECEIPT_INVALID');
  const sourceDir=join(root,'source');
+ // Must validate the actual generated directory before any hash-based audit.
+ // Equal file hashes do not grant permission to follow a redirected directory.
+ await assertV3GeneratedParents(sourceDir);
  await sameSnapshot(sourceDir,manifest);
  if(!(await verifyOriginalUnchanged({workDir:root})).unchanged)
    throw Error('FORGE_V3_AUDIT_ORIGINAL_CHANGED');
