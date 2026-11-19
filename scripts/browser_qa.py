@@ -86,7 +86,14 @@ try:
         page.locator('#rights').check()
         page.locator('#apply-reference').click()
         print('FIDELITY_REF_CHECK: '+page.locator('#reference-result').inner_text(),flush=True)
-        page.locator('.reference-candidate').nth(1).wait_for(timeout=10000)
+        try:
+            page.locator('.reference-candidate').nth(1).wait_for(timeout=10000)
+        except Exception:
+            print('FIDELITY_REF_FAILURE: '+page.locator('#reference-result').inner_text(),flush=True)
+            print('FIDELITY_REF_RIGHTS: '+str(page.locator('#rights').is_checked()),flush=True)
+            print('FIDELITY_REF_PAGE_ERRORS: '+str(exceptions),flush=True)
+            print('FIDELITY_REF_CONSOLE: '+str(console_errors),flush=True)
+            raise
         check('image palette two design hints',
               'SHA256' in page.locator('#reference-result').inner_text() and
               page.locator('.reference-candidate').count()==2)
