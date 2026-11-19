@@ -278,6 +278,9 @@ try:
         page.locator('#forge-vault-source').set_input_files(str(retina))
         page.locator('#forge-vault-consent').check()
         page.locator('#forge-vault-save').click()
+        # The previous 1x upload left a success message on screen; wait for
+        # the new immutable SHA field, not a stale "success" status string.
+        expect(page.locator('#forge-vault-sha')).to_have_value(retina_sha,timeout=45000)
         wait_for_good(page,'#forge-vault-status','로컬 이미지 불변 보관 완료',45000)
         check('v3-retina-vault-physical-source-sha',
               page.locator('#forge-vault-sha').input_value()==retina_sha)
