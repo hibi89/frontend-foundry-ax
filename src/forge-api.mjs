@@ -171,11 +171,12 @@ export function createForgeApi({host='127.0.0.1',port=4173,iaeReferenceLoader=lo
       throw Error('FORGE_V3_CAPTURE_REFERENCE_CHANGED');
      let artifacts;
      try{artifacts=createFidelityArtifacts(body.scene,{
-      typography:body.typography,assets:body.assets,
+      typography:body.typography,assets:body.assets,dpr:replay.viewport.dpr,
       approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});}
      catch{throw Error('FORGE_V3_CAPTURE_SCENE_INVALID');}
      const output=await captureV3FidelitySource(artifacts,replay,{
-      width:body.scene.width,height:body.scene.height,dpr:1});
+      width:body.scene.width/replay.viewport.dpr,
+      height:body.scene.height/replay.viewport.dpr,dpr:replay.viewport.dpr});
      const id=randomBytes(16).toString('hex');
      captures.set(id,{bytes:output.bytes,receipt:output.receipt});
      while(captures.size>2)captures.delete(captures.keys().next().value);
