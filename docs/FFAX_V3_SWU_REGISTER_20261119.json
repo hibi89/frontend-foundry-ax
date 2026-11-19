@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
+  "auditSourceHead": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -568,8 +568,8 @@
       {
         "id": "P2-04",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "Real customer app data/auth/API/routes and full build; current SHA full source CI and independent audit",
-        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED"
+        "remaining": "Prove current SHA strict TSX/React19 synthetic workflow PASS, then owner-approved real customer application auth/API/routes/build and independent review",
+        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED"
       },
       {
         "id": "P2-05",
@@ -663,6 +663,22 @@
       "productionChanged": false,
       "realCustomerRuntime": "NOT_RUN",
       "ownerRealReferenceCount": 0
+    },
+    "latestP204DataSafety": {
+      "state": "SOURCE_COMMITTED_RUNTIME_CI_NOT_VERIFIED",
+      "codeSha": "4c2a458001e9897e30bc2a38a7fc1daa4525bf55",
+      "regressionSha": "09af84149a1b25efe95a67cc0a06be55e73de571",
+      "integrationTestSha": "f67d2d11d1454149c726f26ef283067479d50793",
+      "workflowSha": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
+      "fixed": "Generated FidelityBindings handles data null, undefined, arrays, numbers and inherited-only keys by using an empty safeData object and own-string binding; retains owner Korean fallback and typed intent callback.",
+      "runtimeTest": "Synthetic project cloned in isolated workspace, strict TypeScript NodeNext, actual pinned React19 SSR, callback intent, XSS escaping, source SHA parity, audit and rollback. Source tests authored/committed but Github Actions success NOT_VERIFIED.",
+      "codeSyntax": "PASS_LIMITED_V8_PARSER_ESM_IMPORTS_STRIPPED; not actual Node ESM execution",
+      "fullNodeTests": "NOT_RUN_ACCESS_BLOCKED",
+      "githubActions": "NOT_VERIFIED_CONNECTOR_PR_ONLY",
+      "actualCustomerAuthApiRoutes": "NOT_RUN",
+      "ownerWindows11": "NOT_RUN",
+      "independentAudit": "NOT_RUN",
+      "ownerReferenceImages": 0
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -694,7 +710,7 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
+  "lastSourceHead": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
   "lastEvidenceRun": {
     "id": 44510382267,
     "sha": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
@@ -842,6 +858,20 @@
       ],
       "commit": "85267c9c7bfe13c3294e952a0dd3aba45cef4f6e",
       "meaning": "P2 rollback symlink ancestor/ffax directory redirection guard before unlink; protects customer original even when generated files have matching SHA. Standalone guard 3/3 PASS, full repo CI pending."
+    },
+    {
+      "units": [
+        "P2-04"
+      ],
+      "commit": "4c2a458001e9897e30bc2a38a7fc1daa4525bf55",
+      "meaning": "Guard live data nullable/invalid/inherited binding values without throwing; React scene fallback and customer callback retained."
+    },
+    {
+      "units": [
+        "P2-04_SYNTHETIC_RUNTIME"
+      ],
+      "commit": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
+      "meaning": "Create dedicated read-only push CI for real React19 SSR/TS strict synthetic integration, fallback/XSS/intent and isolated audit/rollback; CI success NOT_VERIFIED."
     }
   ],
   "sharedVerificationPaths": [
