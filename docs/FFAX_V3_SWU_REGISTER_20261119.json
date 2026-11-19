@@ -479,6 +479,42 @@
       "realReferenceImagesUsed": 0,
       "independentAudit": "NOT_RUN",
       "acceptanceCounted": 0
+    },
+    "latestSourceCi": {
+      "sha": "65e254dde247cacbcaf0f872d03e1597bc48468b",
+      "pipelines": [
+        {
+          "id": 44504946619,
+          "name": "FFAX V2 Design Forge P1 source smoke",
+          "conclusion": "SUCCESS",
+          "evidence": "78/78 source tests"
+        },
+        {
+          "id": 44504946712,
+          "name": "FFAX V2.1 P2 real Chromium Forge path",
+          "conclusion": "SUCCESS",
+          "evidence": "V3 TSX React19 + real local IAE synthetic rehearsal PASS; legacy Chromium probe PASS"
+        },
+        {
+          "id": 44504946608,
+          "name": "FFAX V2.1 P2 extracted Windows owner-review package",
+          "conclusion": "SUCCESS",
+          "evidence": "Synthetic Windows packaging CI"
+        },
+        {
+          "id": 44504946629,
+          "name": "FFAX manual verification (opt-in)",
+          "conclusion": "SUCCESS",
+          "evidence": "offline-node, windows-native, browser-qa, package-owner-review all SUCCESS"
+        },
+        {
+          "id": 44504946962,
+          "name": "Final blueprint completion evidence gate",
+          "conclusion": "SUCCESS",
+          "evidence": "Documentation contract gate"
+        }
+      ],
+      "fullP2Acceptance": "NOT_VERIFIED; 0/8 new V3 owner criteria"
     }
   },
   "f95": "NOT_VERIFIED; synthetic reference images 0 real user images in V3 P2",
