@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,rm,symlink} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {inspectReactProject} from '../src/workspace.mjs';
@@ -136,6 +136,35 @@ test('P2-04 V3 audit refuses modified protected auth and generated source',async
   await writeFile(join(r.sourceDir,'src','auth.ts'),'export const token=()=> "unchanged";\n');
   await writeFile(join(r.sourceDir,'src','ffax','FidelityScene.css'),'body { color:red }');
   await assert.rejects(audit(),/GENERATED_CHANGED/);
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+
+test('P2-04 V3 audit and rollback refuse symlinked generated parent even with matching SHA bytes',async(t)=>{
+ const f=await fixture();
+ try{
+  const r=await prepareV3FidelityIntegration({source:f.source,dest:f.dest,jobId:'v3-p2-symlink',
+   scene,typography,contract:contract(f.project.digest),approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'});
+  const generated=join(r.sourceDir,'src','ffax'),external=join(f.root,'external-owner-files');
+  await mkdir(external);
+  const expected=new Map();
+  for(const name of ['FidelityScene.tsx','FidelityScene.css','FidelityBindings.tsx']){
+   const bytes=await readFile(join(generated,name));
+   expected.set(name,bytes);
+   await writeFile(join(external,name),bytes);
+  }
+  await rm(generated,{recursive:true});
+  try{await symlink(external,generated,process.platform==='win32'?'junction':'dir');}
+  catch(e){
+   if(['EPERM','EACCES','ENOTSUP'].includes(e.code)){t.skip('Test OS denies directory links');return;}
+   throw e;
+  }
+  await assert.rejects(auditV3FidelityIntegration({workDir:r.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_AUDIT'}),/GENERATED_UNSAFE_PARENT/);
+  await assert.rejects(rollbackV3FidelityIntegration({workDir:r.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK'}),/GENERATED_UNSAFE_PARENT/);
+  for(const [name,bytes] of expected)
+   assert.deepEqual(await readFile(join(external,name)),bytes);
   assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
  }finally{await rm(f.root,{recursive:true,force:true});}
 });
