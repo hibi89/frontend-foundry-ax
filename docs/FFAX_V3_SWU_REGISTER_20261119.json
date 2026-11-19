@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "0853ac664b416f70f02710705776df78f3dcaf3c",
+  "auditSourceHead": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -552,7 +552,7 @@
         "id": "P2-01",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Real external original rights/asset corpus, symlink/reparse/adversarial security full run",
-        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267; new descriptor no-follow and link tests committed a6f4120a8b61086b60cdcbfce15200de3fe042d7; isolated 3/3 PASS, full repo CI pending (not acceptance); updated source 86/86 PASS #44520106002 with regression link cases, owner adversarial/Windows not accepted; GitHub Actions hosted Linux/Windows + Chromium checks recovered, independent security audit NOT_RUN"
+        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267; new descriptor no-follow and link tests committed a6f4120a8b61086b60cdcbfce15200de3fe042d7; isolated 3/3 PASS, full repo CI pending (not acceptance); updated source 86/86 PASS #44520106002 with regression link cases, owner adversarial/Windows not accepted; GitHub Actions hosted Linux/Windows + Chromium checks recovered, independent security audit NOT_RUN; bounded descriptor read against concurrent growth code ced83f9, tests aa51c81. GitHub source 88/88 #44528875638 PASS, React P2 18/18 #44528875524 PASS, hosted Linux Node 260/260 in #44528875566 PASS. P2 full security/real data still unverified"
       },
       {
         "id": "P2-02",
@@ -815,6 +815,47 @@
       "ownerDecision": "NOT_RUN",
       "officialGate": "NOT_FULLY_ACCEPTED",
       "release": "HOLD"
+    },
+    "latestP201BoundedReadFix": {
+      "sourceSha": "ced83f92e6de01315ca3958f9142414e66a5f941",
+      "regressionSha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+      "scope": "P2-01 local reference vault; held descriptor safe bounded input memory",
+      "issue": "After checked lstat()/fd.stat() size, handle.readFile() could consume beyond the 6MiB ceiling if the file grew concurrently. Post-read stat rejected modified file but allocation was already unbounded.",
+      "fix": "Single held descriptor, at-most MAX+1 allocation, positional reads to fixed ceiling, exact original file size validation, existing inode/mtime/SHA postchecks preserved.",
+      "tests": "Exact 6MiB PNG header-only local source SHA round trip + oversize refusal; no customer data or rights claims.",
+      "results": {
+        "source": {
+          "run": 44528875638,
+          "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+          "status": "SUCCESS",
+          "count": "88/88 PASS"
+        },
+        "react": {
+          "run": 44528875524,
+          "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+          "status": "SUCCESS",
+          "count": "18/18 PASS"
+        },
+        "linuxNode": {
+          "run": 44528875566,
+          "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+          "job": "offline-node",
+          "status": "SUCCESS",
+          "count": "260/260 PASS"
+        },
+        "hostedWindows": {
+          "run": 44528875566,
+          "status": "IN_PROGRESS_AT_RECORD"
+        },
+        "browserQA": {
+          "run": 44528875566,
+          "status": "IN_PROGRESS_AT_RECORD"
+        }
+      },
+      "realOwnerSecurity": "NOT_RUN",
+      "independentAudit": "NOT_RUN",
+      "ownerRightsCorpus": 0,
+      "release": "HOLD"
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -846,7 +887,7 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "0853ac664b416f70f02710705776df78f3dcaf3c",
+  "lastSourceHead": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
   "lastEvidenceRun": {
     "id": 44521069907,
     "sha": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
@@ -1034,6 +1075,13 @@
       ],
       "commit": "0853ac664b416f70f02710705776df78f3dcaf3c",
       "meaning": "P2 evidence safety: reject forged viewport/DPR/unsafe or stale capture preflight in owner visual receipt; 87/87 source tests PASS #44526072706 (synthetic only)."
+    },
+    {
+      "units": [
+        "P2-01"
+      ],
+      "commit": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+      "meaning": "P2 original-reference vault TOCTOU memory exhaustion guard: fixed-buffer descriptor read <=6MiB+1; size-change fail closed, valid boundary retained. Source 88/88, React 18/18, Linux Node 260/260 PASS. Owner/adversarial/independent security verification outstanding."
     }
   ],
   "sharedVerificationPaths": [
