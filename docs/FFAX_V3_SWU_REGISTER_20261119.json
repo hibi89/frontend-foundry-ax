@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+  "auditSourceHead": "0853ac664b416f70f02710705776df78f3dcaf3c",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -562,8 +562,8 @@
       {
         "id": "P2-03",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "Calibrated F95 5-axis and critical-region thresholds, real reference image owner visual acceptance",
-        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313"
+        "remaining": "12 owner-rights-approved real images, calibrated actual five-axis F95, missing critical assets/fonts and owner actual visual acceptance",
+        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313; new viewport/DPR/preflight fail-closed owner-review receipts 0853ac664b416f70f02710705776df78f3dcaf3c; Node CI 87/87 PASS #44526072706; synthetic Chromium #44526066904 on source SHA 4392b3 PASS, real owner visual F95 still NOT_VERIFIED"
       },
       {
         "id": "P2-04",
@@ -779,6 +779,42 @@
         "path": ".github/workflows/ffax-manual-ci.yml",
         "description": "Replace apt timeout with pinned OFL NanumGothic-Regular.ttf from Google Fonts commit 16680f8688ffcd467d2eb2146a9ce0343404581d and exact verified Git blob SHA 2aa2b20905b4136808a0126d8e36e5c0f576715c, enforce fc-list Korean glyph gate"
       }
+    },
+    "latestP203ViewportEvidence": {
+      "sourceSha": "4392b35bdb863f5a11e6d7dab8ed5982a3a9b330",
+      "regressionSha": "0853ac664b416f70f02710705776df78f3dcaf3c",
+      "state": "PARTIAL_SYNTHETIC_PASS_ON_NEW_SOURCE",
+      "issue": "createV3OwnerVisualReview accepted correct SHA/revision with mismatched screenshot viewport, DPR or preflight; could emit owner visual candidate receipt unrelated to comparable raster",
+      "fix": "Require exact 1x CSS viewport and pixel width/height consistency among diagnostics, reference original and viewport, capture worker dimensions and preflight; fail closed on wrong/stale preflight and enabled scripts/network",
+      "evidence": {
+        "sourceSmoke": {
+          "run": 44526072706,
+          "sha": "0853ac664b416f70f02710705776df78f3dcaf3c",
+          "conclusion": "SUCCESS",
+          "tests": "87/87 PASS, includes P2-03 forged viewport/DPR/stale capture regression"
+        },
+        "blueprintGate": {
+          "run": 44526073315,
+          "sha": "0853ac664b416f70f02710705776df78f3dcaf3c",
+          "conclusion": "SUCCESS"
+        },
+        "chromium": {
+          "run": 44526066904,
+          "sha": "4392b35bdb863f5a11e6d7dab8ed5982a3a9b330",
+          "conclusion": "SUCCESS",
+          "scope": "Synthetic Chromium, source only; not full test-head"
+        },
+        "manual": {
+          "run": 44526072705,
+          "sha": "0853ac664b416f70f02710705776df78f3dcaf3c",
+          "status": "PENDING_AT_LAST_CHECK"
+        }
+      },
+      "realF95": "NOT_VERIFIED",
+      "rightsClearedImageCorpus": "0/12",
+      "ownerDecision": "NOT_RUN",
+      "officialGate": "NOT_FULLY_ACCEPTED",
+      "release": "HOLD"
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -810,7 +846,7 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+  "lastSourceHead": "0853ac664b416f70f02710705776df78f3dcaf3c",
   "lastEvidenceRun": {
     "id": 44521069907,
     "sha": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
@@ -991,6 +1027,13 @@
       ],
       "commit": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
       "meaning": "Replaced apt Korea-font install timeout with pinned OFL font and Git blob verification; entire manual P2 hosted runner 4/4 SUCCESS, browser 14/14, Linux/Windows 258/258, no actual owner Windows/real F95/independent acceptance."
+    },
+    {
+      "units": [
+        "P2-03"
+      ],
+      "commit": "0853ac664b416f70f02710705776df78f3dcaf3c",
+      "meaning": "P2 evidence safety: reject forged viewport/DPR/unsafe or stale capture preflight in owner visual receipt; 87/87 source tests PASS #44526072706 (synthetic only)."
     }
   ],
   "sharedVerificationPaths": [
