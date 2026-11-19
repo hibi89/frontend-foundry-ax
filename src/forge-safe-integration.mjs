@@ -4,7 +4,7 @@
  */
 import {createHash} from 'node:crypto';
 import {readFile,writeFile,mkdir,rm,lstat,unlink,rmdir} from 'node:fs/promises';
-import {resolve,join} from 'node:path';
+import {resolve,join,dirname} from 'node:path';
 import {verifyForgeBundle} from './design-forge.mjs';
 import {importReactProject,inspectReactProject,verifyOriginalUnchanged} from './workspace.mjs';
 import {requestDraftPR,assertReviewPlan} from './github-review.mjs';
@@ -124,6 +124,7 @@ export async function auditForgeIntegration({workDir,approval}={}){
  const original=await verifyOriginalUnchanged({workDir:root});
  if(!original.unchanged)throw Error('FORGE_INTEGRATION_ORIGINAL_CHANGED');
  const sourceDir=join(root,'source');
+ await assertV3GeneratedParents(sourceDir);
  await sameSnapshot(sourceDir,manifest);
  const target=join(sourceDir,...TARGET.split('/'));
  const stat=await lstat(target);
@@ -226,6 +227,26 @@ import {createFidelityArtifacts} from './fidelity-renderer.mjs';
 const V3_FILES=Object.freeze([
  'src/ffax/FidelityScene.tsx','src/ffax/FidelityScene.css','src/ffax/FidelityBindings.tsx'
 ]);
+/** Audit/rollback must reject a redirected generated directory before reading or
+ * unlinking. A hash match on the child file does not make its parent safe:
+ * a junction/symlink can point at a customer directory with identical bytes.
+ */
+async function assertV3GeneratedParents(sourceDir){
+ let cursor=resolve(sourceDir);
+ for(;;){
+  const info=await lstat(cursor);
+  if(!info.isDirectory()||info.isSymbolicLink())
+   throw Error('FORGE_V3_GENERATED_UNSAFE_PARENT');
+  const parent=dirname(cursor);
+  if(parent===cursor)break;
+  cursor=parent;
+ }
+ for(const part of ['src','src/ffax']){
+  const info=await lstat(join(sourceDir,...part.split('/')));
+  if(!info.isDirectory()||info.isSymbolicLink())
+   throw Error('FORGE_V3_GENERATED_UNSAFE_PARENT');
+ }
+}
 const contractKey=/^[A-Za-z][A-Za-z0-9_]{0,47}$/;
 function exactlyKeys(value,keys){
  return value&&typeof value==='object'&&!Array.isArray(value)&&
@@ -404,6 +425,7 @@ export async function rollbackV3FidelityIntegration({workDir,approval}={}){
     receipt.sourceFiles.some((r,i)=>r.path!==V3_FILES[i]||!HEX.test(r.sha256||'')))
   throw Error('FORGE_V3_ROLLBACK_RECEIPT_INVALID');
  const clone=join(root,'source');
+ await assertV3GeneratedParents(clone);
  await sameSnapshot(clone,manifest);
  if(!(await verifyOriginalUnchanged({workDir:root})).unchanged)
   throw Error('FORGE_V3_ROLLBACK_ORIGINAL_CHANGED');
@@ -413,8 +435,9 @@ export async function rollbackV3FidelityIntegration({workDir,approval}={}){
      sha(await readFile(file))!==f.sha256)
    throw Error('FORGE_V3_ROLLBACK_GENERATED_CONFLICT');
  }
- // Do not remove generated review files if the approved review patch was swapped.
+ // Recheck generated directory after integrity verification and before deletion.
  await verifyV3ReviewIntegrity(root,manifest,receipt);
+ await assertV3GeneratedParents(clone);
  for(const f of receipt.sourceFiles)await unlink(join(clone,...f.path.split('/')));
  await rmdir(join(clone,'src','ffax'));
  const after=await inspectReactProject(clone);
