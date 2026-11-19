@@ -28,3 +28,34 @@ test('FID-02 malformed pixel input fails closed',()=>{
  assert.throws(()=>segmentReferenceGeometry({...img,data:new Uint8ClampedArray(3)},{sourceWidth:320,sourceHeight:320}),/INPUT_INVALID/);
  assert.throws(()=>segmentReferenceGeometry(img,{sourceWidth:10000,sourceHeight:10000}),/INPUT_INVALID/);
 });
+
+test('P2-02 invisible alpha RGB cannot create fake geometry or color hints',()=>{
+ const width=64,height=64,data=new Uint8ClampedArray(width*height*4);
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const at=(y*width+x)*4;
+  data.set(y<32?[0,0,0,0]:[255,0,200,0],at);
+ }
+ const out=segmentReferenceGeometry({width,height,data},{sourceWidth:640,sourceHeight:640});
+ assert.deepEqual(out.regions.map(r=>r.id),['canvas','section-1']);
+ assert.ok(out.regions.every(r=>r.colorHint==='#ffffff'));
+ assert.equal(out.confidence,'APPROXIMATE_GEOMETRY_ONLY');
+});
+test('P2-02 opacity changes visible edges; palette uses displayed composited color',()=>{
+ const width=64,height=64,data=new Uint8ClampedArray(width*height*4);
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const at=(y*width+x)*4;
+  data.set(y<32?[0,0,0,255]:[0,0,0,0],at);
+ }
+ const out=segmentReferenceGeometry({width,height,data},{sourceWidth:640,sourceHeight:640});
+ const sections=out.regions.filter(r=>r.role==='section');
+ assert.equal(sections.length,2);
+ assert.equal(sections[0].colorHint,'#000000');
+ assert.equal(sections[1].colorHint,'#ffffff');
+ assert.equal(sections[0].bounds.height+sections[1].bounds.height,640);
+ // Half-opacity red on white is pink (not the uncomposited pure red).
+ data.fill(0);
+ for(let i=0;i<data.length;i+=4)data.set([255,0,0,128],i);
+ const alpha=segmentReferenceGeometry({width,height,data},{sourceWidth:640,sourceHeight:640});
+ assert.deepEqual(alpha.regions.map(r=>r.colorHint),['#ff7f7f','#ff7f7f']);
+ assert.equal(alpha.ocrPerformed,false);
+});
