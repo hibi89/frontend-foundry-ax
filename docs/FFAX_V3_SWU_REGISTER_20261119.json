@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
+  "auditSourceHead": "88c758d33748eaa64c38c38bb413bacb862b3e6a",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -462,8 +462,8 @@
     "newV3IndependentAudit": "NOT_RUN",
     "partialSynthetic": {
       "status": "PASS_SYNTHETIC_ONLY_NOT_P2_ACCEPTANCE",
-      "runId": 44561628520,
-      "sourceSha": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
+      "runId": 44570192476,
+      "sourceSha": "88c758d33748eaa64c38c38bb413bacb862b3e6a",
       "scope": [
         "Strict TypeScript NodeNext generated FidelityScene/Binding TSX: 0 type errors",
         "Real React 19 server-side rendering: owner fallback text preserved + dynamic data text bound",
@@ -564,7 +564,7 @@
         "id": "P2-03",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Rights-cleared real owner 12-image corpus, calibrated geometry/typography/assets/colors/effects F95, actual source image and owner visual acceptance",
-        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313; new viewport/DPR/preflight fail-closed owner-review receipts 0853ac664b416f70f02710705776df78f3dcaf3c; Node CI 87/87 PASS #44526072706; synthetic Chromium #44526066904 on source SHA 4392b3 PASS, real owner visual F95 still NOT_VERIFIED; restored snapshot nested SHA/scene revision/exact owner reference dimensions and missing confidence edit guard on source e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76; source 90/90 #44530558366, hosted Linux/Windows 262/262 and browser probes 14/14 in 4/4 manual #44530558342 SUCCESS; real owner F95 unverified; P2 typed Scene canvas background paint fixed 6b20f7e; pixel-level Chromium reference-color and child-color checks PASS at SHA fce629b9c29725b5e53d3a7d4a354d11a47b9e0d in #44531906273; source 91/91 #44531812116, manual 4/4 with hosted Linux/Windows 263/263 #44531906336; real owner F95 NOT_VERIFIED; new physical-pixel DPR2 local path SHA 307749d40c5a5c9985ac35956f0bc8afd8782d05 verified synthetic Chromium 800x800/400x400 CSS, #44537458220 SUCCESS, source 95/95 #44536954264, hosted Linux/Windows 267/267 + browser 14/14, 4/4 manual #44537458273 SUCCESS; NOT real F95; source race/rights revocation and stale visual evidence guard SHA 1a7391edcc99c466a40e6a9d6eff3bf61f450d0a; actual hosted Chromium 43/43 incl four new race checks PASS #44541251158, source 95/95 PASS #44540852039, hosted Linux/Windows 267/267, browser 14/14, manual 4/4 PASS #44541251167; owner 12 real references still 0 and F95 NOT_VERIFIED; EXIF JPEG display rotation fix code 0180ffe and E2E SHA 9f12e1f97e4042a0185c68ba1a430f227f008060; source 102/102 #44554105493, synthetic Chromium 48/48 including 5 EXIF JPEG checks #44555095634, hosted Linux/Windows 274/274 and browser QA 14/14 in manual 4/4 #44555095749; actual user image F95 not verified"
+        "partialEvidence": "PASS: revision-bound Chromium capture, typed diagnostic/patch and visual owner receipt; full Chromium synthetic UI #44510382313; new viewport/DPR/preflight fail-closed owner-review receipts 0853ac664b416f70f02710705776df78f3dcaf3c; Node CI 87/87 PASS #44526072706; synthetic Chromium #44526066904 on source SHA 4392b3 PASS, real owner visual F95 still NOT_VERIFIED; restored snapshot nested SHA/scene revision/exact owner reference dimensions and missing confidence edit guard on source e74be1b8ed7632ad1404ffdcd3e313fcd8e0fa76; source 90/90 #44530558366, hosted Linux/Windows 262/262 and browser probes 14/14 in 4/4 manual #44530558342 SUCCESS; real owner F95 unverified; P2 typed Scene canvas background paint fixed 6b20f7e; pixel-level Chromium reference-color and child-color checks PASS at SHA fce629b9c29725b5e53d3a7d4a354d11a47b9e0d in #44531906273; source 91/91 #44531812116, manual 4/4 with hosted Linux/Windows 263/263 #44531906336; real owner F95 NOT_VERIFIED; new physical-pixel DPR2 local path SHA 307749d40c5a5c9985ac35956f0bc8afd8782d05 verified synthetic Chromium 800x800/400x400 CSS, #44537458220 SUCCESS, source 95/95 #44536954264, hosted Linux/Windows 267/267 + browser 14/14, 4/4 manual #44537458273 SUCCESS; NOT real F95; source race/rights revocation and stale visual evidence guard SHA 1a7391edcc99c466a40e6a9d6eff3bf61f450d0a; actual hosted Chromium 43/43 incl four new race checks PASS #44541251158, source 95/95 PASS #44540852039, hosted Linux/Windows 267/267, browser 14/14, manual 4/4 PASS #44541251167; owner 12 real references still 0 and F95 NOT_VERIFIED; EXIF JPEG display rotation fix code 0180ffe and E2E SHA 9f12e1f97e4042a0185c68ba1a430f227f008060; source 102/102 #44554105493, synthetic Chromium 48/48 including 5 EXIF JPEG checks #44555095634, hosted Linux/Windows 274/274 and browser QA 14/14 in manual 4/4 #44555095749; actual user image F95 not verified; 2026-11-20 visual controls actually implemented: safe font presets/text alignment SHA c5ef490682cfca5378dbe6b7cecddef2541241dd, typed border/glow SHA 88c758d33748eaa64c38c38bb413bacb862b3e6a; source 107/107 #44570192321, React 23/23 #44570192579, Chromium synthetic 48/48 #44570192476, manual 4/4 SUCCESS #44570192328; no real-owner F95 proof"
       },
       {
         "id": "P2-04",
@@ -1390,22 +1390,18 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
+  "lastSourceHead": "88c758d33748eaa64c38c38bb413bacb862b3e6a",
   "lastEvidenceRun": {
-    "id": 44561629117,
-    "sha": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
+    "id": 44570192328,
+    "sha": "88c758d33748eaa64c38c38bb413bacb862b3e6a",
     "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
     "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "275/275 PASS",
-    "windowsTests": "275/275 PASS",
-    "browserProbes": "PASS",
-    "package": "UNRELEASED_OWNER_REVIEW",
-    "sourceSmoke": "103/103 PASS #44561628425",
-    "reactSynthetic": "23/23 PASS #44561628426",
-    "chromiumSynthetic": "48/48 PASS #44561628520",
-    "windowsExtracted": "SUCCESS #44561628412"
+    "linuxTests": "NOT_RECORDED PASS",
+    "windowsTests": "NOT_RECORDED PASS",
+    "browserProbes": "success",
+    "package": "UNRELEASED_OWNER_REVIEW"
   },
   "lastCodeWave": [
     {
@@ -1654,6 +1650,22 @@
       ],
       "commit": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
       "meaning": "Fix legacy V2 React integration rollback symlink/junction external-file deletion path; exact-sha source 103/103, React 23/23, Chromium 48/48, hosted Linux/Windows Node 275/275 and manual 4/4 PASS. User/customer real acceptance 0/8."
+    },
+    {
+      "units": [
+        "P2-03",
+        "FID-09"
+      ],
+      "commit": "c5ef490682cfca5378dbe6b7cecddef2541241dd",
+      "meaning": "Owner-selected safe font-family presets and text alignment through real UI, typed patch, and React CSS emission; exact-sha source 105/105 PASS, synthetic React 23/23; no owner real image acceptance."
+    },
+    {
+      "units": [
+        "P2-03",
+        "FID-09"
+      ],
+      "commit": "88c758d33748eaa64c38c38bb413bacb862b3e6a",
+      "meaning": "Owner-selected region border and glow through real UI, bounded typed patch, DPR-aware React/CSS and same preview; source 107/107, React 23/23, Chromium 48/48 synthetic PASS, owner acceptance unchanged."
     }
   ],
   "sharedVerificationPaths": [
@@ -1712,5 +1724,86 @@
     "manualCI": "4/4 SUCCESS, Linux/Windows Node 275/275 each",
     "realOwnerAcceptance": "0/8",
     "release": "HOLD"
+  },
+  "latestP203TypographyAndEffects": {
+    "sourceSha": "88c758d33748eaa64c38c38bb413bacb862b3e6a",
+    "firstWaveSha": "c5ef490682cfca5378dbe6b7cecddef2541241dd",
+    "state": "PASS_SYNTHETIC_ONLY_OWNER_ACCEPTANCE_HOLD",
+    "changedPaths": [
+      "src/fidelity-patch.mjs",
+      "src/fidelity-renderer.mjs",
+      "index.html",
+      "tests/fidelity-patch.test.mjs",
+      "tests/fidelity-renderer.test.mjs"
+    ],
+    "functions": [
+      "Safe owner text font family presets and alignment",
+      "Safe colored border/glow render",
+      "Owner patch UI to typed patch to React CSS with DPR2 scaling",
+      "Fail-closed unsafe CSS/URL inputs"
+    ],
+    "source": {
+      "runId": 44570192321,
+      "result": "success",
+      "tests": "107/107 PASS"
+    },
+    "react": {
+      "runId": 44570192579,
+      "result": "success",
+      "tests": "23/23 PASS"
+    },
+    "chromium": {
+      "runId": 44570192476,
+      "result": "success",
+      "checks": "48/48 PASS_SYNTHETIC_ONLY"
+    },
+    "manual": {
+      "runId": 44570192328,
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": {
+        "windows-native": {
+          "tests": null,
+          "pass": null,
+          "fail": null,
+          "skipped": null,
+          "status": "success"
+        },
+        "browser-qa": {
+          "status": "success"
+        },
+        "offline-node": {
+          "tests": null,
+          "pass": null,
+          "fail": null,
+          "skipped": null,
+          "status": "success"
+        },
+        "package-owner-review": {
+          "status": "success"
+        }
+      }
+    },
+    "userReferencesApproved": 0,
+    "realF95": "NOT_VERIFIED",
+    "verifiedOwnerGates": "0/8",
+    "weightedRate": "UNASSESSED",
+    "release": "HOLD"
+  },
+  "previousEvidenceRun4": {
+    "id": 44561629117,
+    "sha": "e9bd14911423e9c76bd1e8b902231e7489d5fb08",
+    "name": "FFAX manual verification (opt-in)",
+    "status": "SUCCESS",
+    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
+    "jobs": "4/4 SUCCESS",
+    "linuxTests": "275/275 PASS",
+    "windowsTests": "275/275 PASS",
+    "browserProbes": "PASS",
+    "package": "UNRELEASED_OWNER_REVIEW",
+    "sourceSmoke": "103/103 PASS #44561628425",
+    "reactSynthetic": "23/23 PASS #44561628426",
+    "chromiumSynthetic": "48/48 PASS #44561628520",
+    "windowsExtracted": "SUCCESS #44561628412"
   }
 }
