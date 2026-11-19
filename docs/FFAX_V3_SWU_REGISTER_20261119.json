@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "52e94737c2f35577665c02a22c6433d522530cf7",
+  "auditSourceHead": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -390,12 +390,13 @@
           "src/github-compare-review.mjs",
           "tests/fidelity-v3-integration.test.mjs",
           "src/fidelity-renderer.mjs",
-          ".github/workflows/ffax-design-forge-p1.yml"
+          ".github/workflows/ffax-design-forge-p1.yml",
+          "scripts/forge_integration_review.mjs"
         ],
         "implementationAcceptance": "Approved project contract → scoped isolated React bindings and diff; original remains unchanged",
         "p1Status": "IMPLEMENTED_UNVERIFIED",
-        "evidenceSha": "52e94737c2f35577665c02a22c6433d522530cf7",
-        "p1LocalCheck": "PASS: 77/77 Node source/synthetic unit tests, CI #44502995359 at 52e94737; real customer-app compile/auth/API/routes and browser E2E NOT_RUN",
+        "evidenceSha": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
+        "p1LocalCheck": "PASS: real owner-approved prepare-v3/rollback-v3 CLI roundtrip in isolated synthetic React fixture; original SHA unchanged; Node source smoke 78/78 #44503644394; production customer app auth/API/routes runtime and TSX P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -430,7 +431,7 @@
         "implementationAcceptance": "Local approved package → FFAX job→read-only status/receipts; unapproved execution denied",
         "p1Status": "IMPLEMENTED_UNVERIFIED",
         "evidenceSha": "e4616bb75424dfa73797c28e0f76181e0e4e2016",
-        "p1LocalCheck": "PASS: 77/77 Node source/synthetic unit tests, CI #44502995359 at 52e94737; external IAE_dev product caller and live Windows P2 NOT_RUN",
+        "p1LocalCheck": "PASS: IAE package -> local approved FFAX source job -> read-only status and results via same-origin+CSRF tests; Node 78/78 #44503644394; external IAE_dev integration P2 NOT_RUN",
         "p2Status": "NOT_RUN",
         "securityBoundary": "SOURCE_ONLY; NO_OWNER_ORIGINAL_WRITE; NO_EXTERNAL_DATA",
         "complexity": {
@@ -470,21 +471,23 @@
     "FID-09 allows isolated owner-reviewed bounded geometry/style/type corrections with local one-step rollback; customer originals unchanged.",
     "FID-10 owner visual review and SHA-bound local work JSON resume recorded as candidates; no 95% fidelity/production approval.",
     "P1 source smoke 73/73 PASS at 44500753132; legacy V2.1 synthetic browser P2 success does not imply new V3 fidelity full P2 PASS.",
-    "P1 V3 37/37 is only candidate source implementation, NOT official 12AC weighted completion; source-only CI 77/77 PASS #44502995359.",
     "FID-11 generates actual source TSX/CSS and typed text-slot/event callback bridge in isolated copy, preserves protected original file hashes, rollback and diff; NOT real customer runtime/auth/API/routes integration verified.",
     "FID-12 FFAX-local loopback IAE request/job/status/results API only; external IAE_dev client deployment and cross-repo E2E NOT_RUN. CSRF+Origin+vault SHA required, no remote/source writes.",
     "Additional V3 P2 acceptance 0/8, official weighted AC P1/P2 UNASSESSED, real 95-point visual reproduction NOT_VERIFIED, independent audit NOT_RUN.",
-    "P2 must test 12 real owner-rights references, Windows 11, actual React TSX compiling, auth/API/routes, network/sandbox boundaries, and owner acceptance before any release GO."
+    "P2 must test 12 real owner-rights references, Windows 11, actual React TSX compiling, auth/API/routes, network/sandbox boundaries, and owner acceptance before any release GO.",
+    "Current source candidate evidence 78/78 Node tests PASS #44503644394 at 7420e625; real owner data/React compile/IAE side P2 NOT_RUN.",
+    "CLI: node scripts/forge_integration_review.mjs prepare-v3 --source <REACT_DIR> --dest <ISOLATED_PARENT> --job <ID> --scene <SCENE_JSON> --contract <CONTRACT_JSON> --approval APPROVE_LOCAL_V3_INTEGRATION_REVIEW (optional --typography/--assets); rollback-v3 with --workdir/--approval.",
+    "P2 verification 0/8 additional V3 acceptance; owner F95>=95 unverified; release HOLD."
   ],
   "release": "HOLD",
-  "lastSourceHead": "52e94737c2f35577665c02a22c6433d522530cf7",
+  "lastSourceHead": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
   "lastEvidenceRun": {
-    "id": 44502995359,
-    "sha": "52e94737c2f35577665c02a22c6433d522530cf7",
+    "id": 44503644394,
+    "sha": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
     "name": "FFAX V2 Design Forge P1 source smoke",
     "status": "SUCCESS",
-    "sourceTests": "77/77 PASS, 0 FAIL",
-    "scope": "P1 SOURCE/SYNTHETIC NODE; GENERATED TSX APP BUILD AND EXTERNAL IAE CLIENT P2 NOT_RUN"
+    "sourceTests": "78/78 PASS, 0 FAIL",
+    "scope": "P1 SOURCE/SYNTHETIC INCLUDING REAL CLI IN ISOLATED LOCAL FIXTURE; P2 CUSTOMER/IAE LIVE NOT_RUN"
   },
   "lastCodeWave": [
     {
@@ -543,6 +546,13 @@
         "FID-12"
       ],
       "commit": "e4616bb75424dfa73797c28e0f76181e0e4e2016"
+    },
+    {
+      "units": [
+        "FID-11"
+      ],
+      "commit": "7420e625ff8baca30b2e65c5d13c9dc111a95359",
+      "meaning": "real CLI prepare-v3/rollback-v3 entrypoint and synthetic source-integrity test"
     }
   ],
   "sharedVerificationPaths": [
