@@ -332,6 +332,62 @@ export async function prepareV3FidelityIntegration({source,dest,jobId,scene,typo
    diffPath:join(workDir,'v3-fidelity-review.patch'),originalUnchanged:true};
  }catch(e){if(workDir)await rm(workDir,{recursive:true,force:true});throw e;}
 }
+/** P2-04: Read-only evidence integrity audit for V3 isolated React additions.
+ * This verifies snapshot bytes and the *actual* review patch, never customer
+ * auth/API runtime behavior, application build success or independent review.
+ */
+async function verifyV3ReviewIntegrity(root,manifest,receipt){
+ if(manifest?.schema!=='ffax-project-snapshot.v1'||
+    receipt?.schema!=='ffax.v3.integration-review.v1'||
+    receipt.state!=='ISOLATED_REACT_PROP_INTENT_BRIDGE_REVIEW_ONLY'||
+    !SAFE_JOB.test(receipt.jobId||'')||receipt.jobId!==manifest.id||
+    receipt.originalDigest!==manifest.digest||
+    receipt.existingFilesModified!==0||receipt.originalSourceModified!==false||
+    !HEX.test(receipt.diffSha256||'')||
+    !Array.isArray(receipt.sourceFiles)||receipt.sourceFiles.length!==V3_FILES.length||
+    receipt.sourceFiles.some((f,i)=>f.path!==V3_FILES[i]||!HEX.test(f.sha256||'')))
+   throw Error('FORGE_V3_AUDIT_RECEIPT_INVALID');
+ const sourceDir=join(root,'source');
+ await sameSnapshot(sourceDir,manifest);
+ if(!(await verifyOriginalUnchanged({workDir:root})).unchanged)
+   throw Error('FORGE_V3_AUDIT_ORIGINAL_CHANGED');
+ const sources=[];
+ for(const f of receipt.sourceFiles){
+   const path=join(sourceDir,...f.path.split('/')),info=await lstat(path);
+   if(!info.isFile()||info.isSymbolicLink()||info.nlink!==1)
+     throw Error('FORGE_V3_AUDIT_GENERATED_UNSAFE');
+   const bytes=await readFile(path);
+   if(sha(bytes)!==f.sha256)throw Error('FORGE_V3_AUDIT_GENERATED_CHANGED');
+   sources.push(bytes.toString('utf8'));
+ }
+ const expected=V3_FILES.map((p,i)=>v3FileDiff(p,sources[i])).join('');
+ const patchFile=join(root,'v3-fidelity-review.patch');
+ const patchInfo=await lstat(patchFile);
+ if(!patchInfo.isFile()||patchInfo.isSymbolicLink()||patchInfo.nlink!==1)
+   throw Error('FORGE_V3_AUDIT_DIFF_UNSAFE');
+ const patch=await readFile(patchFile);
+ if(sha(patch)!==receipt.diffSha256||patch.toString('utf8')!==expected)
+   throw Error('FORGE_V3_AUDIT_DIFF_CHANGED');
+ return {generatedFiles:V3_FILES.length,verifiedDiffSha256:receipt.diffSha256};
+}
+export async function auditV3FidelityIntegration({workDir,approval}={}){
+ if(approval!=='APPROVE_LOCAL_V3_INTEGRATION_AUDIT')
+   throw Error('FORGE_V3_AUDIT_APPROVAL_REQUIRED');
+ if(typeof workDir!=='string'||!workDir.trim())
+   throw Error('FORGE_V3_AUDIT_WORKDIR_INVALID');
+ const root=resolve(workDir);
+ const manifest=JSON.parse(await readFile(join(root,'manifest.json'),'utf8'));
+ const receipt=JSON.parse(await readFile(join(root,'v3-fidelity-integration-receipt.json'),'utf8'));
+ const verified=await verifyV3ReviewIntegrity(root,manifest,receipt);
+ return {schema:'ffax.v3.integration-audit.v1',workDir:root,
+   state:'P2_STATIC_ISOLATED_REVIEW_INTEGRITY_PASS',
+   ...verified,originalSourceModified:false,
+   customerAuthRuntimeVerified:false,customerApiRuntimeVerified:false,
+   customerRoutesRuntimeVerified:false,fullCustomerBuildVerified:false,
+   independentSecurityAudit:'NOT_RUN',ownerAcceptance:'NOT_RUN',
+   remoteChanges:false};
+}
+
 export async function rollbackV3FidelityIntegration({workDir,approval}={}){
  if(approval!=='APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK')
   throw Error('FORGE_V3_ROLLBACK_APPROVAL_REQUIRED');
@@ -357,6 +413,8 @@ export async function rollbackV3FidelityIntegration({workDir,approval}={}){
      sha(await readFile(file))!==f.sha256)
    throw Error('FORGE_V3_ROLLBACK_GENERATED_CONFLICT');
  }
+ // Do not remove generated review files if the approved review patch was swapped.
+ await verifyV3ReviewIntegrity(root,manifest,receipt);
  for(const f of receipt.sourceFiles)await unlink(join(clone,...f.path.split('/')));
  await rmdir(join(clone,'src','ffax'));
  const after=await inspectReactProject(clone);
