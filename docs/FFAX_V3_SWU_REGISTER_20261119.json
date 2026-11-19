@@ -845,11 +845,25 @@
         },
         "hostedWindows": {
           "run": 44528875566,
-          "status": "IN_PROGRESS_AT_RECORD"
+          "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+          "job": "windows-native",
+          "status": "SUCCESS",
+          "count": "260/260 PASS",
+          "scope": "GitHub-hosted Windows synthetic, NOT owner laptop"
         },
         "browserQA": {
           "run": 44528875566,
-          "status": "IN_PROGRESS_AT_RECORD"
+          "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+          "job": "browser-qa",
+          "status": "SUCCESS",
+          "count": "14/14 probes PASS",
+          "scope": "GitHub-hosted synthetic, NOT owner visual/F95"
+        },
+        "fullManual": {
+          "run": 44528875566,
+          "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
+          "status": "PACKAGE_JOB_PENDING",
+          "scope": "hosted synthetic"
         }
       },
       "realOwnerSecurity": "NOT_RUN",
