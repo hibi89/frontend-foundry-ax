@@ -106,7 +106,7 @@ async function typeAndReactProbe(root){
  const element=bridge.default({data:{headline:'X'},onIntent:intent=>{emitted=intent;}});
  element.props.onAction('region-button');
  if(emitted!=='openPanel')throw Error('V3_P2_INTENT_CALLBACK_BROKEN');
- assert.equal((await readFile(join(source,'src','App.tsx'),'utf8'),original);
+ assert.equal(await readFile(join(source,'src','App.tsx'),'utf8'),original);
  return {sourceDigest:originalDigest,tsxTypeErrors:0,react19SSR:true,
   textBound:true,defaultTextPreserved:true,intentCallback:true,originalSourcePreserved:true};
 }
