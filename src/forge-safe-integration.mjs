@@ -374,6 +374,20 @@ async function verifyV3ReviewIntegrity(root,manifest,receipt){
     receipt.cssWidth!==receipt.pixelWidth/receipt.dpr||
     receipt.cssHeight!==receipt.pixelHeight/receipt.dpr||
     receipt.existingFilesModified!==0||receipt.originalSourceModified!==false||
+    !HEX.test(receipt.referenceSha256||'')||
+    receipt.dataBindings!=='TYPED_PROPS_ONLY_CUSTOMER_HANDLER_NOT_CONNECTED'||
+    receipt.requiredNextGate!=='OWNER_CONTRACT_REVIEW_THEN_P2_REAL_APP_BUILD'||
+    !exactlyKeys(receipt.contractBoundaries,['auth','api','routes'])||
+    Object.values(receipt.contractBoundaries).some(v=>v!=='OWNER_APPLICATION_ONLY')||
+    !Array.isArray(manifest.files)||!Array.isArray(receipt.protectedFiles)||
+    !Number.isInteger(receipt.textBindingCount)||receipt.textBindingCount<0||
+    receipt.textBindingCount>32||!Number.isInteger(receipt.intentBindingCount)||
+    receipt.intentBindingCount<0||receipt.intentBindingCount>16||
+    receipt.textBindingCount+receipt.intentBindingCount<1||
+    receipt.apiVerified!==false||receipt.authVerified!==false||
+    receipt.routesVerified!==false||receipt.buildVerified!==false||
+    receipt.gitPush!==false||receipt.prCreated!==false||
+    receipt.productionDeployed!==false||
     !HEX.test(receipt.diffSha256||'')||
     !Array.isArray(receipt.sourceFiles)||receipt.sourceFiles.length!==V3_FILES.length||
     receipt.sourceFiles.some((f,i)=>f.path!==V3_FILES[i]||!HEX.test(f.sha256||'')))
@@ -396,6 +410,19 @@ async function verifyV3ReviewIntegrity(root,manifest,receipt){
  }
  // Bind recorded DPR metadata to actual CSS; otherwise a coherent forged
  // dpr/cssWidth pair could survive static hashing of unrelated CSS bytes.
+ // The review receipt is a factual *unverified* status, not permission.
+ // Audit rejects any attempt to promote protected code, runtime testing,
+ // git operations, or deployment through a modified metadata-only receipt.
+ const protectedExpected=manifest.files.filter(f=>sensitivePath.test(f.path))
+  .map(f=>({path:f.path,sha256:f.sha256,state:'ORIGINAL_SHA_IDENTICAL_RUNTIME_UNVERIFIED'}));
+ if(JSON.stringify(receipt.protectedFiles)!==JSON.stringify(protectedExpected))
+  throw Error('FORGE_V3_AUDIT_PROTECTED_FILES_MISMATCH');
+ // Also bind claimed binding counts to the actual emitted typed bridge.
+ const actualTextBindings=(sources[2].match(/Object\\.prototype\\.hasOwnProperty\\.call\\(safeData,/g)||[]).length;
+ const actualIntentBindings=(sources[2].match(/^  "[a-z0-9-]{2,64}": "[A-Za-z][A-Za-z0-9_]{0,47}",$/gm)||[]).length;
+ if(receipt.textBindingCount!==actualTextBindings||
+    receipt.intentBindingCount!==actualIntentBindings)
+  throw Error('FORGE_V3_AUDIT_BINDINGS_MISMATCH');
  const cssRoot='.ffax-v3-root { position:relative; box-sizing:border-box; width:'+
   receipt.cssWidth+'px; height:'+receipt.cssHeight+'px; overflow:hidden;';
  if(!sources[1].includes(cssRoot))
