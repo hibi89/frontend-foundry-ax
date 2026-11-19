@@ -219,6 +219,23 @@ Card|날짜 선택 · 사주 정보"></textarea>
         <input id="forge-vault-source" type="file" accept="image/png,image/jpeg,image/webp" />
         <label class="check"><input id="forge-vault-consent" type="checkbox" /> 바로 위에 지정한 파일을 이 PC에 비공개 SHA 이름으로 보관하고 이용 권한은 본인이 확인했습니다. 다른 이미지 선택란은 사용하지 않습니다.</label>
         <button id="forge-vault-save" type="button" class="ghost-btn">선택한 원본 파일 로컬 불변 보관</button>
+
+        <section aria-label="V3 원본·DPR·사용권 참조 영수증">
+          <p class="subheading">V3 · 참조 원본/화면 크기 영수증</p>
+          <p class="helper">바로 위 로컬 보관이 먼저 필요합니다. 사진의 실제 픽셀 크기로 캡처 화면을 고정하고, 소유자가 주장하는 권리만 기록합니다. 재배포 승인이나 상업적 이용 허가는 생성되지 않습니다.</p>
+          <label for="forge-v3-project-label">프로젝트 별칭 (민감정보 제외)</label>
+          <input id="forge-v3-project-label" maxlength="80" value="FFAX local reference" />
+          <label for="forge-v3-source-type">원본 제공 유형</label>
+          <select id="forge-v3-source-type"><option value="OWNER_GENERATED">직접 생성한 이미지</option><option value="USER_SUPPLIED" selected>기존에 보유한 이미지</option></select>
+          <label for="forge-v3-rights-basis">사용권 근거 · 사용자 확인</label>
+          <select id="forge-v3-rights-basis"><option value="REFERENCE_ONLY" selected>내부 참고 전용</option><option value="LICENSED_USE">사용 허가 받은 자산 (외부 확인 미완)</option><option value="OWNER_CREATED">직접 만든 원본 (직접 생성 이미지 선택 시)</option></select>
+          <label for="forge-v3-dpr">참고 이미지의 DPR</label>
+          <select id="forge-v3-dpr"><option value="1" selected>1</option><option value="2">2</option></select>
+          <label class="check"><input id="forge-v3-receipt-consent" type="checkbox" /> 로컬 SHA 영수증 생성과 제시한 화면 조건/권리 근거를 확인했습니다.</label>
+          <button id="forge-v3-receipt-create" type="button" class="ghost-btn">참조 원본·DPR 영수증 생성 / JSON 저장</button>
+          <p id="forge-v3-receipt-status" class="helper" role="status">보관된 원본 SHA를 이용합니다. 외부 서버에 전송하지 않습니다.</p>
+        </section>
+
         <label for="forge-vault-sha">이전에 보관한 이미지 SHA256</label>
         <input id="forge-vault-sha" type="text" maxlength="64" placeholder="64자리 SHA256" />
         <button id="forge-vault-reload" type="button" class="ghost-btn">보관된 PNG 검증 후 다시 불러오기</button>

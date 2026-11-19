@@ -132,3 +132,43 @@ export async function loadLocalReference({sha256,root}={}){
  const dir=await directory(root),saved=await checkedRead(dir,sha256);
  return {bytes:Buffer.from(saved.bytes),receipt:receipt(saved.meta)};
 }
+
+/** V3 FID-01: bind a user-reviewed screen/DPR/rights record to verified local vault bytes.
+ * This is an immutable receipt RESULT, not legal rights verification or publication approval.
+ */
+export function createV3ReferenceReceipt(localReceipt,
+ {approval,sourceType,rightsBasis,dpr,projectLabel}={}){
+ if(approval!=='APPROVE_LOCAL_REFERENCE_RECEIPT')throw Error('FORGE_REFERENCE_RECEIPT_APPROVAL_REQUIRED');
+ if(localReceipt?.schema!=='ffax.local-reference-receipt.v1'||
+    localReceipt.immutable!==true||localReceipt.networkRequests!==0||
+    localReceipt.rights!=='OWNER_ASSERTED_NOT_VERIFIED'||
+    localReceipt.verification!=='HEADER_AND_SHA_ONLY_BROWSER_DECODE_REQUIRED'||
+    !SHA.test(localReceipt.sha256||'')||
+    !Object.hasOwn(FORMAT,localReceipt.mime)||!Number.isInteger(localReceipt.bytes)||
+    localReceipt.bytes<33||localReceipt.bytes>MAX)
+  throw Error('FORGE_REFERENCE_RECEIPT_SOURCE_INVALID');
+ const {width,height}=dimensions(localReceipt.width,localReceipt.height);
+ if(!['OWNER_GENERATED','USER_SUPPLIED'].includes(sourceType)||
+    !['OWNER_CREATED','LICENSED_USE','REFERENCE_ONLY'].includes(rightsBasis)||
+    ![1,2].includes(dpr)||width%dpr!==0||height%dpr!==0||
+    typeof projectLabel!=='string'||!/^.{1,80}$/u.test(projectLabel.trim())||
+    /[\u0000-\u001f\u007f<>]/u.test(projectLabel))
+  throw Error('FORGE_REFERENCE_RECEIPT_FIELDS_INVALID');
+ if(sourceType==='USER_SUPPLIED'&&rightsBasis==='OWNER_CREATED')
+  throw Error('FORGE_REFERENCE_RECEIPT_RIGHTS_CONFLICT');
+ return {
+  schema:'ffax.reference-bundle.v3',referenceSha256:localReceipt.sha256,
+  original:{sha256:localReceipt.sha256,mime:localReceipt.mime,bytes:localReceipt.bytes,
+   pixelWidth:width,pixelHeight:height,storage:'LOCAL_SHA_VERIFIED_VAULT',
+   reverifiedOnCreate:true,sourceType},
+  project:{label:projectLabel.trim(),writeAuthority:false},
+  viewport:{cssWidth:width/dpr,cssHeight:height/dpr,dpr,
+   capturedPixelWidth:width,capturedPixelHeight:height},
+  provenance:{rightsBasis,rightsStatus:'OWNER_ASSERTED_NOT_LEGALLY_VERIFIED',
+   licenseEvidence:'NOT_VERIFIED',publicRedistributionAllowed:false,
+   externalTransmissionConsent:false},
+  approvedFor:'LOCAL_REFERENCE_ANALYSIS_ONLY',
+  publishGate:'OWNER_RIGHTS_AND_RENDER_VERIFICATION_REQUIRED',
+  sourceBytesMutated:false,remoteRequests:0
+ };
+}

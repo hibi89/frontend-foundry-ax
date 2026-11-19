@@ -7,6 +7,7 @@ import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVar
 import {proposeTypedVisualFixes,applyBoundedVisualPatches} from './forge-correction.mjs';
 import {capture} from '../scripts/forge_capture.mjs';
 import {createForgeRunner} from './forge-runner.mjs';
+import {loadLocalReference,createV3ReferenceReceipt} from './reference-vault.mjs';
 import {readBoundedUtf8} from './http-body.mjs';
 const MAX_BYTES=150000,MAX_RESPONSE=350000;
 const storeRoot=join(homedir(),'.ffax','forge-bundles');
@@ -70,6 +71,15 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
    const body=await parseJson(req);
    let value;
    switch(path){
+    case '/api/design/reference-receipt':{
+     assertKeys(body,['sha256','sourceType','rightsBasis','dpr','projectLabel','approval']);
+     if(!/^[0-9a-f]{64}$/.test(body.sha256||''))
+      throw Error('FORGE_REFERENCE_RECEIPT_SOURCE_INVALID');
+     let local;
+     try{local=await loadLocalReference({sha256:body.sha256});}
+     catch{throw Error('FORGE_REFERENCE_RECEIPT_VAULT_UNAVAILABLE');}
+     value=createV3ReferenceReceipt(local.receipt,body);
+     break;}
     case '/api/design/brief':
      assertKeys(body,['brief']);value={schema:'ffax.design-brief-result.v1',brief:makeForgeBrief(body.brief)};break;
     case '/api/design/recommend':{

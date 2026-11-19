@@ -82,6 +82,32 @@ $('forge-vault-reload').addEventListener('click',async()=>{
  finally{button.disabled=false;}
 });
 
+// FID-01: explicit source/rights binding, no new file write or remote request.
+$('forge-v3-receipt-create').addEventListener('click',async()=>{
+ const status=$('forge-v3-receipt-status'),button=$('forge-v3-receipt-create');
+ try{
+  if(!$('forge-v3-receipt-consent').checked)throw Error('FORGE_REFERENCE_RECEIPT_APPROVAL_REQUIRED');
+  const sha256=$('forge-vault-sha').value.trim().toLowerCase();
+  if(!/^[a-f0-9]{64}$/.test(sha256))throw Error('FORGE_REFERENCE_RECEIPT_SOURCE_INVALID');
+  button.disabled=true;
+  const result=await postForgeReview('reference-receipt',{
+   sha256,sourceType:$('forge-v3-source-type').value,
+   rightsBasis:$('forge-v3-rights-basis').value,
+   dpr:Number($('forge-v3-dpr').value),
+   projectLabel:$('forge-v3-project-label').value,
+   approval:'APPROVE_LOCAL_REFERENCE_RECEIPT'});
+  if(result?.schema!=='ffax.reference-bundle.v3'||result.referenceSha256!==sha256)
+   throw Error('FORGE_REFERENCE_RECEIPT_RESPONSE_INVALID');
+  const url=URL.createObjectURL(new Blob([JSON.stringify(result,null,2)],{type:'application/json'}));
+  const link=document.createElement('a');link.href=url;link.download='FFAX-V3-Reference-Receipt.json';
+  document.body.append(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  status.textContent='원본 SHA 재확인 · '+result.viewport.cssWidth+'×'+result.viewport.cssHeight+
+   ' CSSpx, DPR '+result.viewport.dpr+' · 로컬 분석용 영수증 저장. 법적 사용권/공개 승인 아님.';
+ }catch(e){status.textContent='영수증 거부: '+(e?.message||'FORGE_REFERENCE_RECEIPT_FAILED');}
+ finally{button.disabled=false;$('forge-v3-receipt-consent').checked=false;}
+});
+
 const clear=()=>{
  finished=null;$('forge-convergence-report').disabled=true;$('forge-convergence-apply').disabled=true;
  $('forge-convergence-apply-consent').checked=false;
