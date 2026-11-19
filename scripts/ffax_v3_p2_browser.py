@@ -260,6 +260,69 @@ try:
                   and REPORT['p2FullAcceptance']=='NOT_RUN')
         finally:
             paint_page.close()
+        # Full synthetic user-driven 2x upload -> SHA vault -> React CSS
+        # viewport -> offline Chromium PNG -> physical-pixel comparison ->
+        # local visual candidate. Never counts as a real owner reference.
+        retina=ART/'v3-p2-retina-source.png'
+        retina_im=Image.new('RGB',(800,800),'#17539a')
+        retina_draw=ImageDraw.Draw(retina_im)
+        retina_draw.rectangle((40,60,520,300),fill='#f8e0ba')
+        retina_draw.rectangle((120,400,720,700),fill='#ca195e')
+        retina_im.save(retina)
+        retina_sha=hashlib.sha256(retina.read_bytes()).hexdigest()
+        page.locator('#reference-file').set_input_files(str(retina))
+        if not page.locator('#rights').is_checked():
+            page.locator('#rights').check()
+        page.locator('#apply-reference').click()
+        expect(page.locator('#export-fidelity-scene')).to_be_enabled(timeout=15000)
+        page.locator('#forge-vault-source').set_input_files(str(retina))
+        page.locator('#forge-vault-consent').check()
+        page.locator('#forge-vault-save').click()
+        wait_for_good(page,'#forge-vault-status','로컬 이미지 불변 보관 완료',45000)
+        check('v3-retina-vault-physical-source-sha',
+              page.locator('#forge-vault-sha').input_value()==retina_sha)
+        page.locator('#forge-v3-dpr').select_option('2')
+        page.locator('#forge-v3-receipt-consent').check()
+        retina_receipt=download_json(page,'#forge-v3-receipt-create',
+                                     ART/'v3-p2-retina-reference-receipt.json')
+        check('v3-retina-original-800px-css-400px-dpr2',
+              retina_receipt['referenceSha256']==retina_sha
+              and retina_receipt['original']['pixelWidth']==800
+              and retina_receipt['original']['pixelHeight']==800
+              and retina_receipt['viewport']['cssWidth']==400
+              and retina_receipt['viewport']['cssHeight']==400
+              and retina_receipt['viewport']['dpr']==2)
+        page.locator('#fidelity-render-consent').check()
+        page.locator('#fidelity-render-create').click()
+        wait_for_good(page,'#fidelity-render-status','DPR 2')
+        page.locator('#fidelity-capture-consent').check()
+        page.locator('#fidelity-capture-run').click()
+        wait_for_good(page,'#fidelity-capture-status','Chromium 실제 정지 캡처 완료',75000)
+        expect(page.locator('#fidelity-capture-image')).to_have_js_property(
+            'naturalWidth',800,timeout=30000)
+        check('v3-retina-chromium-physical-pixels-800x800',
+              page.locator('#fidelity-capture-image').evaluate(
+                  '(img)=>img.naturalWidth===800 && img.naturalHeight===800'))
+        page.locator('#fidelity-score-consent').check()
+        page.locator('#fidelity-score-run').click()
+        wait_for_good(page,'#fidelity-score-status','색상 진단',45000)
+        retina_diag=download_json(page,'#fidelity-score-export',
+                                  ART/'v3-p2-retina-diagnostic.json')
+        check('v3-retina-physical-pixel-comparison-not-f95',
+              retina_diag['referenceSha256']==retina_sha
+              and retina_diag['viewport']=={'width':800,'height':800,'dpr':2}
+              and retina_diag['weightedF95Score'] is None
+              and retina_diag['status']=='F95_UNASSESSED')
+        page.locator('#fidelity-review-consent').check()
+        page.locator('#fidelity-review-accept').click()
+        wait_for_good(page,'#fidelity-review-status','OWNER_VISUAL_CANDIDATE_ACCEPTED')
+        retina_review=download_json(page,'#fidelity-review-export',
+                                    ART/'v3-p2-retina-review.json')
+        check('v3-retina-candidate-no-production-or-f95-claim',
+              retina_review['ownerVisualAccepted'] is True
+              and retina_review['publishApproved'] is False
+              and retina_review['f95']=='UNASSESSED'
+              and REPORT['p2FullAcceptance']=='NOT_RUN')
         page.keyboard.press('Tab')
         focused=page.evaluate("() => document.activeElement?.tagName")
         check('v3-keyboard-tab-focus-not-lost',focused not in (None,'BODY','HTML'),focused)
