@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,rm,rename,symlink} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {makeForgeBrief,generateForgeVariants,freezeForgeVariant} from '../src/design-forge.mjs';
@@ -95,4 +95,35 @@ test('RF-08: changed source and dynamic module discovery block audit and draft P
    branch:'feature/ffax-review',base:'main',commit:'a'.repeat(40),
    approval:'APPROVE_DRAFT_PR_PLAN_ONLY'}),/DYNAMIC_DISCOVERY_BLOCKED/);
  }finally{await rm(g.root,{recursive:true,force:true});}
+});
+
+test('RF-08 rollback refuses a redirected generated directory with matching source hash',async(t)=>{
+ const f=await fixture();
+ try{
+  const review=await prepareForgeIntegration({source:f.source,dest:f.dest,bundle:f.bundle,
+   jobId:'review-symlink-1',approval:'APPROVE_LOCAL_INTEGRATION_REVIEW'});
+  const generatedDir=join(review.sourceDir,'src','ffax');
+  const retainedDir=join(review.sourceDir,'src','ffax-retained');
+  const externalDir=join(f.root,'external-owner-synthetic');
+  const externalFile=join(externalDir,'GeneratedScreen.tsx');
+  await mkdir(externalDir);
+  await writeFile(externalFile,f.bundle.manifest.reactSource);
+  await rename(generatedDir,retainedDir);
+  try{
+   await symlink(externalDir,generatedDir,process.platform==='win32'?'junction':'dir');
+  }catch(error){
+   if(['EPERM','EACCES','ENOTSUP','EOPNOTSUPP'].includes(error.code)){
+    t.skip('OS policy prevents creating a local directory symlink/junction');
+    return;
+   }
+   throw error;
+  }
+  await assert.rejects(
+   rollbackForgeIntegration({workDir:review.workDir,approval:'APPROVE_LOCAL_INTEGRATION_ROLLBACK'}),
+   /UNSAFE_PARENT/
+  );
+  assert.equal(await readFile(externalFile,'utf8'),f.bundle.manifest.reactSource);
+  assert.equal(await readFile(join(retainedDir,'GeneratedScreen.tsx'),'utf8'),f.bundle.manifest.reactSource);
+  assert.equal(await readFile(join(f.source,'src','App.tsx'),'utf8'),f.app);
+ }finally{await rm(f.root,{recursive:true,force:true});}
 });

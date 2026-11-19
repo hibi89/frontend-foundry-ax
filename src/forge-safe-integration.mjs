@@ -91,11 +91,16 @@ export async function rollbackForgeIntegration({workDir,approval}={}){
     !HEX.test(receipt.sourceSha256||'')||receipt.originalDigest!==manifest.digest)
    throw Error('FORGE_INTEGRATION_ROLLBACK_RECEIPT_INVALID');
  const targetDir=join(root,'source','src','ffax');
+ // V2 rollback must enforce the same no-symlink ancestor boundary as V3.
+ // A redirected ffax directory may contain byte-identical generated code.
+ await assertV3GeneratedParents(join(root,'source'));
  const file=join(targetDir,'GeneratedScreen.tsx');
  const stat=await lstat(file);
  if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1||
     sha(await readFile(file))!==receipt.sourceSha256)throw Error('FORGE_INTEGRATION_ROLLBACK_CONFLICT');
  await sameSnapshot(join(root,'source'),manifest);
+ // Recheck immediately before unlink; never delete through a redirected parent.
+ await assertV3GeneratedParents(join(root,'source'));
  await unlink(file);
  await rmdir(targetDir);
  const clone=await inspectReactProject(join(root,'source'));
