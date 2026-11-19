@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,writeFile,readFile,rm,mkdir,symlink,lstat} from 'node:fs/promises';
+import {mkdtemp,writeFile,readFile,rm,mkdir,symlink,lstat,link} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {createHash} from 'node:crypto';
@@ -80,5 +80,38 @@ test('P2-01 vault rejects symlinked parent before any SHA-named customer byte wr
   await assert.rejects(lstat(join(target,'vault')),e=>e.code==='ENOENT');
   // A direct symlink to the purported vault is equally unsafe.
   await assert.rejects(saveLocalReference({...options,root:alias}),/UNSAFE_ANCESTOR/);
+ }finally{await rm(home,{recursive:true,force:true});}
+});
+
+test('P2-01 vault refuses a SHA-matching symlink file even when target bytes are valid',async(t)=>{
+ const home=await mkdtemp(join(tmpdir(),'ffax-vault-p2-filelink-')),root=join(home,'vault');
+ try{
+  await mkdir(root);
+  const external=join(home,'external-reference.png');
+  await writeFile(external,sample);
+  try{await symlink(external,join(root,sha+'.png'),'file');}
+  catch(e){
+   if(['EPERM','ENOTSUP','EACCES'].includes(e.code)){t.skip('OS denies file symlink creation');return;}
+   throw e;
+  }
+  await assert.rejects(loadLocalReference({root,sha256:sha}),/UNSAFE_FILE/);
+  await assert.rejects(saveLocalReference({root,bytes:sample,sha256:sha,
+   rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'}),/UNSAFE_FILE/);
+ }finally{await rm(home,{recursive:true,force:true});}
+});
+test('P2-01 vault refuses SHA-matching hardlinks to another local owner file',async(t)=>{
+ const home=await mkdtemp(join(tmpdir(),'ffax-vault-p2-hardlink-')),root=join(home,'vault');
+ try{
+  await mkdir(root);
+  const external=join(home,'external-reference.png');
+  await writeFile(external,sample);
+  try{await link(external,join(root,sha+'.png'));}
+  catch(e){
+   if(['EPERM','ENOTSUP','EACCES','EXDEV'].includes(e.code)){t.skip('OS denies hardlink creation');return;}
+   throw e;
+  }
+  await assert.rejects(loadLocalReference({root,sha256:sha}),/UNSAFE_FILE/);
+  await assert.rejects(saveLocalReference({root,bytes:sample,sha256:sha,
+   rightsConfirmed:true,approval:'APPROVE_LOCAL_REFERENCE_VAULT'}),/UNSAFE_FILE/);
  }finally{await rm(home,{recursive:true,force:true});}
 });
