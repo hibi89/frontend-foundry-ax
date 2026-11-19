@@ -136,6 +136,7 @@ export {capture};
 export function inspectV3CaptureReadiness(artifacts,referenceReceipt,{width,height,dpr=1}={}){
  if(artifacts?.schema!=='ffax.fidelity-render-artifacts.v1'||
     artifacts.originalSourceModified!==false||artifacts.externalRequests!==0||
+    !Number.isInteger(artifacts.sceneRevision)||artifacts.sceneRevision<1||
     typeof artifacts.html!=='string'||artifacts.html.length<100||artifacts.html.length>100000||
     !/^[a-f0-9]{64}$/.test(artifacts.sourceSha256||''))
   throw Error('FORGE_V3_CAPTURE_ARTIFACTS_INVALID');
@@ -152,6 +153,7 @@ export function inspectV3CaptureReadiness(artifacts,referenceReceipt,{width,heig
     referenceReceipt.provenance?.publicRedistributionAllowed!==false)
   throw Error('FORGE_V3_CAPTURE_REFERENCE_MISMATCH');
  return {schema:'ffax.v3.capture-preflight.v1',referenceSha256:artifacts.sourceSha256,
+  sceneRevision:artifacts.sceneRevision,
   sourceKind:'TYPED_SCENE_STATIC_HTML',browserScripts:'DISABLED',
   network:'BLOCK_ALL',fontStatus:'SYSTEM_FONTS_NOT_VERIFIED',
   assetStatus:'ORIGINAL_RASTER_ASSETS_NOT_ATTACHED',
@@ -165,6 +167,8 @@ export function createV3CaptureReceipt(worker,artifacts,preflight){
     !/^[a-f0-9]{64}$/.test(worker.sha256||'')||
     preflight?.schema!=='ffax.v3.capture-preflight.v1'||
     preflight.referenceSha256!==artifacts?.sourceSha256||
+    !Number.isInteger(artifacts.sceneRevision)||artifacts.sceneRevision<1||
+    preflight.sceneRevision!==artifacts.sceneRevision||
     ![worker.width,worker.height,worker.dpr].every(Number.isInteger)||
     worker.width!==preflight.viewport?.width||
     worker.height!==preflight.viewport?.height||
@@ -173,6 +177,7 @@ export function createV3CaptureReceipt(worker,artifacts,preflight){
     typeof artifacts.tsx!=='string'||typeof artifacts.css!=='string')
   throw Error('FORGE_V3_CAPTURE_RECEIPT_INVALID');
  return {...worker,schema:'ffax.v3.capture-receipt.v1',
+  sceneRevision:artifacts.sceneRevision,
   referenceSha256:artifacts.sourceSha256,
   typedSourceSha256:createHash('sha256').update(artifacts.tsx+'\n'+artifacts.css).digest('hex'),
   preflight,visualAcceptance:'NOT_VERIFIED',customerAppIntegration:'NOT_RUN'};

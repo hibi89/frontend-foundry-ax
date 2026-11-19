@@ -52,7 +52,7 @@ export function measureV3RegionDiagnostics({reference,render,scene,typography=nu
     reference.height!==render.height||reference.width<2||reference.height<2||
     viewport?.width!==reference.width||viewport?.height!==reference.height||viewport?.dpr!==1)
   throw Error('FIDELITY_SCORE_VIEWPORT_OR_RASTER_INVALID');
- if(scene?.schema!=='ffax.fidelity-scene.v1'||scene.sourceSha256!==referenceSha256||
+ if(scene?.schema!=='ffax.fidelity-scene.v1'||!Number.isInteger(scene.revision)||scene.revision<1||scene.sourceSha256!==referenceSha256||
     scene.width!==reference.width||scene.height!==reference.height||
     !Array.isArray(scene.regions)||scene.regions.length<2||scene.regions.length>24)
   throw Error('FIDELITY_SCORE_SCENE_MISMATCH');
@@ -92,7 +92,7 @@ export function measureV3RegionDiagnostics({reference,render,scene,typography=nu
   .map(r=>({regionId:r.regionId,role:r.role,rgbError:r.meanRgbError,
    issue:'VISUAL_DIFFERENCE_OWNER_REVIEW_REQUIRED'}));
  return {schema:'ffax.f95-region-diagnostics.v1',metricsVersion:'V3_RGB_EDGE_HEURISTIC_20261119',
-  referenceSha256,renderSha256,viewport:{...viewport},axes:measuredAxes,
+  referenceSha256,renderSha256,sceneRevision:scene.revision,viewport:{...viewport},axes:measuredAxes,
   regions:measured,criticalIssues:critical,
   status:'F95_UNASSESSED',weightedF95Score:null,passed95:false,
   blockingReasons:['FONT_NOT_VERIFIED','ORIGINAL_ASSETS_NOT_RENDERED',

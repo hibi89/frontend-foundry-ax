@@ -9,7 +9,9 @@ export function createV3OwnerVisualReview(diagnostic,referenceReceipt,captureRec
  if(!['ACCEPT_VISUAL_CANDIDATE','REJECT_VISUAL_CANDIDATE'].includes(decision))
   throw Error('FIDELITY_REVIEW_DECISION_INVALID');
  if(diagnostic?.schema!=='ffax.f95-region-diagnostics.v1'||
-   diagnostic.status!=='F95_UNASSESSED'||diagnostic.weightedF95Score!==null||
+   diagnostic.status!=='F95_UNASSESSED'||!Number.isInteger(diagnostic.sceneRevision)||
+   diagnostic.sceneRevision<1||captureReceipt?.sceneRevision!==diagnostic.sceneRevision||
+   diagnostic.weightedF95Score!==null||
    diagnostic.passed95!==false||
    referenceReceipt?.schema!=='ffax.reference-bundle.v3'||
    captureReceipt?.schema!=='ffax.v3.capture-receipt.v1'||
@@ -19,7 +21,7 @@ export function createV3OwnerVisualReview(diagnostic,referenceReceipt,captureRec
    captureReceipt.referenceSha256!==referenceReceipt.referenceSha256||
    referenceReceipt.provenance?.publicRedistributionAllowed!==false)
   throw Error('FIDELITY_REVIEW_EVIDENCE_MISMATCH');
- return {schema:'ffax.v3.visual-review.v1',referenceSha256:diagnostic.referenceSha256,
+ return {schema:'ffax.v3.visual-review.v1',sceneRevision:diagnostic.sceneRevision,referenceSha256:diagnostic.referenceSha256,
   renderSha256:diagnostic.renderSha256,
   decision,ownerVisualAccepted:decision==='ACCEPT_VISUAL_CANDIDATE',
   status:decision==='ACCEPT_VISUAL_CANDIDATE'?

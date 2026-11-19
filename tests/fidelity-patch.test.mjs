@@ -8,7 +8,7 @@ const scene=()=>({schema:'ffax.fidelity-scene.v1',sourceSha256:'a'.repeat(64),wi
  {id:'canvas',role:'canvas',parentId:null,bounds:{x:0,y:0,width:600,height:400},style:{background:'#ffffff'}},
  {id:'section-1',role:'hero',parentId:'canvas',bounds:{x:0,y:0,width:600,height:200},style:{background:'#112233'},ownerReviewed:true}
  ]});
-const diag={schema:'ffax.f95-region-diagnostics.v1',status:'F95_UNASSESSED',
+const diag={schema:'ffax.f95-region-diagnostics.v1',status:'F95_UNASSESSED',sceneRevision:1,
  referenceSha256:'a'.repeat(64),regions:[{regionId:'section-1',meanRgbError:80}]};
 test('FID-09 owner patches color and typography on a copy, CSS actually reflects edit',()=>{
  const s=scene(),t=addOwnerTextBox(createTypographyDraft(s),s,{regionId:'section-1',
@@ -19,7 +19,9 @@ test('FID-09 owner patches color and typography on a copy, CSS actually reflects
  assert.equal(color.candidateScene.regions[1].style.background,'#abcdef');
  assert.match(createFidelityArtifacts(color.candidateScene,{typography:color.candidateTypography,
   approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'}).css,/background-color:#abcdef/);
- const font=applyFidelityPatch(color.candidateScene,color.candidateTypography,null,diag,
+ assert.throws(()=>applyFidelityPatch(color.candidateScene,color.candidateTypography,null,diag,
+  {regionId:'section-1',property:'fontSize',textId:'text-1',value:'24',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'}),/DIAGNOSTIC_INVALID/);
+ const font=applyFidelityPatch(color.candidateScene,color.candidateTypography,null,{...diag,sceneRevision:2},
   {regionId:'section-1',property:'fontSize',textId:'text-1',value:'24',approval:'APPROVE_LOCAL_V3_TYPED_PATCH'});
  assert.match(createFidelityArtifacts(font.candidateScene,{typography:font.candidateTypography,
   approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'}).css,/font-size:24px/);

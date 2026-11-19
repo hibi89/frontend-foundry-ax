@@ -12,7 +12,8 @@ function number(v,min,max,int=false){
 }
 export function planFidelityPatches(diag,scene){
  if(diag?.schema!=='ffax.f95-region-diagnostics.v1'||diag.referenceSha256!==scene?.sourceSha256||
-    diag.status!=='F95_UNASSESSED'||!Array.isArray(diag.regions))
+    diag.status!=='F95_UNASSESSED'||!Number.isInteger(scene.revision)||scene.revision<1||
+    diag.sceneRevision!==scene.revision||!Array.isArray(diag.regions))
   throw Error('FIDELITY_PATCH_DIAGNOSTIC_INVALID');
  return {schema:'ffax.v3.patch-plan.v1',referenceSha256:scene.sourceSha256,
   options:diag.regions.filter(r=>r.regionId!=='canvas')

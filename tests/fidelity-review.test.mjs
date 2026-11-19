@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createV3OwnerVisualReview,createV3LocalWorkSnapshot,restoreV3LocalWorkSnapshot} from '../src/fidelity-review.mjs';
 const sha='a'.repeat(64),renderSha='b'.repeat(64);
-const diag={schema:'ffax.f95-region-diagnostics.v1',status:'F95_UNASSESSED',
+const diag={schema:'ffax.f95-region-diagnostics.v1',status:'F95_UNASSESSED',sceneRevision:1,
  weightedF95Score:null,passed95:false,referenceSha256:sha,renderSha256:renderSha};
 const reference={schema:'ffax.reference-bundle.v3',referenceSha256:sha,
  provenance:{publicRedistributionAllowed:false}};
-const capture={schema:'ffax.v3.capture-receipt.v1',sha256:renderSha,referenceSha256:sha};
+const capture={schema:'ffax.v3.capture-receipt.v1',sha256:renderSha,referenceSha256:sha,sceneRevision:1};
 const scene={schema:'ffax.fidelity-scene.v1',sourceSha256:sha,width:600,height:400,revision:1,
  regions:[
  {id:'canvas',parentId:null,role:'canvas',bounds:{x:0,y:0,width:600,height:400},style:{background:'#ffffff'}},
@@ -15,6 +15,9 @@ const scene={schema:'ffax.fidelity-scene.v1',sourceSha256:sha,width:600,height:4
 test('FID-10 owner visual decision is provenance-bound and never F95/production approval',()=>{
  const accepted=createV3OwnerVisualReview(diag,reference,capture,{decision:'ACCEPT_VISUAL_CANDIDATE',approval:'APPROVE_V3_CANDIDATE_VISUAL_REVIEW'});
  assert.equal(accepted.ownerVisualAccepted,true);
+ assert.equal(accepted.sceneRevision,1);
+ assert.throws(()=>createV3OwnerVisualReview({...diag,sceneRevision:2},reference,capture,
+  {decision:'ACCEPT_VISUAL_CANDIDATE',approval:'APPROVE_V3_CANDIDATE_VISUAL_REVIEW'}),/EVIDENCE_MISMATCH/);
  assert.equal(accepted.f95,'UNASSESSED');
  assert.equal(accepted.publishApproved,false);
  const rejected=createV3OwnerVisualReview(diag,reference,capture,{decision:'REJECT_VISUAL_CANDIDATE',approval:'APPROVE_V3_CANDIDATE_VISUAL_REVIEW'});

@@ -13,6 +13,7 @@ const params={scene,viewport:{width:32,height:32,dpr:1},
 test('FID-08 distinct SHA real raster difference yields per-region evidence but NEVER fake F95',()=>{
  const result=measureV3RegionDiagnostics({...params,reference:pixels([0,0,0]),render:pixels([255,255,255])});
  assert.equal(result.regions.length,1);
+ assert.equal(result.sceneRevision,1);
  assert.equal(result.axes.colors.status,'APPROXIMATE_RGB_RASTER_COMPARISON');
  assert.equal(result.axes.colors.diagnosticScore,0);
  assert.equal(result.status,'F95_UNASSESSED');
@@ -27,6 +28,8 @@ test('FID-08 forbids self image SHA, mismatched viewport, forged source and miss
  assert.throws(()=>measureV3RegionDiagnostics({...params,reference:black,render:{...black,width:31}}),/VIEWPORT_OR_RASTER/);
  assert.throws(()=>measureV3RegionDiagnostics({...params,reference:black,render:black,
   scene:{...scene,sourceSha256:'c'.repeat(64)}}),/SCENE_MISMATCH/);
+ assert.throws(()=>measureV3RegionDiagnostics({...params,reference:black,render:black,
+  scene:{...scene,revision:0}}),/SCENE_MISMATCH/);
  assert.throws(()=>measureV3RegionDiagnostics({...params,reference:black,render:black,
   scene:{...scene,regions:[scene.regions[0]]}}),/SCENE_MISMATCH/);
 });
