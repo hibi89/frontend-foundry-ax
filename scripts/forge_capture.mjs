@@ -92,9 +92,11 @@ function runPython(args,timeoutMs=65000){
 export async function validateCaptureOutputDestination(out){
  if(typeof out!=='string'||!out.trim())throw Error('FORGE_OUTPUT_CONFLICT');
  const destination=resolve(out);
- const [sourceRoot,parent]=await Promise.all([realpath(join(root,'src')),realpath(dirname(destination))]);
+ // A capture is derived output, not source: exclude the entire checkout
+ // (including docs/tests/workflows), not only the src/ subdirectory.
+ const [repoRoot,parent]=await Promise.all([realpath(root),realpath(dirname(destination))]);
  const canonicalTarget=resolve(parent,basename(destination));
- if(canonicalTarget===sourceRoot||canonicalTarget.startsWith(sourceRoot+sep))
+ if(canonicalTarget===repoRoot||canonicalTarget.startsWith(repoRoot+sep))
   throw Error('FORGE_OUTPUT_CONFLICT');
  return destination;
 }
