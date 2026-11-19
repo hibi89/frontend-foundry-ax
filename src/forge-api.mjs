@@ -5,7 +5,8 @@ import {join} from 'node:path';
 import {mkdir,readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
 import {makeForgeBrief,recommendForgeStyles,generateForgeVariants,refineForgeVariant,mixForgeVariants,freezeForgeVariant,finalizeForgeBundleWithCapture,verifyForgeBundle} from './design-forge.mjs';
 import {proposeTypedVisualFixes,applyBoundedVisualPatches} from './forge-correction.mjs';
-import {capture} from '../scripts/forge_capture.mjs';
+import {capture,captureV3FidelitySource} from '../scripts/forge_capture.mjs';
+import {createFidelityArtifacts} from './fidelity-renderer.mjs';
 import {createForgeRunner} from './forge-runner.mjs';
 import {loadLocalReference,createV3ReferenceReceipt} from './reference-vault.mjs';
 import {readBoundedUtf8} from './http-body.mjs';
@@ -71,6 +72,40 @@ export function createForgeApi({host='127.0.0.1',port=4173}={}){
    const body=await parseJson(req);
    let value;
    switch(path){
+    case '/api/design/v3-capture':{
+     assertKeys(body,['scene','typography','assets','referenceReceipt','approval']);
+     if(body.approval!=='APPROVE_FIDELITY_LOCAL_CAPTURE')
+      throw Error('FORGE_V3_CAPTURE_OWNER_APPROVAL_REQUIRED');
+     const ref=body.referenceReceipt;
+     if(!/^[a-f0-9]{64}$/.test(ref?.referenceSha256||''))
+      throw Error('FORGE_V3_CAPTURE_REFERENCE_INVALID');
+     let persisted;
+     try{persisted=await loadLocalReference({sha256:ref.referenceSha256});}
+     catch{throw Error('FORGE_V3_CAPTURE_LOCAL_REFERENCE_UNAVAILABLE');}
+     let replay;
+     try{
+      replay=createV3ReferenceReceipt(persisted.receipt,{
+       approval:'APPROVE_LOCAL_REFERENCE_RECEIPT',
+       sourceType:ref.original?.sourceType,rightsBasis:ref.provenance?.rightsBasis,
+       dpr:ref.viewport?.dpr,projectLabel:ref.project?.label});
+     }catch{throw Error('FORGE_V3_CAPTURE_REFERENCE_INVALID');}
+     if(JSON.stringify(replay)!==JSON.stringify(ref))
+      throw Error('FORGE_V3_CAPTURE_REFERENCE_CHANGED');
+     let artifacts;
+     try{artifacts=createFidelityArtifacts(body.scene,{
+      typography:body.typography,assets:body.assets,
+      approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});}
+     catch{throw Error('FORGE_V3_CAPTURE_SCENE_INVALID');}
+     const output=await captureV3FidelitySource(artifacts,replay,{
+      width:body.scene.width,height:body.scene.height,dpr:1});
+     const id=randomBytes(16).toString('hex');
+     captures.set(id,{bytes:output.bytes,receipt:output.receipt});
+     while(captures.size>2)captures.delete(captures.keys().next().value);
+     value={schema:'ffax.v3.capture-result.v1',id,referenceSha256:replay.referenceSha256,
+      download:'/api/design/captures/'+id+'.png',receipt:output.receipt,
+      status:'BROWSER_CAPTURED_STATIC_CANDIDATE_VISUAL_UNVERIFIED'};
+     break;}
+
     case '/api/design/reference-receipt':{
      assertKeys(body,['sha256','sourceType','rightsBasis','dpr','projectLabel','approval']);
      if(!/^[0-9a-f]{64}$/.test(body.sha256||''))

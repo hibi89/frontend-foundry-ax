@@ -102,7 +102,8 @@ $('forge-v3-receipt-create').addEventListener('click',async()=>{
   const link=document.createElement('a');link.href=url;link.download='FFAX-V3-Reference-Receipt.json';
   document.body.append(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);
-  status.textContent='원본 SHA 재확인 · '+result.viewport.cssWidth+'×'+result.viewport.cssHeight+
+  window.dispatchEvent(new CustomEvent('ffax:v3-reference-receipt',{detail:result}));
+    status.textContent='원본 SHA 재확인 · '+result.viewport.cssWidth+'×'+result.viewport.cssHeight+
    ' CSSpx, DPR '+result.viewport.dpr+' · 로컬 분석용 영수증 저장. 법적 사용권/공개 승인 아님.';
  }catch(e){status.textContent='영수증 거부: '+(e?.message||'FORGE_REFERENCE_RECEIPT_FAILED');}
  finally{button.disabled=false;$('forge-v3-receipt-consent').checked=false;}

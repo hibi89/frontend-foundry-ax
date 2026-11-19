@@ -222,6 +222,12 @@
          <label class="check"><input id="fidelity-render-consent" type="checkbox" /> 구조화 React/CSS 후보 내보내기와 정지 이미지 미리보기를 승인합니다.</label>
          <button id="fidelity-render-create" type="button" class="ghost-btn">React/TSX + CSS 후보 생성·로컬 저장</button>
          <p id="fidelity-render-status" class="helper" role="status">본 단계는 실제 CSS·DOM 코드 생성. 시각 95점·폰트·반응형·API 검증 전입니다.</p>
+
+         <label class="check"><input id="fidelity-capture-consent" type="checkbox" /> 동일 로컬 원본 영수증을 확인했고 격리 Chromium 정지 화면 캡처에 동의합니다.</label>
+         <button id="fidelity-capture-run" type="button" class="ghost-btn">V3 코드 후보 → 실제 Chromium PNG 캡처</button>
+         <p id="fidelity-capture-status" class="helper" role="status">위 별도 원본 Vault에서 이미지 SHA·권리·DPR 영수증을 먼저 생성해야 합니다. DPR 1 지원.</p>
+         <img id="fidelity-capture-image" alt="V3 Chromium 정지 캡처 (시각 일치도 미검증)" style="max-width:100%;height:auto" />
+
          <iframe id="fidelity-render-preview" sandbox="" title="V3 정지 화면 구조 프리뷰" loading="lazy" style="width:100%;height:300px;border:1px solid var(--stroke, #444);background:#fff"></iframe>
        </section>
 

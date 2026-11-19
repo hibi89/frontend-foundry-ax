@@ -129,3 +129,51 @@ if(import.meta.url==='file://'+process.argv[1] || process.argv[1]===fileURLToPat
  }catch(e){console.error(JSON.stringify({ok:false,code:(e.message||'UNKNOWN').slice(0,300)}));process.exitCode=1;}
 }
 export {capture};
+
+/** FID-07: approved typed V3 scene -> offline static Chromium screenshot and bound receipt.
+ * Uses the already-vetted Python capture script; imported TSX is NEVER executed.
+ */
+export function inspectV3CaptureReadiness(artifacts,referenceReceipt,{width,height,dpr=1}={}){
+ if(artifacts?.schema!=='ffax.fidelity-render-artifacts.v1'||
+    artifacts.originalSourceModified!==false||artifacts.externalRequests!==0||
+    typeof artifacts.html!=='string'||artifacts.html.length<100||artifacts.html.length>100000||
+    !/^[a-f0-9]{64}$/.test(artifacts.sourceSha256||''))
+  throw Error('FORGE_V3_CAPTURE_ARTIFACTS_INVALID');
+ if(!Number.isInteger(width)||width<320||width>2560||
+    !Number.isInteger(height)||height<320||height>2200||
+    dpr!==1)throw Error('FORGE_V3_CAPTURE_VIEWPORT_UNSUPPORTED');
+ if(referenceReceipt?.schema!=='ffax.reference-bundle.v3'||
+    referenceReceipt.referenceSha256!==artifacts.sourceSha256||
+    referenceReceipt.original?.pixelWidth!==width||
+    referenceReceipt.original?.pixelHeight!==height||
+    referenceReceipt.viewport?.cssWidth!==width||
+    referenceReceipt.viewport?.cssHeight!==height||
+    referenceReceipt.viewport?.dpr!==1||
+    referenceReceipt.provenance?.publicRedistributionAllowed!==false)
+  throw Error('FORGE_V3_CAPTURE_REFERENCE_MISMATCH');
+ return {schema:'ffax.v3.capture-preflight.v1',referenceSha256:artifacts.sourceSha256,
+  sourceKind:'TYPED_SCENE_STATIC_HTML',browserScripts:'DISABLED',
+  network:'BLOCK_ALL',fontStatus:'SYSTEM_FONTS_NOT_VERIFIED',
+  assetStatus:'ORIGINAL_RASTER_ASSETS_NOT_ATTACHED',
+  visualAcceptance:'NOT_VERIFIED',dpr,viewport:{width,height}};
+}
+export async function captureV3FidelitySource(artifacts,referenceReceipt,{width,height,dpr=1}={}){
+ const preflight=inspectV3CaptureReadiness(artifacts,referenceReceipt,{width,height,dpr});
+ const scratch=await mkdtemp(join(tmpdir(),'ffax-v3-capture-'));
+ try{
+  const html=join(scratch,'typed.html'),png=join(scratch,'screenshot.png');
+  await writeFile(html,artifacts.html,{flag:'wx',mode:0o600});
+  const response=await runPython([join(root,'scripts/forge_capture.py'),
+   '--html',html,'--out',png,'--width',String(width),'--height',String(height),'--dpr',String(dpr)]);
+  const bytes=await readFile(png),sha256=createHash('sha256').update(bytes).digest('hex');
+  if(response?.schema!=='ffax.capture.v1'||response.sha256!==sha256||
+      response.width!==width||response.height!==height||response.dpr!==dpr||
+      response.scriptExecution!=='DISABLED'||response.network!=='ABORT_ALL'||
+      bytes.length<33||bytes.length>6*1024*1024)
+   throw Error('FORGE_V3_CAPTURE_RECEIPT_MISMATCH');
+  return {bytes,receipt:{schema:'ffax.v3.capture-receipt.v1',...response,
+   referenceSha256:artifacts.sourceSha256,
+   typedSourceSha256:createHash('sha256').update(artifacts.tsx+'\\n'+artifacts.css).digest('hex'),
+   preflight,visualAcceptance:'NOT_VERIFIED',customerAppIntegration:'NOT_RUN'}};
+ }finally{await rm(scratch,{recursive:true,force:true});}
+}

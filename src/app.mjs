@@ -75,6 +75,15 @@ function updateAll(updateBrief=true){if(updateBrief)renderBrief();renderCanvas()
 function run(command){try{history.exec(command);updateAll();el('qa-report').textContent='수정 이후 다시 검증해야 합니다.';el('qa-report').className='qa-result';}catch(e){log(e.message,true);}}
 function edit(prop,value){if(!selected)return;run({kind:'update',id:selected,prop,value});}
 let latestReferenceInventory=null,latestFidelityScene=null,latestTypographyDraft=null,latestAssetManifest=null;
+let latestV3ReferenceReceipt=null,latestV3CaptureUrl=null;
+window.addEventListener('ffax:v3-reference-receipt',event=>{
+ const receipt=event.detail;
+ if(receipt?.schema==='ffax.reference-bundle.v3'){
+  latestV3ReferenceReceipt=receipt;
+  el('fidelity-capture-status').textContent='로컬 원본 영수증 연결됨. 분석된 이미지 SHA와 같을 때만 실제 캡처 실행 가능.';
+ }
+});
+
 function updateReference(){
  const file=el('reference-file').files?.[0];
  if(!file){el('reference-result').textContent='이미지 파일을 선택하세요.';return;}
@@ -409,6 +418,41 @@ el('fidelity-render-create').addEventListener('click',async()=>{
   status.textContent='실제 계층 구조 '+result.regionCount+'개 → React TSX/CSS 생성. 정지 화면 미리보기만 제공하며 실제 앱 데이터·폰트·자산·반응형·95점 일치는 별도 검증.';
  }catch(e){status.textContent='React 후보 생성 거부: '+(e?.message||'FIDELITY_RENDER_FAILED');}
  finally{button.disabled=false;el('fidelity-render-consent').checked=false;}
+});
+
+
+el('fidelity-capture-run').addEventListener('click',async()=>{
+ const status=el('fidelity-capture-status'),button=el('fidelity-capture-run');
+ try{
+  if(!el('fidelity-capture-consent').checked)throw Error('FORGE_V3_CAPTURE_OWNER_APPROVAL_REQUIRED');
+  if(!latestReferenceInventory||!latestFidelityScene||!latestV3ReferenceReceipt||
+     latestReferenceInventory.sha256!==latestV3ReferenceReceipt.referenceSha256||
+     latestFidelityScene.sourceSha256!==latestV3ReferenceReceipt.referenceSha256)
+   throw Error('FORGE_V3_CAPTURE_REFERENCE_MISMATCH');
+  const {postForgeReview,getForgeSessionToken}=await import('./design-forge-ui.mjs');
+  button.disabled=true;
+  const result=await postForgeReview('v3-capture',{
+   scene:latestFidelityScene,typography:latestTypographyDraft,assets:latestAssetManifest,
+   referenceReceipt:latestV3ReferenceReceipt,approval:'APPROVE_FIDELITY_LOCAL_CAPTURE'});
+  if(result.schema!=='ffax.v3.capture-result.v1'||result.referenceSha256!==latestFidelityScene.sourceSha256)
+   throw Error('FORGE_V3_CAPTURE_RESULT_INVALID');
+  const token=await getForgeSessionToken();
+  const png=await fetch(result.download,{headers:{'x-ffax-csrf':token},
+   cache:'no-store',credentials:'omit',redirect:'error'});
+  if(!png.ok||png.headers.get('content-type')!=='image/png')
+   throw Error('FORGE_V3_CAPTURE_PNG_UNAVAILABLE');
+  const blob=await png.blob();
+  if(blob.size<33||blob.size>6*1024*1024)throw Error('FORGE_V3_CAPTURE_PNG_INVALID');
+  const image=el('fidelity-capture-image');
+  if(latestV3CaptureUrl)URL.revokeObjectURL(latestV3CaptureUrl);
+  latestV3CaptureUrl=URL.createObjectURL(blob);
+  image.src=latestV3CaptureUrl;
+  save('FFAX-V3-Chromium-Capture-Receipt.json',JSON.stringify(result.receipt,null,2),'application/json');
+  status.textContent='Chromium 실제 정지 캡처 완료 · '+result.receipt.width+'×'+result.receipt.height+
+   ' DPR '+result.receipt.dpr+' · SHA '+result.receipt.sha256.slice(0,16)+
+   '… · 기능/실원본 시각 95점 검증 및 폰트/자산 재현은 미완';
+ }catch(e){status.textContent='실캡처 거부/실패: '+(e?.message||'FORGE_V3_CAPTURE_FAILED');}
+ finally{button.disabled=false;el('fidelity-capture-consent').checked=false;}
 });
 
 el('reference-owner-map').addEventListener('click',async()=>{
