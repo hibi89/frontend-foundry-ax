@@ -160,7 +160,7 @@
       <label for="reference-file">본인이 사용할 권리가 있는 이미지</label>
       <input id="reference-file" type="file" accept="image/png,image/jpeg,image/webp" />
       <label class="check"><input id="rights" type="checkbox" /> 이미지 사용 권한을 확인했습니다.</label>
-      <button id="apply-reference" class="ghost-btn" type="button">이미지에서 색상 2안 추출</button>
+      <button id="apply-reference" class="ghost-btn" type="button">이미지 색상·여러 영역의 위치 분석</button>
       <div id="reference-result" class="helper" role="status">이미지는 브라우저 안에서만 분석합니다.</div><div id="reference-choices" class="reference-choices" role="group" aria-label="이미지 스타일 후보와 승인"></div>
       <button id="export-reference-inventory" type="button" class="ghost-btn" disabled>외부 이미지 SHA·레이어 불확실성 분석 JSON 저장</button>
 
@@ -180,7 +180,7 @@ Card|날짜 선택 · 사주 정보"></textarea>
       <button id="reference-owner-map" type="button" class="ghost-btn" disabled>확인한 이미지 영역 → React 시안 생성 · 소스 번들 저장</button>
       <p id="reference-owner-map-status" class="helper" role="status">이미지 분석 및 사용자 영역 지정 후 실행할 수 있습니다.</p>
 
-      <p class="micro-note">이미지 인식은 기본 색상 힌트 단계입니다. 구조·레이어·디자인 1:1 복원은 지원하지 않습니다.</p>
+      <p class="micro-note">경계 기반 영역 분석은 대략적인 위치·색만 관측하며 폰트·텍스트·숨겨진 자산·95점 일치는 보장하지 않습니다.</p>
     </aside>
     <section class="canvas-panel" aria-label="프론트엔드 미리보기">
       <div class="canvas-toolbar"><div><small>LIVE PREVIEW · COMPONENT CANVAS</small><strong id="project-title">마켓플레이스</strong></div><div class="viewport-tools"><button data-width="375" type="button">375</button><button data-width="768" type="button">768</button><button data-width="1440" class="active" type="button">1440</button></div></div>

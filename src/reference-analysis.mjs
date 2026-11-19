@@ -1,3 +1,4 @@
+import {segmentReferenceGeometry} from './fidelity-geometry.mjs';
 /* Browser-only image inventory for external references. This does NOT infer hidden layers or fonts. */
 const MAX_FILE=4*1024*1024;
 const TYPES=new Set(['image/png','image/jpeg','image/webp']);
@@ -28,6 +29,13 @@ export async function analyzeUserReference(file,{rightsConfirmed=false}={}){
    const rgb=total?[r,g,b].map(x=>Math.round(x/total).toString(16).padStart(2,'0')).join(''):'64748b';
    regions.push({id:'band-'+(i+1),bounds:{x:0,y:Math.floor(height*i/3),width,height:Math.ceil(height/3)},colorHint:'#'+rgb,geometry:'OBSERVED_APPROXIMATE',semantic:'UNKNOWN_REQUIRES_HUMAN_REVIEW'});
   }
-  return {schema:'ffax.external-reference-inventory.v1',name:file.name.slice(0,120),mime:file.type,sha256,width,height,bytes:file.size,rightsConfirmed:true,regions,paletteHints:regions.map(x=>x.colorHint),fonts:{status:'UNKNOWN'},textLayers:{status:'UNKNOWN_NO_OCR'},artwork:{status:'UNKNOWN_BEHIND_TEXT'},assetManifest:{status:'NOT_READY_REQUIRES_OWNER_REVIEW'},externalRequests:0,sourceMutated:false};
+  const scale=Math.min(1,512/Math.max(width,height));
+  const sw=Math.max(1,Math.round(width*scale)),sh=Math.max(1,Math.round(height*scale));
+  const geometryCanvas=document.createElement('canvas');geometryCanvas.width=sw;geometryCanvas.height=sh;
+  const geometryContext=geometryCanvas.getContext('2d',{willReadFrequently:true});
+  if(!geometryContext)throw Error('FIDELITY_GEOMETRY_CANVAS_UNAVAILABLE');
+  geometryContext.drawImage(bitmap,0,0,sw,sh);
+  const fidelityGeometry=segmentReferenceGeometry(geometryContext.getImageData(0,0,sw,sh),{sourceWidth:width,sourceHeight:height});
+  return {fidelityGeometry,schema:'ffax.external-reference-inventory.v1',name:file.name.slice(0,120),mime:file.type,sha256,width,height,bytes:file.size,rightsConfirmed:true,regions,paletteHints:regions.map(x=>x.colorHint),fonts:{status:'UNKNOWN'},textLayers:{status:'UNKNOWN_NO_OCR'},artwork:{status:'UNKNOWN_BEHIND_TEXT'},assetManifest:{status:'NOT_READY_REQUIRES_OWNER_REVIEW'},externalRequests:0,sourceMutated:false};
  }finally{bitmap?.close();}
 }

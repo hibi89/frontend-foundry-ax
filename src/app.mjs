@@ -89,7 +89,7 @@ function updateReference(){
    history.past.push(history.present);history.present=next;history.future=[];latestReferenceInventory=inventory;
    el('export-reference-inventory').disabled=false;
    el('reference-owner-map').disabled=false;
-   el('reference-result').textContent=file.name+': '+inventory.width+'×'+inventory.height+' · SHA256 '+inventory.sha256.slice(0,16)+'… · 색상 힌트 '+colors.join('/')+' · 폰트/숨겨진 이미지 자산은 아직 미확인';
+   el('reference-result').textContent=file.name+': '+inventory.width+'×'+inventory.height+' · SHA256 '+inventory.sha256.slice(0,16)+'… · 색상 힌트 '+colors.join('/')+' · 추정 영역 '+inventory.fidelityGeometry.regions.length+'개(위치·색만; OCR/폰트·자산 미복원)';
    updateAll();
   }catch(err){el('reference-result').textContent='참고 이미지 분석 실패: '+err.message;}
  })();
