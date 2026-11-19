@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "ab7383fb31ea428b0685ece3f573ceab6117477e",
+  "auditSourceHead": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -557,8 +557,8 @@
       {
         "id": "P2-02",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "12 real owner-rights images and Korean OCR/font/asset fidelity measurement",
-        "partialEvidence": "; new physical-pixel DPR2 local path SHA 307749d40c5a5c9985ac35956f0bc8afd8782d05 verified synthetic Chromium 800x800/400x400 CSS, #44537458220 SUCCESS, source 95/95 #44536954264, hosted Linux/Windows 267/267 + browser 14/14, 4/4 manual #44537458273 SUCCESS; NOT real F95"
+        "remaining": "12 real owner-rights images and Korean OCR/font/asset fidelity measurement and owner acceptance",
+        "partialEvidence": "; new physical-pixel DPR2 local path SHA 307749d40c5a5c9985ac35956f0bc8afd8782d05 verified synthetic Chromium 800x800/400x400 CSS, #44537458220 SUCCESS, source 95/95 #44536954264, hosted Linux/Windows 267/267 + browser 14/14, 4/4 manual #44537458273 SUCCESS; NOT real F95; 2026-11-19 visible RGBA alpha composition fix dd7f863038fb47877d6379ab98ac7d5abd78120a; source 100/100 in #44549598240, hosted Linux/Windows 272/272, browser 14/14 and manual 4/4 SUCCESS in #44549598242, earlier synthetic Chromium #44549516067 SUCCESS at preceding source SHA. No rights-cleared owner images (0/12), real font/OCR/assets/F95 NOT_VERIFIED"
       },
       {
         "id": "P2-03",
@@ -1217,6 +1217,74 @@
       "ownerWindows11": "NOT_RUN",
       "independentSecurityUXAudits": "NOT_RUN",
       "release": "HOLD"
+    },
+    "latestP202AlphaVisiblePixels": {
+      "scope": "P2-02 bounded local browser reference geometry and palette, synthetic verification only",
+      "issue": "Geometry edge segmentation previously measured hidden raw RGB under fully transparent PNG/WebP pixels and palette skipped alpha<128, inventing regions/incorrect hints that could never appear on visible reference",
+      "sourceCommits": {
+        "geometry": "cf4d11303f743851dfa71730de685ef08805986f",
+        "palette": "d63033b61521efdf783e57f0351af213f1dc577d",
+        "regressions": "dd7f863038fb47877d6379ab98ac7d5abd78120a"
+      },
+      "codeFiles": [
+        "src/fidelity-geometry.mjs",
+        "src/reference-analysis.mjs"
+      ],
+      "tests": [
+        "tests/fidelity-geometry.test.mjs"
+      ],
+      "fix": "Compare and sample the RGBA image composited against the existing white preview matte; fully transparent hidden RGB does not create edges and 50% alpha colors become accurate visible tint; original source bytes unmodified",
+      "evidence": {
+        "source": {
+          "run": 44549598240,
+          "sha": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
+          "result": "SUCCESS",
+          "tests": "100/100 PASS",
+          "newCases": "transparent hidden RGB and alpha color/edge 2/2 PASS"
+        },
+        "linuxNode": {
+          "run": 44549598242,
+          "sha": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
+          "result": "SUCCESS",
+          "tests": "272/272 PASS"
+        },
+        "windowsNode": {
+          "run": 44549598242,
+          "sha": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
+          "result": "SUCCESS",
+          "tests": "272/272 PASS",
+          "scope": "GitHub-hosted Windows synthetic"
+        },
+        "browserQA": {
+          "run": 44549598242,
+          "sha": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
+          "result": "SUCCESS",
+          "probes": "14/14 PASS"
+        },
+        "manual": {
+          "run": 44549598242,
+          "sha": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
+          "result": "SUCCESS",
+          "jobs": "4/4 SUCCESS",
+          "package": "UNRELEASED_REVIEW_ONLY"
+        },
+        "chromium": {
+          "run": 44549516067,
+          "sha": "d63033b61521efdf783e57f0351af213f1dc577d",
+          "result": "SUCCESS",
+          "scope": "Previous code SHA containing both fixes before two Node regressions; synthetic only"
+        },
+        "blueprint": {
+          "run": 44549599127,
+          "sha": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
+          "result": "SUCCESS"
+        }
+      },
+      "actualRightsClearedReferences": "0/12",
+      "actualCalibratedF95": "NOT_VERIFIED",
+      "ownerWindows11": "NOT_RUN",
+      "independentAudit": "NOT_RUN",
+      "release": "HOLD"
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -1248,16 +1316,16 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "ab7383fb31ea428b0685ece3f573ceab6117477e",
+  "lastSourceHead": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
   "lastEvidenceRun": {
-    "id": 44544867286,
-    "sha": "ab7383fb31ea428b0685ece3f573ceab6117477e",
+    "id": 44549598242,
+    "sha": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
     "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
     "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "270/270 PASS",
-    "windowsTests": "270/270 PASS",
+    "linuxTests": "272/272 PASS",
+    "windowsTests": "272/272 PASS",
     "browserProbes": "14/14 PASS",
     "package": "UNRELEASED_OWNER_REVIEW"
   },
@@ -1486,6 +1554,13 @@
       ],
       "commit": "ab7383fb31ea428b0685ece3f573ceab6117477e",
       "meaning": "Fix forged audit receipt authority claims and protected files integrity; actual backend integrity and regression testing; source 98/98, React 21/21, Linux/Windows 270/270, browser 14/14, Chromium 43/43, manual 4/4 PASS; real P2-04 user project NOT_RUN."
+    },
+    {
+      "units": [
+        "P2-02"
+      ],
+      "commit": "dd7f863038fb47877d6379ab98ac7d5abd78120a",
+      "meaning": "Fix alpha-invisible RGB fake reference regions and palette; real geometry/palette code + 2 targeted regression cases, 100/100 source, 272/272 Linux/Windows, 14/14 browser, 4/4 CI all PASS; real F95 NOT_VERIFIED."
     }
   ],
   "sharedVerificationPaths": [
