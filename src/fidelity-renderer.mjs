@@ -62,7 +62,7 @@ function checked(scene,typography,assets){
     (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined&&
       (!Number.isInteger(t.fontWeight)||t.fontWeight<100||t.fontWeight>900||t.fontWeight%100!==0))||
     (t.fontColor!==undefined&&!RGB.test(t.fontColor))||
-    (t.lineHeight!==undefined&&(typeof t.lineHeight!=='number'||t.lineHeight<.8||t.lineHeight>2.5))||
+    (t.lineHeight!==undefined&&t.lineHeight!=='UNKNOWN'&&(typeof t.lineHeight!=='number'||t.lineHeight<.8||t.lineHeight>2.5))||
     (t.letterSpacing!==undefined&&(typeof t.letterSpacing!=='number'||t.letterSpacing< -2||t.letterSpacing>8)))
     throw Error('FIDELITY_RENDER_TEXT_INVALID');
   }
@@ -111,7 +111,7 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,appro
    (t.fontSize!==undefined?" font-size:"+t.fontSize+"px;":"")+
    (t.fontWeight!=='UNKNOWN'&&t.fontWeight!==undefined?" font-weight:"+t.fontWeight+";":"")+
    (t.fontColor?" color:"+t.fontColor+";":"")+
-   (t.lineHeight!==undefined?" line-height:"+t.lineHeight+";":"")+
+   (t.lineHeight!==undefined&&t.lineHeight!=='UNKNOWN'?" line-height:"+t.lineHeight+";":"")+
    (t.letterSpacing!==undefined?" letter-spacing:"+t.letterSpacing+"px;":"")+" }");
  }
  function node(r,react){
