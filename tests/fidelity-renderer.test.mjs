@@ -18,6 +18,10 @@ test('FID-06 real nested React source and matched local static preview retain co
  const assets=createFidelityAssetManifest(s.sourceSha256);
  const r=createFidelityArtifacts(s,{typography:t,assets,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
  assert.equal(r.regionCount,3);
+ // CSS used for static Chromium preview and exported React must paint the
+ // owner-reviewed canvas even where no child region exists.
+ assert.match(r.css,/\.ffax-v3-root \{[^}]*background-color:#111111;/);
+ assert.match(r.html,/\.ffax-v3-root \{[^}]*background-color:#111111;/);
  assert.match(r.tsx,/export default function FidelityScene/);
  assert.match(r.tsx,/onAction\?\./);
  assert.match(r.tsx,/서비스 시작/);
@@ -37,4 +41,26 @@ test('FID-06 no owner approval, invalid child, stale typography or unimported re
  const blocked=gateFidelityAssets(createFidelityAssetManifest(s.sourceSha256),
   {requiredKinds:['logo'],approval:'APPROVE_FIDELITY_ASSET_REQUIREMENTS'});
  assert.throws(()=>createFidelityArtifacts(s,{assets:blocked,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'}),/REQUIRED_ASSET_BYTES_NOT_IMPORTED/);
+});
+
+test('P2-03 rejects nonfinite scene and typography values before emitting invalid CSS',()=>{
+ const s=scene(),approval='APPROVE_FIDELITY_SCENE_SOURCE_EXPORT';
+ const artifact=(source,typography=null)=>createFidelityArtifacts(source,{typography,approval});
+ for(const value of [NaN,Infinity,-Infinity]){
+  const invalid={...s,regions:s.regions.map(r=>r.id==='section-1'?{
+   ...r,style:{...r.style,opacity:value}
+  }:r)};
+  assert.throws(()=>artifact(invalid),/REGION_INVALID/);
+  const text=addOwnerTextBox(createTypographyDraft(s),s,{
+   regionId:'section-1-panel-1',text:'검증 문구',
+   bounds:{x:310,y:20,width:170,height:30},
+   approval:'APPROVE_FIDELITY_LOCAL_TEXT_LABEL'
+  });
+  for(const field of ['lineHeight','letterSpacing']){
+   const t={...text,textBoxes:text.textBoxes.map(x=>({...x,[field]:value}))};
+   assert.throws(()=>artifact(s,t),/TEXT_INVALID/);
+  }
+ }
+ assert.throws(()=>artifact({...s,revision:NaN}),/SCENE_INVALID/);
+ assert.throws(()=>artifact({...s,revision:0}),/SCENE_INVALID/);
 });
