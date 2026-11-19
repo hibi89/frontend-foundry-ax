@@ -64,3 +64,28 @@ test('P2-03 rejects nonfinite scene and typography values before emitting invali
  assert.throws(()=>artifact({...s,revision:NaN}),/SCENE_INVALID/);
  assert.throws(()=>artifact({...s,revision:0}),/SCENE_INVALID/);
 });
+
+test('P2-02/03 retina source scene exports identical CSS/HTML tree in CSS pixels',()=>{
+ const s=scene(),t=addOwnerTextBox(createTypographyDraft(s),s,{
+  regionId:'section-1-panel-1',text:'레티나',bounds:{x:310,y:20,width:170,height:30},
+  approval:'APPROVE_FIDELITY_LOCAL_TEXT_LABEL'
+ });
+ const updated={...t,textBoxes:t.textBoxes.map(x=>({...x,fontSize:24,letterSpacing:2}))};
+ const d=createFidelityArtifacts(s,{typography:updated,dpr:2,
+  approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
+ assert.equal(d.dpr,2);assert.equal(d.pixelWidth,600);assert.equal(d.cssWidth,300);
+ assert.equal(d.pixelHeight,300);assert.equal(d.cssHeight,150);
+ assert.match(d.css,/width:300px; height:150px; overflow:hidden; background-color:#111111/);
+ assert.match(d.css,/left:150px; top:5px; width:100px; height:25px/);
+ assert.match(d.css,/left:5px; top:5px; width:85px; height:15px/);
+ assert.match(d.css,/font-size:12px/);assert.match(d.css,/letter-spacing:1px/);
+ assert.match(d.html,/width:300px; height:150px/);
+ assert.match(d.tsx,/레티나/);
+ assert.equal(d.canPublish,false);
+ for(const badDpr of [0,1.5,3,NaN])
+  assert.throws(()=>createFidelityArtifacts(s,{dpr:badDpr,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'}),/DPR_UNSUPPORTED/);
+ assert.throws(()=>createFidelityArtifacts({...s,width:601,
+  regions:s.regions.map(x=>x.id==='canvas'?{...x,bounds:{...x.bounds,width:601}}:x)},{
+  dpr:2,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'
+ }),/DPR_UNSUPPORTED/);
+});
