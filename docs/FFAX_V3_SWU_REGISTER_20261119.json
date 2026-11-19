@@ -734,10 +734,18 @@
           "sha": "f5cd3613788c424949563ab5f748d60b97068423",
           "result": "SUCCESS",
           "evidence": "Synthetic Chromium UI 31/31, not exactly final test SHA"
+        },
+        "manualWindowsNode": {
+          "run": 44520105967,
+          "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+          "job": "windows-native",
+          "result": "SUCCESS",
+          "tests": "258/258 PASS",
+          "note": "GitHub hosted Windows synthetic runner, not owner's Windows11 GTX1050Ti"
         }
       },
       "remaining": {
-        "manualBrowserAndWindows": "IN_PROGRESS at latest check; not owner hardware",
+        "manualBrowserAndWindows": "browser-qa job IN_PROGRESS; GitHub-hosted Windows synthetic Node 258/258 PASS, owner hardware NOT_RUN",
         "realOwnerReferenceImages": "0/12",
         "realF95": "NOT_VERIFIED",
         "realCustomerAuthApiRoutes": "NOT_RUN",
