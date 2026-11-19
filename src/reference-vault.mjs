@@ -6,7 +6,8 @@
 import {createHash} from 'node:crypto';
 import {homedir} from 'node:os';
 import {join,dirname,resolve} from 'node:path';
-import {mkdir,readFile,writeFile,lstat} from 'node:fs/promises';
+import {mkdir,writeFile,lstat,open} from 'node:fs/promises';
+import {constants as fsConstants} from 'node:fs';
 const MAX=6*1024*1024,SHA=/^[a-f0-9]{64}$/;
 const PNG=Buffer.from([137,80,78,71,13,10,26,10]);
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -106,14 +107,37 @@ async function directory(root){
 }
 async function readExact(root,sha256,extension){
  const path=join(root,sha256+extension);
- let stat;
- try{stat=await lstat(path);}catch(e){if(e.code==='ENOENT')return null;throw e;}
- if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1||stat.size>MAX)
+ let before;
+ try{before=await lstat(path);}catch(e){if(e.code==='ENOENT')return null;throw e;}
+ if(!before.isFile()||before.isSymbolicLink()||before.nlink!==1||before.size>MAX)
   throw Error('REFERENCE_VAULT_UNSAFE_FILE');
- const bytes=await readFile(path),meta=inspectLocalReference(bytes);
- if(meta.sha256!==sha256||FORMAT[meta.mime]!==extension)
-  throw Error('REFERENCE_VAULT_CHANGED_OR_CORRUPT');
- return {bytes,meta};
+ // Read through one held descriptor rather than lstat(path) -> readFile(path),
+ // which can follow a replacement symlink/reparse target between those calls.
+ let handle;
+ try{handle=await open(path,fsConstants.O_RDONLY|(fsConstants.O_NOFOLLOW||0));}
+ catch(e){
+  if(['ENOENT','ELOOP','EMLINK'].includes(e.code))
+   throw Error('REFERENCE_VAULT_UNSAFE_FILE');
+  throw e;
+ }
+ try{
+  const opened=await handle.stat();
+  if(!opened.isFile()||opened.nlink!==1||opened.size>MAX||
+     opened.dev!==before.dev||opened.ino!==before.ino)
+   throw Error('REFERENCE_VAULT_UNSAFE_FILE');
+  const bytes=await handle.readFile();
+  const after=await handle.stat(),current=await lstat(path);
+  if(!current.isFile()||current.isSymbolicLink()||current.nlink!==1||
+     current.dev!==opened.dev||current.ino!==opened.ino||
+     after.dev!==opened.dev||after.ino!==opened.ino||
+     after.nlink!==1||after.size!==bytes.length||
+     after.size!==opened.size||after.mtimeMs!==opened.mtimeMs)
+   throw Error('REFERENCE_VAULT_UNSAFE_FILE');
+  const meta=inspectLocalReference(bytes);
+  if(meta.sha256!==sha256||FORMAT[meta.mime]!==extension)
+   throw Error('REFERENCE_VAULT_CHANGED_OR_CORRUPT');
+  return {bytes,meta};
+ }finally{await handle.close();}
 }
 async function checkedRead(root,sha256){
  if(!SHA.test(sha256||''))throw Error('REFERENCE_VAULT_SHA_INVALID');
