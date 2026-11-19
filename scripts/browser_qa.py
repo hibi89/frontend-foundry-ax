@@ -85,6 +85,7 @@ try:
         check('image reference requires consent','사용 권한 확인' in page.locator('#reference-result').inner_text())
         page.locator('#rights').check()
         page.locator('#apply-reference').click()
+        print('FIDELITY_REF_CHECK: '+page.locator('#reference-result').inner_text(),flush=True)
         page.locator('.reference-candidate').nth(1).wait_for(timeout=10000)
         check('image palette two design hints',
               'SHA256' in page.locator('#reference-result').inner_text() and
