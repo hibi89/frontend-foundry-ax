@@ -297,13 +297,13 @@ function v3FileDiff(path,value){
  return 'diff --git a/'+path+' b/'+path+'\nnew file mode 100644\n--- /dev/null\n+++ b/'+path+
   '\n@@ -0,0 +1,'+lines.length+' @@\n'+lines.map(l=>'+'+l).join('\n')+'\n';
 }
-export async function prepareV3FidelityIntegration({source,dest,jobId,scene,typography=null,assets=null,contract,approval}={}){
+export async function prepareV3FidelityIntegration({source,dest,jobId,scene,typography=null,assets=null,dpr=1,contract,approval}={}){
  if(approval!=='APPROVE_LOCAL_V3_INTEGRATION_REVIEW')
   throw Error('FORGE_V3_INTEGRATION_OWNER_APPROVAL_REQUIRED');
  if(!SAFE_JOB.test(jobId||'')||typeof source!=='string'||!source.trim()||
     typeof dest!=='string'||!dest.trim())
   throw Error('FORGE_V3_INTEGRATION_INPUT_INVALID');
- const generated=createFidelityArtifacts(scene,{typography,assets,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
+ const generated=createFidelityArtifacts(scene,{typography,assets,dpr,approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'});
  const before=await inspectReactProject(source);
  const bindings=validateV3BindingContract(contract,scene,typography,before.digest);
  // Glob discovery may auto-bundle new files even without a route import. Fail closed.
@@ -338,6 +338,8 @@ export async function prepareV3FidelityIntegration({source,dest,jobId,scene,typo
    .map(f=>({path:f.path,sha256:f.sha256,state:'ORIGINAL_SHA_IDENTICAL_RUNTIME_UNVERIFIED'}));
   const receipt={schema:'ffax.v3.integration-review.v1',jobId,
    originalDigest:before.digest,referenceSha256:scene.sourceSha256,
+   dpr:generated.dpr,pixelWidth:generated.pixelWidth,pixelHeight:generated.pixelHeight,
+   cssWidth:generated.cssWidth,cssHeight:generated.cssHeight,
    sourceFiles:V3_FILES.map((path,i)=>({path,sha256:sha(Buffer.from(sources[i]))})),
    diffSha256:sha(Buffer.from(diff)),textBindingCount:bindings.textBindings.length,
    intentBindingCount:bindings.intentBindings.length,contractBoundaries:{...contract.boundaries},
@@ -363,6 +365,14 @@ async function verifyV3ReviewIntegrity(root,manifest,receipt){
     receipt.state!=='ISOLATED_REACT_PROP_INTENT_BRIDGE_REVIEW_ONLY'||
     !SAFE_JOB.test(receipt.jobId||'')||receipt.jobId!==manifest.id||
     receipt.originalDigest!==manifest.digest||
+    ![1,2].includes(receipt.dpr)||
+    !Number.isInteger(receipt.pixelWidth)||!Number.isInteger(receipt.pixelHeight)||
+    receipt.pixelWidth<1||receipt.pixelHeight<1||
+    receipt.pixelWidth>10000||receipt.pixelHeight>10000||
+    receipt.pixelWidth*receipt.pixelHeight>32000000||
+    receipt.pixelWidth%receipt.dpr!==0||receipt.pixelHeight%receipt.dpr!==0||
+    receipt.cssWidth!==receipt.pixelWidth/receipt.dpr||
+    receipt.cssHeight!==receipt.pixelHeight/receipt.dpr||
     receipt.existingFilesModified!==0||receipt.originalSourceModified!==false||
     !HEX.test(receipt.diffSha256||'')||
     !Array.isArray(receipt.sourceFiles)||receipt.sourceFiles.length!==V3_FILES.length||
