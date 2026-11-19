@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
+  "auditSourceHead": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -552,7 +552,7 @@
         "id": "P2-01",
         "state": "PARTIAL_SYNTHETIC_PASS",
         "remaining": "Real external original rights/asset corpus, symlink/reparse/adversarial security full run",
-        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267; new descriptor no-follow and link tests committed a6f4120a8b61086b60cdcbfce15200de3fe042d7; isolated 3/3 PASS, full repo CI pending (not acceptance)"
+        "partialEvidence": "PASS: Vault SHA and symlink/junction ancestor rejection via Node source and synthetic CI #44510382267; new descriptor no-follow and link tests committed a6f4120a8b61086b60cdcbfce15200de3fe042d7; isolated 3/3 PASS, full repo CI pending (not acceptance); updated source 86/86 PASS #44520106002 with regression link cases, owner adversarial/Windows not accepted"
       },
       {
         "id": "P2-02",
@@ -568,8 +568,8 @@
       {
         "id": "P2-04",
         "state": "PARTIAL_SYNTHETIC_PASS",
-        "remaining": "Prove current SHA strict TSX/React19 synthetic workflow PASS, then owner-approved real customer application auth/API/routes/build and independent review",
-        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED"
+        "remaining": "Real owner/customer React app authentication/API/routes/data, full build, rights, independent audits; P2 actual owner acceptance 0/8",
+        "partialEvidence": "NEW CODE awaiting CI: audit-v3 verifies isolated original/protected file hashes, generated file hashes, review patch and refuses tampered rollback; source 9a325690aea45f3980ffb58880a33ddd0d42d8f8; no real customer runtime auth/API/routes/build test; generated-directory symlink rollback guard committed 85267c9c7bfe13c3294e952a0dd3aba45cef4f6e; standalone synthetic guard 3/3 PASS, full CI NOT_VERIFIED; P2 dynamic data binding fallback code 4c2a458001e9897e30bc2a38a7fc1daa4525bf55 and real React19/TypeScript workflow 63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31 authored; CI result NOT_VERIFIED; FAIL #44518828926/#44519130545 and TS2550 #44518404139 fixed at f5cd3613 + c28c1d5f; PASS P2 React 17/17 #44520105942, source 86/86 #44520106002, full Linux Node 258/258 in manual run #44520105967; real customer app still NOT_RUN"
       },
       {
         "id": "P2-05",
@@ -666,19 +666,84 @@
     },
     "latestP204DataSafety": {
       "state": "SOURCE_COMMITTED_RUNTIME_CI_NOT_VERIFIED",
-      "codeSha": "4c2a458001e9897e30bc2a38a7fc1daa4525bf55",
-      "regressionSha": "09af84149a1b25efe95a67cc0a06be55e73de571",
+      "codeSha": "f5cd3613788c424949563ab5f748d60b97068423",
+      "regressionSha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
       "integrationTestSha": "f67d2d11d1454149c726f26ef283067479d50793",
       "workflowSha": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
       "fixed": "Generated FidelityBindings handles data null, undefined, arrays, numbers and inherited-only keys by using an empty safeData object and own-string binding; retains owner Korean fallback and typed intent callback.",
       "runtimeTest": "Synthetic project cloned in isolated workspace, strict TypeScript NodeNext, actual pinned React19 SSR, callback intent, XSS escaping, source SHA parity, audit and rollback. Source tests authored/committed but Github Actions success NOT_VERIFIED.",
-      "codeSyntax": "PASS_LIMITED_V8_PARSER_ESM_IMPORTS_STRIPPED; not actual Node ESM execution",
-      "fullNodeTests": "NOT_RUN_ACCESS_BLOCKED",
-      "githubActions": "NOT_VERIFIED_CONNECTOR_PR_ONLY",
+      "codeSyntax": "PASS_ACTUAL_NODE22_CI",
+      "fullNodeTests": "PASS_SYNTHETIC_ONLY_258_OF_258",
+      "githubActions": "PASS 17/17 #44520105942; source 86/86 #44520106002; offline Node 258/258 #44520105967",
       "actualCustomerAuthApiRoutes": "NOT_RUN",
       "ownerWindows11": "NOT_RUN",
       "independentAudit": "NOT_RUN",
       "ownerReferenceImages": 0
+    },
+    "ciRecovery20261119": {
+      "scope": "P2-01/04/05 synthetic code recovery, not 8-gate owner acceptance",
+      "failed": {
+        "reactRuntime": {
+          "run": 44518828926,
+          "sha": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
+          "reason": "Missing expected rejection: audit did not call unsafe generated directory guard"
+        },
+        "sourceSmoke": {
+          "run": 44519130545,
+          "sha": "258be48209173cfda72c7ef6285cf82b23ce1e0c",
+          "reason": "Same generated directory symlink regression"
+        },
+        "chromiumEarlier": {
+          "run": 44518404139,
+          "sha": "4c2a458001e9897e30bc2a38a7fc1daa4525bf55",
+          "reason": "TS2550 Object.hasOwn unsupported by existing compiler lib"
+        }
+      },
+      "codeFix": {
+        "sha": "f5cd3613788c424949563ab5f748d60b97068423",
+        "summary": "Call assertV3GeneratedParents before V3 audit, replace generated Object.hasOwn with Object.prototype.hasOwnProperty.call"
+      },
+      "regressionFixSha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+      "verified": {
+        "sourceSmoke": {
+          "run": 44520106002,
+          "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+          "result": "SUCCESS",
+          "tests": "86/86 PASS"
+        },
+        "reactRuntime": {
+          "run": 44520105942,
+          "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+          "result": "SUCCESS",
+          "tests": "17/17 PASS; actual React19 SSR and TS strict synthetic"
+        },
+        "manualOfflineNode": {
+          "run": 44520105967,
+          "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+          "job": "offline-node",
+          "result": "SUCCESS",
+          "tests": "258/258 PASS"
+        },
+        "blueprintEvidence": {
+          "run": 44520106482,
+          "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+          "result": "SUCCESS"
+        },
+        "chromiumPriorCode": {
+          "run": 44520082314,
+          "sha": "f5cd3613788c424949563ab5f748d60b97068423",
+          "result": "SUCCESS",
+          "evidence": "Synthetic Chromium UI 31/31, not exactly final test SHA"
+        }
+      },
+      "remaining": {
+        "manualBrowserAndWindows": "IN_PROGRESS at latest check; not owner hardware",
+        "realOwnerReferenceImages": "0/12",
+        "realF95": "NOT_VERIFIED",
+        "realCustomerAuthApiRoutes": "NOT_RUN",
+        "independentAudit": "NOT_RUN",
+        "release": "HOLD"
+      }
     }
   },
   "f95": "UNASSESSED/NOT_VERIFIED (0/12 real owner reference images)",
@@ -710,14 +775,19 @@
     "P2 completion is 0/8 full gates not because code missing but external owner image rights/corpus, calibration, real customer API/auth, Windows 11/1050 Ti hardware, independent audit and release approval NOT_RUN."
   ],
   "release": "HOLD",
-  "lastSourceHead": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
+  "lastSourceHead": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
   "lastEvidenceRun": {
-    "id": 44510382267,
-    "sha": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
+    "id": 44520106002,
+    "sha": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
     "name": "FFAX V2 Design Forge P1 source smoke",
     "status": "SUCCESS",
-    "sourceTests": "81/81 PASS, 0 FAIL",
-    "scope": "P1 regression + P2-01/P2-03 security tests; owner environment NOT_VERIFIED"
+    "sourceTests": "86/86 PASS, 0 FAIL",
+    "relatedRuns": [
+      44520105942,
+      44520105967,
+      44520106482
+    ],
+    "scope": "P2 synthetic regression, not actual owner reference/customer integration/real F95"
   },
   "lastCodeWave": [
     {
@@ -872,10 +942,26 @@
       ],
       "commit": "63fd0b6f46c14d6773c2cd3bc18bf2ec09893c31",
       "meaning": "Create dedicated read-only push CI for real React19 SSR/TS strict synthetic integration, fallback/XSS/intent and isolated audit/rollback; CI success NOT_VERIFIED."
+    },
+    {
+      "units": [
+        "P2-01",
+        "P2-04"
+      ],
+      "commit": "c28c1d5fe34505bf5ccaf22a349c6e9b63c519e8",
+      "meaning": "P2 failure-driven correction: enforce symlink parent audit call and remove unsupported Object.hasOwn in generated TSX; GitHub Actions source 86/86, React19 17/17, manual Linux Node 258/258 PASS; owner acceptance still 0/8."
     }
   ],
   "sharedVerificationPaths": [
     ".github/workflows/ffax-design-forge-p1.yml",
     "tests/server-security.test.mjs"
-  ]
+  ],
+  "previousEvidenceRun": {
+    "id": 44510382267,
+    "sha": "e25e4a394838e91129f1c2e5f77b1108bc864e96",
+    "name": "FFAX V2 Design Forge P1 source smoke",
+    "status": "SUCCESS",
+    "sourceTests": "81/81 PASS, 0 FAIL",
+    "scope": "P1 regression + P2-01/P2-03 security tests; owner environment NOT_VERIFIED"
+  }
 }
