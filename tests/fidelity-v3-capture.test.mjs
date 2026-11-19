@@ -46,3 +46,21 @@ test('P2-03 V3 capture forbids preflight re-use across mutated Scene versions',(
  assert.throws(()=>createV3CaptureReceipt(worker,{...artifacts,sceneRevision:2},preflight),
   /RECEIPT_INVALID/);
 });
+
+test('P2-02/03 owner retina 2x original 1200x800 binds CSS 600x400 capture and immutable source',()=>{
+ const a={...artifacts,dpr:2,pixelWidth:1200,pixelHeight:800,cssWidth:600,cssHeight:400};
+ const ref={...reference,original:{pixelWidth:1200,pixelHeight:800},
+  viewport:{cssWidth:600,cssHeight:400,dpr:2,capturedPixelWidth:1200,capturedPixelHeight:800}};
+ const ready=inspectV3CaptureReadiness(a,ref,{width:600,height:400,dpr:2});
+ assert.equal(ready.dpr,2);assert.equal(ready.viewport.width,600);
+ const response={schema:'ffax.capture.v1',sha256:'c'.repeat(64),width:600,height:400,
+  dpr:2,scriptExecution:'DISABLED',network:'ABORT_ALL'};
+ const receipt=createV3CaptureReceipt(response,a,ready);
+ assert.equal(receipt.referenceSha256,sha);assert.equal(receipt.dpr,2);
+ assert.equal(receipt.visualAcceptance,'NOT_VERIFIED');
+ assert.throws(()=>inspectV3CaptureReadiness(a,ref,{width:600,height:400,dpr:1}),/VIEWPORT_UNSUPPORTED/);
+ assert.throws(()=>inspectV3CaptureReadiness(a,{...ref,original:{...ref.original,pixelWidth:1198}},{width:600,height:400,dpr:2}),/REFERENCE_MISMATCH/);
+ assert.throws(()=>inspectV3CaptureReadiness(a,{...ref,viewport:{...ref.viewport,cssWidth:1200}},{width:600,height:400,dpr:2}),/REFERENCE_MISMATCH/);
+ assert.throws(()=>inspectV3CaptureReadiness({...a,pixelWidth:1198},ref,{width:600,height:400,dpr:2}),/REFERENCE_MISMATCH/);
+ assert.throws(()=>createV3CaptureReceipt({...response,dpr:1},a,ready),/RECEIPT_INVALID/);
+});
