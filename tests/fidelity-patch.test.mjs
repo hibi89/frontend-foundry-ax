@@ -80,3 +80,27 @@ test('P2-03 local text family and alignment patches reach generated React CSS wi
   approval:'APPROVE_LOCAL_V3_TYPED_PATCH'
  }),/TEXT_NOT_FOUND/);
 });
+
+
+test('P2-03 typed border and glow corrections render isolated CSS with source preserved',()=>{
+ const s=scene(),approve='APPROVE_LOCAL_V3_TYPED_PATCH';
+ const border=applyFidelityPatch(s,null,null,diag,{regionId:'section-1',
+  property:'borderColor',value:'#8B5CF6',approval:approve});
+ const glow=applyFidelityPatch(border.candidateScene,null,null,{...diag,sceneRevision:2},{
+  regionId:'section-1',property:'glowColor',value:'#d8b4fe',approval:approve
+ });
+ const css=createFidelityArtifacts(glow.candidateScene,{
+  approval:'APPROVE_FIDELITY_SCENE_SOURCE_EXPORT'
+ }).css;
+ assert.match(css,/border:1px solid #8b5cf6;/);
+ assert.match(css,/box-shadow:0 0 16px #d8b4fe;/);
+ assert.equal(s.regions[1].style.borderColor,undefined);
+ assert.equal(glow.candidateScene.regions[1].style.glowColor,'#d8b4fe');
+ for(const field of ['borderColor','glowColor']){
+  for(const bad of ['red;url(https://evil.example)','var(--untrusted)','rgba(0,0,0,.5)']){
+   assert.throws(()=>applyFidelityPatch(s,null,null,diag,{
+    regionId:'section-1',property:field,value:bad,approval:approve
+   }),/VALUE_INVALID/);
+  }
+ }
+});

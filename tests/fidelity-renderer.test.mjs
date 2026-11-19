@@ -112,3 +112,22 @@ test('P2-03 renderer denies arbitrary font names, CSS injection and invalid text
  assert.match(output.css,/text-align:right;/);
  assert.equal(output.externalRequests,0);
 });
+
+
+test('P2-03 safe static border/glow works at DPR2, rejects injected effects',()=>{
+ const s=scene(),approve='APPROVE_FIDELITY_SCENE_SOURCE_EXPORT';
+ const styled={...s,regions:s.regions.map(x=>x.id==='section-1'?{
+  ...x,style:{...x.style,borderColor:'#8b5cf6',glowColor:'#d8b4fe'}
+ }:x)};
+ const r=createFidelityArtifacts(styled,{dpr:2,approval:approve});
+ assert.match(r.css,/border:1px solid #8b5cf6;/);
+ assert.match(r.css,/box-shadow:0 0 8px #d8b4fe;/);
+ assert.match(r.html,/box-shadow:0 0 8px #d8b4fe;/);
+ assert.equal(r.canPublish,false);
+ for(const field of ['borderColor','glowColor']){
+  const broken={...s,regions:s.regions.map(x=>x.id==='section-1'?{
+   ...x,style:{...x.style,[field]:'red;position:fixed'}
+  }:x)};
+  assert.throws(()=>createFidelityArtifacts(broken,{approval:approve}),/REGION_INVALID/);
+ }
+});

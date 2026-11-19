@@ -37,6 +37,8 @@ function checked(scene,typography,assets){
    !Object.hasOwn(roles,r.role)||!bbox(r.bounds)||
    r.bounds.x+r.bounds.width>scene.width||r.bounds.y+r.bounds.height>scene.height||
    !RGB.test(r.style?.background||'')||
+   (r.style.borderColor!==undefined&&!RGB.test(r.style.borderColor))||
+   (r.style.glowColor!==undefined&&!RGB.test(r.style.glowColor))||
    (r.style.radius!==undefined&&(!Number.isInteger(r.style.radius)||r.style.radius<0||r.style.radius>48))||
    (r.style.opacity!==undefined&&(!Number.isFinite(r.style.opacity)||r.style.opacity<0||r.style.opacity>1)))
    throw Error('FIDELITY_RENDER_REGION_INVALID');
@@ -121,6 +123,8 @@ export function createFidelityArtifacts(scene,{typography=null,assets=null,dpr=1
   css.push(".ffax-v3-node-"+at+" { left:"+cssPx(x)+"px; top:"+cssPx(y)+
    "px; width:"+cssPx(r.bounds.width)+"px; height:"+cssPx(r.bounds.height)+
    "px; background-color:"+r.style.background+";"+
+   (r.style.borderColor!==undefined?" border:1px solid "+r.style.borderColor+";":"")+
+   (r.style.glowColor!==undefined?" box-shadow:0 0 "+cssPx(16)+"px "+r.style.glowColor+";":"")+
    (r.style.radius!==undefined?" border-radius:"+cssPx(r.style.radius)+"px;":"")+
    (r.style.opacity!==undefined?" opacity:"+r.style.opacity+";":"")+" }");
  }

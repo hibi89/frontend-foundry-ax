@@ -2,7 +2,7 @@
 import {createFidelityArtifacts} from './fidelity-renderer.mjs';
 const HEX=/^#[a-f0-9]{6}$/i;
 const geometry=new Set(['x','y','width','height']);
-const visual=new Set(['background','radius','opacity']);
+const visual=new Set(['background','radius','opacity','borderColor','glowColor']);
 const text=new Set(['fontSize','fontColor','fontWeight','lineHeight','letterSpacing','fontFamily','textAlign']);
 const fontPresets=new Set(['system-ui','serif','korean-serif','korean-sans','monospace']);
 const textAlignments=new Set(['left','center','right']);
@@ -35,9 +35,10 @@ export function applyFidelityPatch(scene,typography,assets,diag,{regionId,proper
   throw Error('FIDELITY_PATCH_REGION_LOCKED');
  if(geometry.has(property))
   region.bounds[property]=number(value,['x','y'].includes(property)?0:1,10000,true);
- else if(property==='background'||property==='fontColor'){
+ else if(['background','fontColor','borderColor','glowColor'].includes(property)){
   if(typeof value!=='string'||!HEX.test(value))throw Error('FIDELITY_PATCH_VALUE_INVALID');
-  if(property==='background')region.style.background=value.toLowerCase();
+  if(property==='background'||property==='borderColor'||property==='glowColor')
+   region.style[property]=value.toLowerCase();
   else{
    const t=nextText?.textBoxes?.find(x=>x.id===textId&&x.regionId===regionId);
    if(!t)throw Error('FIDELITY_PATCH_TEXT_NOT_FOUND');
