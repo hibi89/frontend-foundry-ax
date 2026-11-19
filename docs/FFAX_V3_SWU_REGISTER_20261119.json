@@ -4,7 +4,7 @@
   "repo": "hibi89/frontend-foundry-ax",
   "branch": "feature/ffax-reference-fidelity-20261118",
   "blueprint": "docs/FINAL_BLUEPRINT_FFAX_V3_FIDELITY_FIRST_20261119.md",
-  "auditSourceHead": "6af9115130a928d6cf696a932e66e0793b2f2dbe",
+  "auditSourceHead": "b04003e4271d1bd5d557a371f9ae33ac6421c539",
   "baseline": {
     "sourceRegistry": "docs/FFAX_P1_SWU_REGISTER_20261118.json",
     "count": 25,
@@ -481,36 +481,48 @@
       "acceptanceCounted": 0
     },
     "latestSourceCi": {
-      "sha": "8e1b33f8b5a4f0f2bb8f5f45998291442939eef7",
+      "sha": "b04003e4271d1bd5d557a371f9ae33ac6421c539",
       "pipelines": [
         {
-          "id": 44507046517,
+          "id": 44508578455,
           "name": "FFAX V2 Design Forge P1 source smoke",
           "conclusion": "SUCCESS",
-          "evidence": "79/79 Node source and capture receipt regression PASS, 0 FAIL"
+          "evidence": "79/79 Node source tests at 27e7b37b"
         },
         {
-          "id": 44507354030,
+          "id": 44508917055,
           "name": "FFAX V2.1 P2 real Chromium Forge path",
           "conclusion": "SUCCESS",
-          "evidence": "29/29 V3 UI Chromium checks + existing V2.1 browser and V3 strict TSX local HTTP smoke"
+          "evidence": "31/31 V3 actual Chromium synthetic UI E2E, plus local React19/IAE API and legacy Forge browser"
         },
         {
-          "id": 44507353620,
+          "id": 44508578784,
           "name": "FFAX V2.1 P2 extracted Windows owner-review package",
           "conclusion": "SUCCESS",
-          "evidence": "Synthetic Windows package CI"
+          "evidence": "Synthetic Windows distribution QA at 27e7b37b"
+        },
+        {
+          "id": 44508579147,
+          "name": "Final blueprint completion evidence gate",
+          "conclusion": "SUCCESS",
+          "evidence": "Source/docs gate at 27e7b37b"
+        },
+        {
+          "id": 44508578467,
+          "name": "FFAX manual verification (opt-in)",
+          "conclusion": "CANCELLED",
+          "evidence": "Superseded by subsequent push; not PASS in this wave"
         }
       ],
-      "fullP2Acceptance": "NOT_VERIFIED; V3 P2-01..08 partial/not-run, 0/8 complete"
+      "fullP2Acceptance": "NOT_VERIFIED; 0/8 new V3 owner criteria"
     },
     "liveV3Browser": {
       "status": "PASS_SYNTHETIC_ONLY_NOT_OWNER_REAL_REFERENCE_ACCEPTANCE",
-      "runId": 44507354030,
-      "sourceSha": "6af9115130a928d6cf696a932e66e0793b2f2dbe",
+      "runId": 44508917055,
+      "sourceSha": "b04003e4271d1bd5d557a371f9ae33ac6421c539",
       "browser": "REAL_PLAYWRIGHT_CHROMIUM_ON_UBUNTU_24_04",
-      "checksPassed": 29,
-      "checksTotal": 29,
+      "checksPassed": 31,
+      "checksTotal": 31,
       "failed": 0,
       "covered": [
         "Image rights gate, original SHA, observed nested scene and owner region correction",
@@ -528,7 +540,12 @@
       "realCustomerAuthApiRoutesUsed": false,
       "realOwnerWindowsDeviceTested": false,
       "independentCodeOrUiAudit": "NOT_RUN",
-      "acceptanceCriteriaSatisfied": 0
+      "acceptanceCriteriaSatisfied": 0,
+      "additionalCoverage": [
+        "Owner Korean text change invalidates previously accepted visual receipt, forces new Chromium capture",
+        "Second real Chromium recapture and source-vs-render diagnostic completes before bounded patch",
+        "Refreshed capture state invalidates previous completion UI while work is in-flight"
+      ]
     },
     "gateEvidence": [
       {
@@ -573,7 +590,7 @@
       }
     ]
   },
-  "f95": "UNASSESSED/NOT_VERIFIED for real owner images; synthetic UI diagnostics ONLY",
+  "f95": "UNASSESSED — actual user-source images 0/12; no numeric 95% claim",
   "caveats": [
     "FID-03 owner's manual text bounding boxes only; optical character recognition NOT_IMPLEMENTED.",
     "FID-04 verifies supplied file magic/SHA and asserts owner rights; actual original font/image asset bytes are not yet bound into V3 renderer.",
@@ -592,19 +609,22 @@
     "P1 37/37 remains only source candidate; 78/78 test PASS on latest code 65e254dd #44504946619.",
     "P2 Chromium+real local IAE HTTP and strict TSX/React19 synthetic rehearsal PASS #44504946712, explicitly NOT user-owner real reference/independent 8-gate acceptance.",
     "P2 probe early FAIL: script syntax at 3c879bc5, repaired a2db43dd; strict TSX NodeNext TS2835 at 471886d3, repaired 65e254dd; final PASS #44504946712. Failure evidence preserved.",
-    "New P2 browser probe initially FAILED at visual owner review because V1 capture schema overwrote V3 receipt; fixed in 8e1b33f8 and re-run 44507046601 PASS, extended 29/29 44507354030 PASS. This is a real app defect, not test-only.",
     "P1 source 79/79 PASS run 44507046517; V3 real Chromium UI 29/29 PASS run 44507354030 with synthetic image and no external data.",
-    "V3 P2 gate completion 0/8 and weighted AC UNASSESSED; 95-point F95 does not become numeric until original fonts/assets and owner corpus verified."
+    "V3 P2 gate completion 0/8 and weighted AC UNASSESSED; 95-point F95 does not become numeric until original fonts/assets and owner corpus verified.",
+    "Source-level V3 receipt schema mismatch and stale visual approval invalidation defects fixed; failed attempts preserved #44506681925, #44508011940, #44508319859, #44508578735.",
+    "Latest P2 V3 Chromium synthetic browser 31/31 PASS #44508917055. P1 Node 79/79 PASS #44508578455 (source 27e7b37b).",
+    "Real user source-image 95-point F95, external IAE_dev client, owner Windows 11 GTX1050Ti hardware and independent audit NOT_VERIFIED/NOT_RUN.",
+    "P2 eight complete owner acceptance gates: 0/8, synthetic partial progress not counted toward finished gates."
   ],
   "release": "HOLD",
-  "lastSourceHead": "6af9115130a928d6cf696a932e66e0793b2f2dbe",
+  "lastSourceHead": "b04003e4271d1bd5d557a371f9ae33ac6421c539",
   "lastEvidenceRun": {
-    "id": 44507046517,
-    "sha": "8e1b33f8b5a4f0f2bb8f5f45998291442939eef7",
+    "id": 44508578455,
+    "sha": "27e7b37b108f093a77b972a734a3f50576bf658d",
     "name": "FFAX V2 Design Forge P1 source smoke",
     "status": "SUCCESS",
     "sourceTests": "79/79 PASS, 0 FAIL",
-    "scope": "P1 SOURCE INCLUDING V3 CAPTURE RECEIPT SCHEMA + INTEGRITY FAILURES; NOT CUSTOMER FULL P2"
+    "scope": "P1 code candidate/synthetic source checks; not real owner P2 acceptance"
   },
   "lastCodeWave": [
     {
@@ -700,6 +720,30 @@
       ],
       "commit": "6af9115130a928d6cf696a932e66e0793b2f2dbe",
       "meaning": "29/29 actual Chromium full local V3 UI plus responsive and keyboard, no owner/customer originals"
+    },
+    {
+      "units": [
+        "FID-05",
+        "FID-09",
+        "FID-10"
+      ],
+      "commit": "bc3b2c928e7e13732ff60b7a512b02a59703c02a",
+      "meaning": "Invalidate stale V3 approved visual evidence after owner text, region, assets and reference receipt edits"
+    },
+    {
+      "units": [
+        "FID-07",
+        "FID-10"
+      ],
+      "commit": "27e7b37b108f093a77b972a734a3f50576bf658d",
+      "meaning": "Invalidate previous PNG/approval and set running state immediately at second Chromium capture start"
+    },
+    {
+      "units": [
+        "P2_BROWSER_SYNTHETIC"
+      ],
+      "commit": "b04003e4271d1bd5d557a371f9ae33ac6421c539",
+      "meaning": "31/31 real Chromium synthetic full local flow with two recaptures, Korean text change and typed patch"
     }
   ],
   "sharedVerificationPaths": [
