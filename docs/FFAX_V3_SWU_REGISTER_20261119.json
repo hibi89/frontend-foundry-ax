@@ -862,8 +862,15 @@
         "fullManual": {
           "run": 44528875566,
           "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
-          "status": "PACKAGE_JOB_PENDING",
-          "scope": "hosted synthetic"
+          "status": "SUCCESS_4_OF_4_JOBS",
+          "scope": "hosted synthetic",
+          "jobs": [
+            "offline-node",
+            "windows-native",
+            "browser-qa",
+            "package-owner-review"
+          ],
+          "release": "HOLD"
         }
       },
       "realOwnerSecurity": "NOT_RUN",
@@ -903,16 +910,16 @@
   "release": "HOLD",
   "lastSourceHead": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
   "lastEvidenceRun": {
-    "id": 44521069907,
-    "sha": "260377b0efff91c7dd84711a47e9ac20b6e23e88",
+    "id": 44528875566,
+    "sha": "aa51c817f9b358b9126bd9f59498e1c5d869df7a",
     "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
-    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_REAL_OWNER_ACCEPTANCE",
+    "scope": "SYNTHETIC_GITHUB_HOSTED_ONLY",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "258/258 PASS",
-    "windowsTests": "258/258 PASS",
-    "browserProbes": "14/14 PASS",
-    "package": "OWNER_REVIEW_UNSIGNED_UNRELEASED"
+    "linuxTests": "260/260",
+    "windowsTests": "260/260",
+    "browserProbes": "14/14",
+    "package": "UNRELEASED_OWNER_REVIEW"
   },
   "lastCodeWave": [
     {
