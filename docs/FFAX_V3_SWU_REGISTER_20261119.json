@@ -1129,18 +1129,23 @@
           "run": 44543032652,
           "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
           "job": "windows-native",
-          "result": "PENDING_AT_LEDGER_WRITE"
+          "result": "SUCCESS",
+          "tests": "269/269 PASS"
         },
         "browserQA": {
           "run": 44543032652,
           "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
           "job": "browser-qa",
-          "result": "PENDING_AT_LEDGER_WRITE"
+          "result": "SUCCESS",
+          "probes": "14/14 PASS",
+          "scope": "GitHub-hosted synthetic, not owner reference"
         },
         "manual": {
           "run": 44543032652,
           "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
-          "result": "IN_PROGRESS_AT_LEDGER_WRITE"
+          "result": "SUCCESS",
+          "jobs": "4/4 SUCCESS",
+          "package": "UNRELEASED_OWNER_REVIEW"
         }
       },
       "actualCustomerApp": "NOT_RUN",
@@ -1181,14 +1186,14 @@
   "release": "HOLD",
   "lastSourceHead": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
   "lastEvidenceRun": {
-    "id": 44541251167,
-    "sha": "1a7391edcc99c466a40e6a9d6eff3bf61f450d0a",
+    "id": 44543032652,
+    "sha": "6a792558c55b59f1b1ca2aec5534d62bfdd8e9e6",
     "name": "FFAX manual verification (opt-in)",
     "status": "SUCCESS",
-    "scope": "GITHUB_HOSTED_SYNTHETIC_ONLY",
+    "scope": "GITHUB_HOSTED_SYNTHETIC_NOT_OWNER_ACCEPTANCE",
     "jobs": "4/4 SUCCESS",
-    "linuxTests": "267/267 PASS",
-    "windowsTests": "267/267 PASS",
+    "linuxTests": "269/269 PASS",
+    "windowsTests": "269/269 PASS",
     "browserProbes": "14/14 PASS",
     "package": "UNRELEASED_OWNER_REVIEW"
   },
