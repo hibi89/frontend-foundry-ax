@@ -235,3 +235,50 @@ test('P2-04 CLI --dpr 2 passes owner physical/CSS dimensions and refuses unsafe 
   }),/DPR_UNSUPPORTED/);
  }finally{await rm(f.root,{recursive:true,force:true});}
 });
+
+
+test('P2-04 audit rejects forged runtime, release and protected-source evidence without touching customer app',async()=>{
+ const f=await fixture();
+ try{
+  const prepared=await prepareV3FidelityIntegration({
+   source:f.source,dest:f.dest,jobId:'v3-receipt-guard',scene,typography,dpr:2,
+   contract:contract(f.project.digest),approval:'APPROVE_LOCAL_V3_INTEGRATION_REVIEW'
+  });
+  const receiptPath=join(prepared.workDir,'v3-fidelity-integration-receipt.json');
+  const receipt=prepared.receipt;
+  const audit=()=>auditV3FidelityIntegration({workDir:prepared.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_AUDIT'});
+  assert.equal((await audit()).fullCustomerBuildVerified,false);
+  assert.equal(receipt.protectedFiles[0].path,'src/auth.ts');
+  const tamper=[
+   ['authVerified',{authVerified:true}],
+   ['apiVerified',{apiVerified:true}],
+   ['routesVerified',{routesVerified:true}],
+   ['buildVerified',{buildVerified:true}],
+   ['productionDeployed',{productionDeployed:true}],
+   ['gitPush',{gitPush:true}],
+   ['prCreated',{prCreated:true}],
+   ['dataBindings',{dataBindings:'CUSTOMER_API_BOUND_AND_VERIFIED'}],
+   ['requiredNextGate',{requiredNextGate:'OWNER_APPROVED_RELEASE'}],
+   ['referenceSha256',{referenceSha256:'forged'}],
+   ['contractBoundaries',{contractBoundaries:{...receipt.contractBoundaries,auth:'FFAX_OVERRIDES_AUTH'}}],
+   ['textBindingCount',{textBindingCount:0}],
+   ['intentBindingCount',{intentBindingCount:0}],
+   ['protectedFiles removed',{protectedFiles:[]}],
+   ['protected file SHA',{protectedFiles:receipt.protectedFiles.map(p=>({...p,sha256:'b'.repeat(64)}))}],
+   ['protected file state',{protectedFiles:receipt.protectedFiles.map(p=>({...p,state:'RUNTIME_VERIFIED'}))}]
+  ];
+  for(const [label,patch] of tamper){
+   await writeFile(receiptPath,JSON.stringify({...receipt,...patch}));
+   await assert.rejects(audit(),/FORGE_V3_AUDIT_(?:RECEIPT_INVALID|BINDINGS_MISMATCH|PROTECTED_FILES_MISMATCH)/,label);
+  }
+  await writeFile(receiptPath,JSON.stringify(receipt));
+  const valid=await audit();
+  assert.equal(valid.customerAuthRuntimeVerified,false);
+  assert.equal(valid.fullCustomerBuildVerified,false);
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+  await rollbackV3FidelityIntegration({workDir:prepared.workDir,
+   approval:'APPROVE_LOCAL_V3_INTEGRATION_ROLLBACK'});
+  assert.equal((await inspectReactProject(f.source)).digest,f.project.digest);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
