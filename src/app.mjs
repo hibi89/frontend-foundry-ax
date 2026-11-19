@@ -627,6 +627,8 @@ el('fidelity-snapshot-restore').addEventListener('click',async()=>{
   const {restoreV3LocalWorkSnapshot}=await import('./fidelity-review.mjs');
   const restored=restoreV3LocalWorkSnapshot(await file.text(),{
    referenceSha256:latestReferenceInventory.sha256,
+   referenceWidth:latestReferenceInventory.width,
+   referenceHeight:latestReferenceInventory.height,
    approval:'APPROVE_LOCAL_V3_SNAPSHOT_RESTORE'});
   latestFidelityScene=restored.scene;latestTypographyDraft=restored.typography;
   latestAssetManifest=restored.assets;
